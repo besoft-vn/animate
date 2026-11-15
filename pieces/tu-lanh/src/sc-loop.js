@@ -128,7 +128,7 @@ SCENES.loop = function () {
     boil: ev(tSoi, 0.3), run: TT > tS[1], flow: 1, condWarm: ev(tS[2] + 0.2, 0.4) });
   if (box >= 1) for (let i = 0; i < 3; i++) {
     const ph = mod(TT * 0.45 + i / 3, 1), x = 712 - ph * 250 + Math.sin(ph * 7 + i) * 10, y = 640 - ph * 120;
-    if (ph < 0.92) l_mote(x, y, 9 + 3 * Math.sin(ph * Math.PI), 'l_lm' + i);
+    if (ph < 0.92) l_mote(x, y, 12 + 4 * Math.sin(ph * Math.PI), 'l_lm' + i);
   }
   // R600a on "chất", the thermometer on "âm": the reading falls to −12
   const sR = popS(tChat);
@@ -154,7 +154,7 @@ SCENES.cycle = function () {
   darkWorld('cycle');
   const tStop = VL('cycle').t1, tBon = VW('cycle', 'bốn'), t0 = ET('cycle');
   const realT = TT; TT = Math.min(TT, tStop);         // after the line: everything holds; only the boil (B) goes on
-  const cool = EZ.io(seg(TT, VW('cycle', 'quay'), tBon)), temp = lerp(25, 4, cool);
+  const cool = seg(TT, VW('cycle', 'quay'), tBon) ** 1.15, temp = lerp(25, 4, cool);
   l_map({ box: 1, warm: lerp(0.8, 0.12, cool), ev: 1, comp: 1, cond: 1, valve: 1, boil: 1, run: realT < tStop, flow: 3, condWarm: 1 });
   // heat motes: rise out of the soup into the pipe, ride clockwise, and are thrown out of the dàn nóng into the room
   const per = 0.26, fIn = 0.068, life = 2.6;
@@ -162,7 +162,7 @@ SCENES.cycle = function () {
     const tb = t0 - 0.6 + k * per; if (tb > TT) break;
     const a = TT - tb; if (a < 0 || a > life) continue;
     const R = RNG('l_cm', k), fEx = R.r(0.44, 0.56), x0 = 712 + R.n(30), y0 = 650;
-    let x, y, r = 11;
+    let x, y, r = 15;
     if (a < 0.35) { const u = EZ.o2(a / 0.35), p = l_at(fIn); x = lerp(x0, p[0], u); y = lerp(y0, p[1], u) - Math.sin(u * Math.PI) * 30; }
     else {
       const f = fIn + (a - 0.35) * l_MSP;
@@ -170,7 +170,7 @@ SCENES.cycle = function () {
       else {                                           // out through the fins, into the room
         const tEx = 0.35 + (fEx - fIn) / l_MSP, u = (a - tEx) / 0.7; if (u > 1) continue;
         const p = l_at(fEx), side = R.f() < 0.5 ? -1 : 1;
-        x = p[0] + side * R.r(40, 150) * EZ.o2(u) + Math.sin(u * 8 + k) * 6; y = p[1] + 30 + R.r(15, 45) * EZ.o2(u); r = 11 * (1 - u * 0.6);
+        x = p[0] + side * R.r(70, 210) * EZ.o2(u) + Math.sin(u * 8 + k) * 6; y = p[1] + 30 + R.r(15, 45) * EZ.o2(u); r = 15 * (1 - u * 0.5);
       }
     }
     l_mote(x, y, r, 'l_cm' + (k % 12));
