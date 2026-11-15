@@ -187,7 +187,7 @@ if (!flag('no-mux') && !onlyAudio && full) {
     // libass scales subtitle units to PlayResY=288, so margins/sizes are in 288ths of the frame height
     const unit = meta.height / 288, vertical = meta.height > meta.width;
     const marginV = Math.round((vertical ? 470 : 70) / unit), fontSize = Math.round((vertical ? 64 : 46) / unit);
-    const style = `Fontname=${process.platform === 'win32' ? 'Consolas' : process.platform === 'darwin' ? 'Menlo' : 'DejaVu Sans Mono'},Fontsize=${fontSize},PrimaryColour=&H00FFFFFF,BackColour=&H99000000,BorderStyle=3,Outline=6,Shadow=0,Alignment=2,MarginV=${marginV}`;
+    const style = `Fontname=${PIECE_JSON.captions?.font || (process.platform === 'win32' ? 'Consolas' : process.platform === 'darwin' ? 'Menlo' : 'DejaVu Sans Mono')},Fontsize=${PIECE_JSON.captions?.size ? Math.round(PIECE_JSON.captions.size / unit) : fontSize},PrimaryColour=&H00FFFFFF,BackColour=&H99000000,BorderStyle=3,Outline=6,Shadow=0,Alignment=2,MarginV=${marginV}`;
     const r2 = spawnSync('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error', '-i', 'final.mp4',
       '-vf', `subtitles=narration.srt:force_style='${style}'`, '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-pix_fmt', 'yuv420p', '-c:a', 'copy', 'final-captions.mp4'],
     { cwd: RENDERS, stdio: 'inherit' });

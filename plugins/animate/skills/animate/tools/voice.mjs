@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Voice-over: place the script's lines on the timeline and time every word, so the picture can cue on the voice.
-//   usage: node tools/voice.mjs pieces/<name> [--scratch] [--model small.en] [--rate 0]
+//   usage: node tools/voice.mjs pieces/<name> [--scratch] [--model small.en] [--lang en] [--rate 0]
+//   --lang (or "lang" in script.json): the narration's language, e.g. vi; anything but en uses the multilingual
+//   recogniser (default model small) and a scratch voice in that language (espeak-ng -v <lang>)
 // reads  <piece>/voice/script.json:
 //   { "lead": 0.8, "tail": 1.5, "lines": [ { "id": "open", "text": "As it is spoken.", "file": "open.mp3", "after": 0.4 }, ... ] }
 //   file   the line's audio, relative to <piece>/voice/: a text-to-speech take (e.g. the ElevenLabs MCP's download link,
@@ -19,10 +21,12 @@ import { fileURLToPath } from 'node:url';
 
 const argv = process.argv.slice(2);
 const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
-if (!argv[0] || argv[0].startsWith('--')) { console.error('usage: node tools/voice.mjs pieces/<name> [--scratch] [--model small.en] [--rate 0]'); process.exit(2); }
+if (!argv[0] || argv[0].startsWith('--')) { console.error('usage: node tools/voice.mjs pieces/<name> [--scratch] [--model small.en] [--lang en] [--rate 0]'); process.exit(2); }
 const ROOT = path.resolve(argv[0]), VDIR = path.join(ROOT, 'voice'), SR = 48000;
 const S = JSON.parse(fs.readFileSync(path.join(VDIR, 'script.json'), 'utf8'));
 const HERE = path.dirname(fileURLToPath(import.meta.url));
+const LANG = opt('--lang', S.lang || 'en');
+const MODEL = opt('--model', S.asr || (LANG === 'en' ? 'small.en' : 'large-v3-turbo'));   // small mishears Vietnamese tones; large-v3-turbo hears them
 
 // --scratch: the OS's own voice for missing lines (timing only; never ship it)
 function scratch(text, out) {
@@ -31,7 +35,9 @@ function scratch(text, out) {
     return spawnSync('powershell', ['-NoProfile', '-Command', ps], { env: { ...process.env, VO_TEXT: text, VO_OUT: out } }).status === 0;
   }
   if (process.platform === 'darwin') return spawnSync('say', ['-o', out, '--data-format=LEI16@22050', text]).status === 0;
-  return spawnSync('espeak', ['-w', out, text]).status === 0;
+  const v = LANG === 'en' ? [] : ['-v', LANG];
+  for (const bin of ['espeak-ng', 'espeak']) { const r = spawnSync(bin, [...v, '-w', out, text]); if (r.status === 0) return true; }
+  return false;
 }
 
 // decode a take to 48 kHz mono s16, trimmed of the silence around it
@@ -69,9 +75,9 @@ const wav = path.join(VDIR, 'voice.wav');
 fs.writeFileSync(wav, Buffer.concat([hdr, out]));
 
 // ---- word times: what the recogniser heard, matched to the script's words line by line
-const norm = (w) => w.toLowerCase().replace(/[^a-z0-9]/g, '');
+const norm = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');   // keeps accented letters (vi, fr, ...)
 let heard = null;
-const py = spawnSync(process.platform === 'win32' ? 'python' : 'python3', [path.join(HERE, 'voice_words.py'), wav, '--model', opt('--model', 'small.en')], { maxBuffer: 1 << 26 });
+const py = spawnSync(process.platform === 'win32' ? 'python' : 'python3', [path.join(HERE, 'voice_words.py'), wav, '--model', MODEL, '--lang', LANG], { maxBuffer: 1 << 26 });
 if (py.status === 0) { try { heard = JSON.parse(py.stdout.toString().trim().split('\n').pop()); } catch { heard = null; } }
 if (!heard) console.warn('word times: faster-whisper unavailable (pip install faster-whisper) — estimating from the letters');
 let matched = 0, totalWords = 0;

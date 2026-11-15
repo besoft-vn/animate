@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tủ lạnh làm lạnh như thế nào?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Tủ lạnh làm lạnh như thế nào?" — 9:16, crosshatch, voiced (vi), 24fps, 120 BPM grid.
+//  Format F5 (fixed-hero journey): the hero dot IS a bit of heat ("hạt nhiệt"). It leaves the food, rides the
+//  refrigerant loop (dàn lạnh -> máy nén -> dàn nóng) and is dumped into the kitchen. Colour code for the whole
+//  piece: TERRACOTTA = heat (the hero, hot pipes, warm glow), CYAN = cold (cold pipes, frost). Never swap them.
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). Scenes cue on VL()/VW().
+//  Shared file: owned by the director. Scene agents read it, never edit it.
+// =====================================================================
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+// Vietnamese-capable handwriting: Pangolin (installed by channel/setup.sh), then system fallbacks with Vietnamese glyphs
+const HAND = '"Pangolin", "Segoe Print", "Comic Sans MS", "DejaVu Sans", sans-serif';
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'turn', 'sweat', 'loop', 'evap', 'comp', 'cond', 'valve', 'cycle', 'end'];
+// era starts: 0, then the 8th after the previous line ends + 0.3s; the last era ("end") starts on the SLAM:
+// a hard cut on the thermostat click, inside the pause after "cycle" (the payoff sits in a pause, before its line)
+const SLAM = snap8(VL('cycle').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === 'end' ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- the bridges' contract: where the hero (dotHero radius 80) or the bridge object MUST be at the boundary.
+// Scenes keep it there during [tc - 0.5, tc + 0.5] (the old world shrinks onto it, the new opens out of it).
+const HR = 80;                                                  // the hero's dotHero radius in every scene
+const BR = {
+  hookTurn:  { a: [700, 1010], b: [540, 820] },                 // hero on the soup bowl -> hero inside the cut-away fridge
+  turnSweat: { a: [880, 760],  b: [600, 820] },                 // hero leaving the back of the fridge -> hero on the forearm
+  sweatLoop: { a: [540, 900, 105, 140], b: 'ring' },            // a cyan sweat drop (rx, ry) -> the refrigerant loop ring
+  loopEvap:  { a: [540, 470],  b: [540, 820] },                 // hero at the dàn lạnh station -> hero in the evaporator close-up
+  evapComp:  { a: [800, 820],  b: [540, 760] },                 // hero leaving right with the vapour -> hero inside the compressor
+  compCond:  { a: [540, 760],  b: [540, 760] },                 // hero squeezed hot -> hero entering the condenser coil
+  condValve: { a: [540, 1080, 90], b: [300, 760, 90] },         // a cyan liquid drop (r) -> the same drop entering the ống mao
+  valveCycle:{ a: [700, 800, 170], b: 'ring' },                 // a frosty cold puff (r) -> the loop ring
+};
+// the loop diagram, shared by "loop" and "cycle" (same picture: the end of the journey returns to the map, changed)
+const RING = { x: 540, y: 830, w: 660, h: 760, r: 120 };
+const STATION = { evap: [540, 450], comp: [870, 830], cond: [540, 1210], valve: [210, 830] };   // top / right / bottom / left
+
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'tủ lạnh không tạo ra lạnh', turn: 'nó bê hơi nóng ra ngoài', sweat: 'như mồ hôi bay hơi',
+  loop: 'vòng ống kín, sôi ở -12°C', evap: 'dàn lạnh: sôi và hút nhiệt', comp: 'máy nén: ép cho nóng',
+  cond: 'dàn nóng: nhả nhiệt ra phòng', valve: 'ống mao: tụt áp, lạnh buốt', cycle: 'vòng lặp tới 4°C', end: 'sau lưng tủ luôn ấm',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1, -1),
+  cues: { slam: SLAM, click: SLAM },
+  acts: [
+    { name: '1 Bếp',        role: 'build',   t0: 0,          t1: ET('loop') },
+    { name: '2 Vòng ống',   role: 'journey', t0: ET('loop'), t1: ET('cycle') },
+    { name: '3 Vòng lặp',   role: 'peak',    t0: ET('cycle'), t1: snap8(VL('cycle').t1) },
+    { name: '4 Lặng',       role: 'silence', t0: snap8(VL('cycle').t1), t1: SLAM },
+    { name: '5 Tách!',      role: 'gift',    t0: SLAM,       t1: SLAM + 1.5 },
+    { name: '6 Ấm sau lưng', role: 'goodbye', t0: SLAM + 1.5, t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;
