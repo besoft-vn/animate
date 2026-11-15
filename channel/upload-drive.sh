@@ -42,6 +42,9 @@ print(json.dumps(t))
 PY
 )
 export RCLONE_CONFIG_GD_TYPE=drive RCLONE_CONFIG_GD_TOKEN="$TOKEN_JSON"
+# rclone đọc mọi biến RCLONE_DRIVE_* làm tuỳ chọn của backend drive: RCLONE_DRIVE_TOKEN (chuỗi base64 thô) sẽ đè lên
+# token đã giải mã ở trên — bỏ nó khỏi môi trường của rclone
+unset RCLONE_DRIVE_TOKEN
 if [ -n "$FOLDER_ID" ]; then export RCLONE_CONFIG_GD_SCOPE=drive RCLONE_CONFIG_GD_ROOT_FOLDER_ID="$FOLDER_ID"; DEST="gd:"
 else export RCLONE_CONFIG_GD_SCOPE=drive.file; DEST="gd:$FOLDER_NAME/"; fi
 fail=0
