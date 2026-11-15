@@ -4,8 +4,8 @@
  "tail": 2.0,
  "tts": {
   "provider": "elevenlabs-connector",
-  "voice": "1vQIxPxX4lsNi2g3Z4cF",
-  "voice_name": "Quyet Nguyen - Calm Vietnamese Narrative & Education",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
   "model": "eleven_v3"
  },
  "lines": [

@@ -23,3 +23,8 @@
 **Shot yếu nhất:** hook — khung tĩnh, ít chuyển động trong 3 giây đầu; lần sau mở bằng một hành động (tay đặt bát canh vào tủ).
 **Chưa kiểm chứng:** không nghe được bản mix bằng tai — cần người nghe lại giọng + nhạc.
 **Rule đề xuất (craft.md):** với giọng tiếng Việt dùng eleven_v3 + whisper large-v3-turbo; payoff dưới voice cần hợp âm giữ ~2s để act "gift" thắng p90.
+
+## Run 2 — đổi giọng sang Tuan Khang (theo yêu cầu)
+- 10 câu tạo lại song song (eleven_v3, GaEEAHHYlbueVlFfyrPr), ~650 credit; bản Quyet Nguyen lưu ở voice/quyet/.
+- 58.4s; Whisper 138/156 chữ. Hình tự căn lại theo VOICE, không sửa cảnh nào.
+- Review: cuts/morphs on grid PASS, narration PASS, STORY ARC 6/6, TEXT PASS, dead beats PASS, loudest 100ms 50.5s trong act payoff sau 0.7s im lặng, −13.9 LUFS.

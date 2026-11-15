@@ -4,7 +4,7 @@ Mỗi ngày người quản lý chọn **một** chủ đề chưa làm (ưu ti�
 Tiêu chí: có một **quá trình thật** với các bước rõ ràng, có một "cú lật" gây tò mò ở câu mở đầu, giải thích được trong ~45–60 giây.
 
 ## Đã làm
-- [x] 2026-11-15 — Tủ lạnh làm lạnh như thế nào? → `pieces/tu-lanh/` (crosshatch, 53s, giọng Quyet Nguyen / eleven_v3)
+- [x] 2026-11-15 — Tủ lạnh làm lạnh như thế nào? → `pieces/tu-lanh/` (crosshatch, 58s, giọng Tuan Khang / eleven_v3)
 
 ## Hàng chờ (gợi ý style)
 - [ ] Vì sao bầu trời màu xanh? (riso)
