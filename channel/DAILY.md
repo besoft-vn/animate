@@ -5,7 +5,7 @@ Bạn là **quản lý team agents** của kênh. Lần chạy này tự động
 ## 0. Chuẩn bị
 1. Repo `besoft-vn/animate`. Code kênh nằm trên nhánh `claude/nifty-keller-b05bpw` (chưa merge vào main): `git fetch origin claude/nifty-keller-b05bpw && git checkout claude/nifty-keller-b05bpw && git pull`. Làm việc và push lên chính nhánh này (`git push origin claude/nifty-keller-b05bpw`, thử lại tối đa 4 lần nếu lỗi mạng).
 2. `bash channel/setup.sh` (font Pangolin, espeak-ng, faster-whisper + large-v3-turbo; lần đầu tải model mất vài phút).
-3. Kiểm tra connector ElevenLabs (`account_get_usage`): còn ≥ 1.500 ký tự. Nếu không có connector hoặc hết ký tự: vẫn làm video với giọng tạm (`--scratch`) KHÔNG giao bản đó như bản chính — báo rõ trong tin nhắn cuối.
+3. Giọng: dùng connector ElevenLabs nếu phiên có (`account_get_usage`, còn ≥ 1.500 ký tự); lịch tự động thường KHÔNG có connector → dùng `ELEVENLABS_API_KEY` với `node plugins/animate/skills/animate/tools/tts-elevenlabs.mjs lines pieces/<slug> --voice 1vQIxPxX4lsNi2g3Z4cF --model eleven_v3` (chạy được nhiều câu, tự đặt "file"). Nếu cả hai đều không có hoặc hết ký tự: vẫn làm video với giọng tạm (`--scratch`) KHÔNG giao bản đó như bản chính — báo rõ trong tin nhắn cuối.
 
 ## 1. Chọn chủ đề
 Lấy chủ đề `[ ]` đầu tiên trong `channel/topics.md` mà khác nhóm với tập liền trước (đồ gia dụng / cơ thể / thiên nhiên / công nghệ / giao thông). Slug không dấu, ví dụ `bau-troi-xanh`. Tạo `pieces/<slug>/`. Khi còn < 5 chủ đề chờ, bổ sung thêm 10 chủ đề mới vào hàng chờ.
@@ -31,6 +31,7 @@ Gói Starter tạo song song được: gọi `creative_generate_speech` cho TẤ
 ## 7. Giao
 - `pieces/<slug>/deliver/<slug>-phude.mp4` (nén lại bản phụ đề: libx264 crf 24, aac 160k, +faststart) và `<slug>.mp4` (= renders/share.mp4). Video không commit (deliver/ và renders/ đã gitignore).
 - `LOG.md` với bảng PASS từng shot, các số đo, shot yếu nhất, điều chưa kiểm chứng (không nghe được bằng tai). Đánh dấu `[x]` chủ đề trong topics.md (ngày, slug, style, thời lượng).
+- **Drive:** đặt tên `YYYY-MM-DD — <Tiêu đề> (phụ đề).mp4` và `YYYY-MM-DD — <Tiêu đề>.mp4` (bản sao đổi tên trong deliver/), rồi `bash channel/upload-drive.sh <hai file>` (thư mục "Vạn vật vận hành như thế nào — Video"). Nếu script báo thiếu RCLONE_DRIVE_TOKEN: ghi rõ trong tin nhắn cuối là chưa lưu được lên Drive.
 - Commit + push lên `claude/nifty-keller-b05bpw`.
 - Gửi hai file video bằng SendUserFile (`status: "proactive"`), kèm tin nhắn tiếng Việt ngắn: chủ đề, ý chính, style, độ dài, các số đo review, điều đã sửa, shot yếu nhất, credit ElevenLabs đã dùng / còn lại, chủ đề ngày mai.
 - Nếu một bước hỏng không cứu được (thiếu connector, export lỗi): vẫn commit những gì có, gửi tin nhắn nói rõ đã dừng ở đâu và cần anh làm gì.
