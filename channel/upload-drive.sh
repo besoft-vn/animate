@@ -3,7 +3,7 @@
 #   bash channel/upload-drive.sh <file.mp4> [<file2.mp4> ...]
 # Cần biến môi trường RCLONE_DRIVE_TOKEN = JSON token tạo một lần trên máy anh, quyền hẹp "drive.file"
 # (rclone chỉ thấy và sửa được file/thư mục do chính nó tạo — không đọc được phần còn lại của Drive):
-#   rclone authorize "drive" "eyJzY29wZSI6ImRyaXZlLmZpbGUifQ=="      # = {"scope":"drive.file"}
+#   rclone authorize "drive" "eyJzY29wZSI6ImRyaXZlLmZpbGUifQ"      # = {"scope":"drive.file"}
 # Mặc định tải vào thư mục DRIVE_FOLDER_NAME ở gốc My Drive (rclone tự tạo lần đầu).
 # Đặt DRIVE_FOLDER_ID để dùng một thư mục có sẵn (chỉ được khi token có quyền "drive" đầy đủ).
 set -e
