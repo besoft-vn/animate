@@ -156,13 +156,13 @@ SCENES.comp = function () {
     for (const sx of [450, 630]) m_arrow([[sx, pTop + 250], [sx, pTop + 130]], { key: 'cp_pa' + sx + tp, color: C.white, w: 7, head: 26 });
   }
   // the thermometer passes the kitchen's 25 °C
-  const val = lerp(-10, 45, smooth(tHot - 0.1, tHot + 1.0, TT)), TX = 900, TY = 1110, TH = 300;
+  const val = lerp(-10, 45, smooth(tHot - 0.1, tHot + 1.0, TT)), TX = 850, TY = 1110, TH = 300;
   thermo(TX, TY, val, '°C', { h: TH, key: 'cp_th', frac: 0 });
   const s = (val < 0 ? '−' : '') + Math.abs(Math.round(val)) + '°C';
   handText(s, TX - handW(s, 64) / 2, TY - TH - 26, 64, C.white, { key: 'cp_tv' });
   const yK = TY - 20 - (TH - 50) * 0.75;
-  ctx.save(); ctx.setLineDash([10, 8]); ink([[840, yK], [990, yK]], { w: 3, color: C.peri, key: 'cp_k' }); ctx.restore();
-  handText('bếp', 768, yK + 16, 50, C.peri, { key: 'cp_bep' });
+  ctx.save(); ctx.setLineDash([10, 8]); ink([[790, yK], [930, yK]], { w: 3, color: C.peri, key: 'cp_k' }); ctx.restore();
+  handText('bếp', 718, yK + 16, 50, C.peri, { key: 'cp_bep' });
   // the hero: squeezed in the middle, wiggling
   const wig = smooth(tP1, tP1 + 0.3, TT) * (1 - smooth(t1 - 0.9, t1 - 0.6, TT));
   dotHero(540 + Math.sin(TT * 9) * 7 * wig, 760 + Math.cos(TT * 7) * 5 * wig, HR, { key: 'hero', dark: true, mood: TT > tP1 ? 'wow' : undefined });

@@ -27,8 +27,9 @@
   // the payoff: the click's chord stab on the SLAM, then a flat warm chord under the last line, the motif to close
   ['D3', 'A3', 'D4', 'Fs4', 'A4', 'D5'].forEach((n, i) => pluck(SLAM + i * 0.006, nz(n), 0.34, (i - 2.5) * 0.15, 0.7, 5000, 0.4));
   pad(SLAM, SLAM + 0.4, ['D3', 'A3', 'D4', 'Fs4', 'A4'], 0.45, { cut: 3400, att: 0.008, rel: 0.35, send: 0.3 });
-  pad(SLAM + 0.5, DURATION, ['D3', 'A3', 'D4', 'Fs4'], 0.04, { cut: 1000, att: 0.3, rel: 0.4, send: 0.45 });
-  motif(DURATION - 1.6, 0.14);
+  pad(SLAM + 0.3, SLAM + 2.3, ['D3', 'A3', 'D4', 'Fs4', 'A4'], 0.04, { cut: 2200, att: 0.05, rel: 0.6, send: 0.4 });   // the flat warm chord, held through the payoff act
+  pad(SLAM + 2.0, DURATION, ['D3', 'A3', 'D4', 'Fs4'], 0.016, { cut: 1000, att: 0.3, rel: 0.4, send: 0.45 });
+  motif(DURATION - 1.6, 0.07);
 
   // ================= SFX =================
   to = 's';

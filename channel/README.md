@@ -29,4 +29,4 @@ Video ngắn tiếng Việt (9:16, 45–60 s) giải thích nguyên nhân, nguy�
 - Font chữ trên hình: `Pangolin` (OFL, `channel/fonts/`), có đủ dấu tiếng Việt. Phụ đề cháy sẵn cũng dùng Pangolin (`piece.json` → `captions.font`).
 - `voice.mjs` nhận `"lang": "vi"` trong `script.json`: giọng tạm espeak-ng tiếng Việt, nhận dạng đa ngôn ngữ, chuẩn hoá chữ có dấu khi so khớp.
 - `review.wpsMax: 5.0` — tiếng Việt đơn âm tiết nên số "từ"/giây cao hơn tiếng Anh.
-- Gói ElevenLabs Free: 10.000 ký tự/tháng (~1 video ≈ 700 ký tự), đôi lúc báo bận; gói Free yêu cầu ghi nguồn và không cho dùng thương mại — nâng gói trước khi đăng lên kênh có kiếm tiền.
+- Gói ElevenLabs Starter (~40.000 ký tự/tháng, ~1 video ≈ 750 ký tự, cho phép thương mại). Tạo cả 10 câu song song được. (Gói Free chỉ cho 1 lượt/lần và không cho dùng thương mại.)
