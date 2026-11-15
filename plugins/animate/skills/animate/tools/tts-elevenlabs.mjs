@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Voice takes from the ElevenLabs API, for sessions without the ElevenLabs connector (e.g. a scheduled cloud run).
-// Reads the key from the environment variable ELEVENLABS_API_KEY — never from the script or the chat.
+// The key: the environment variable ELEVENLABS_API_KEY if set; otherwise none is sent and the request relies on a
+// network secret (a proxy that adds the key to requests for api.elevenlabs.io, as in Claude Code cloud environments).
+// Never put the key in the script or the chat.
 //   node tools/tts-elevenlabs.mjs voices [--lang vi] [--search "narrator"]     list candidate narrators (your voices + the shared library)
 //   node tools/tts-elevenlabs.mjs sample pieces/<name> <voice_id>[,<voice_id>...] [--line open]
 //                                         one take of one line per voice -> voice/samples/<voice_id>.mp3 (to pick a narrator)
@@ -10,16 +12,21 @@
 // Prints the character count (≈ credits) before generating. Then run tools/voice.mjs to place and time the takes.
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+// behind an HTTPS proxy (cloud sessions, where a network secret adds the key), Node's fetch must be told to use it
+if ((process.env.HTTPS_PROXY || process.env.https_proxy) && !process.env.NODE_USE_ENV_PROXY) {
+  const r = spawnSync(process.execPath, ['--no-warnings', ...process.argv.slice(1)], { stdio: 'inherit', env: { ...process.env, NODE_USE_ENV_PROXY: '1' } });
+  process.exit(r.status ?? 1);
+}
 
 const argv = process.argv.slice(2);
 const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
 const KEY = process.env.ELEVENLABS_API_KEY || process.env.XI_API_KEY;
 const API = 'https://api.elevenlabs.io';
-if (!KEY) { console.error('ELEVENLABS_API_KEY is not set: add it to the environment (cloud: environment settings → secrets/variables), then start a new session.'); process.exit(3); }
 
 async function api(p, init = {}) {
-  const r = await fetch(API + p, { ...init, headers: { 'xi-api-key': KEY, 'content-type': 'application/json', ...(init.headers || {}) } });
-  if (!r.ok) { const t = await r.text(); throw new Error(`${r.status} ${p}: ${t.slice(0, 400)}`); }
+  const r = await fetch(API + p, { ...init, headers: { ...(KEY ? { 'xi-api-key': KEY } : {}), 'content-type': 'application/json', ...(init.headers || {}) } });
+  if (!r.ok) { const t = await r.text(); throw new Error(`${r.status} ${p}: ${t.slice(0, 400)}${r.status === 401 && !KEY ? ' (no ELEVENLABS_API_KEY and no network secret for api.elevenlabs.io)' : ''}`); }
   return r;
 }
 

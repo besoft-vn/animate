@@ -10,5 +10,10 @@ if ! command -v rclone >/dev/null; then
   (cd "$T" && unzip -q rc.zip) && install -m 755 "$T"/rclone-*/rclone /usr/local/bin/rclone
 fi
 export RCLONE_CONFIG_GD_TYPE=drive RCLONE_CONFIG_GD_SCOPE=drive RCLONE_CONFIG_GD_TOKEN="$RCLONE_DRIVE_TOKEN" RCLONE_CONFIG_GD_ROOT_FOLDER_ID="$FOLDER_ID"
-for f in "$@"; do rclone copyto "$f" "gd:$(basename "$f")" --progress=false && echo "Drive: đã tải $(basename "$f")"; done
+fail=0
+for f in "$@"; do
+  if rclone copyto "$f" "gd:$(basename "$f")" --progress=false; then echo "Drive: đã tải $(basename "$f")"
+  else fail=1; echo "Drive: LỖI khi tải $(basename "$f") — nếu lỗi là 404 notFound trên thư mục: token thuộc tài khoản Google không có quyền sửa thư mục $FOLDER_ID (chia sẻ thư mục cho tài khoản đó, hoặc tạo lại token bằng đúng tài khoản chủ thư mục)" >&2; fi
+done
+[ "$fail" = 0 ] || exit 1
 echo "https://drive.google.com/drive/folders/$FOLDER_ID"
