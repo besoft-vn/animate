@@ -20,7 +20,7 @@ function k_frost(x, y, r, key) {
 }
 
 // ---- the kitchen wall: cream paper, a tile band, a window with a moving cloud
-function k_kitchenWall(key) {
+function k_kitchenWall(key, o = {}) {
   paperSheet(key, { ruled: false });
   // tile band behind the counter
   paint(box(-20, 960, W + 40, K_COUNTER_Y - 960), { raw: true, line: false, fill: '#efe5cf', key: key + 'tile', tex: [{ k: 'pencil', c: C.skyL, al: 0.5, per: 260 }] });
@@ -29,7 +29,7 @@ function k_kitchenWall(key) {
   for (let x = 30; x < W; x += 66) { ctx.moveTo(x, 960); ctx.lineTo(x + RNG('ktx', key, x, B).n(1.2), K_COUNTER_Y); }
   ctx.stroke(); ctx.restore();
   // window, upper right
-  const wx = 620, wy = 420, ww = 300, wh = 300;
+  const wx = o.wx ?? 620, wy = 420, ww = o.ww ?? 300, wh = 300;
   paint(box(wx - 18, wy - 18, ww + 36, wh + 36), { fill: C.cream, key: key + 'wf', w: 3.5, tex: [{ k: 'hatch', a: 0.8, gap: 6, al: 0.3, dens: (x, y) => clamp((x - wx + y - wy) / 600) }] });
   paint(box(wx, wy, ww, wh), { fill: C.skyL, key: key + 'wg', w: 3, tex: [{ k: 'pencil', c: C.sky, al: 0.6, per: 120 }, { k: 'hatch', a: -0.6, gap: 9, al: 0.18, c: C.skyD }] });
   const cx = wx + 60 + mod(TT * 18, ww - 60), cy = wy + 90;
@@ -40,7 +40,7 @@ function k_kitchenWall(key) {
   ink([[wx + ww / 2, wy], [wx + ww / 2, wy + wh]], { w: 4, key: key + 'wm1' });
   ink([[wx, wy + wh / 2], [wx + ww, wy + wh / 2]], { w: 4, key: key + 'wm2' });
   // a little potted plant on the sill, its leaves sway
-  const px = wx + 230, py = wy + wh + 18;
+  const px = wx + ww - 70, py = wy + wh + 18;
   for (let i = 0; i < 4; i++) {
     const a = -1.9 + i * 0.45 + Math.sin(TT * 2 + i) * 0.06;
     paint(ellipsePts(px + Math.cos(a) * 46, py - 60 + Math.sin(a) * 40, 34, 13, a, 16), { fill: C.green, key: key + 'lf' + i, w: 2.2, tex: [{ k: 'hatch', a: 0.4, gap: 4, al: 0.4, c: '#2f5a2e' }] });
@@ -186,8 +186,6 @@ SCENES.turn = function () {
   const dumping = ev(tDump - 0.2, 0.5);
   if (dumping > 0) ink(Co, { w: 50, color: 'rgba(217,119,87,' + (0.15 + 0.12 * dumping) + ')', key: 'tcglow', amt: 2 });
   pipe(Co, { w: 18, dark: false, key: 'tco', flow: 1, u: 0.95 });
-  // compressor dome at the bottom back
-  paint(ellipsePts(800, 1205, 64, 44, 0, 28), { fill: '#5a4636', key: 'tcomp', w: 3, tex: [{ k: 'cross', c: '#1e130b', al: 0.4, gap: 5 }] });
   // the bowl on the shelf (its steam thins as the heat leaves)
   const leave = ev(tGo, 2.5);
   k_bowl(540, 900, 125, 'tbowl', { steamN: leave < 0.6 ? 2 : 1 });
@@ -218,7 +216,7 @@ SCENES.turn = function () {
 //  3 SWEAT — "Bí mật thì bạn đã biết rồi: mồ hôi bay hơi, mang hơi nóng đi, nên da thấy mát."
 //  extreme close-up of a forearm; a drop evaporates and carries heat (and the hero) away; ends on a big drop
 // =====================================================================
-const K_DROPS = [[290, 610, 40], [800, 560, 34], [240, 1050, 44], [830, 1090, 40], [430, 1190, 30], [690, 1200, 28], [960, 820, 30]];
+const K_DROPS = [[290, 610, 40], [800, 560, 34], [240, 1050, 44], [830, 1090, 40], [430, 1190, 30], [620, 1150, 28], [960, 820, 30]];
 function k_drop(x, y, r, key, o = {}) {
   const ry = r * 1.2, P = ellipsePts(x, y, r, ry, 0, 32);
   paint(ellipsePts(x + r * 0.25, y + r * 0.3, r, ry, 0, 24), { fill: 'rgba(120,70,40,0.25)', line: false, key: key + 'sh', tex: [{ k: 'hatch', a: 0.8, gap: 4, al: 0.4 }] });
@@ -296,7 +294,6 @@ SCENES.sweat = function () {
     paint(P, { fill: C.sky, key: 'big', w: 5, tex: [{ k: 'pencil', c: C.skyL, al: 0.7, per: 30 }, { k: 'hatch', a: -0.7, gap: 6, al: 0.5, c: C.skyD, dens: (px, py) => clamp((px - bx) / brx * 0.6 + (py - by) / bry * 0.6 + 0.3) }] });
     paint(ellipsePts(bx - 38 * bs, by - 55 * bs, 20 * bs, 32 * bs, -0.5, 16), { fill: '#ffffff', line: false, key: 'bighl' });
   }
-  if (TT > tCool - 0.1) inkCard('da mát', 800, 1230, 60, { rot: 0.03, s: popS(tCool - 0.1) });
   inkTag('mồ hôi');
 };
 
@@ -305,7 +302,7 @@ SCENES.sweat = function () {
 //  the same kitchen, the fridge turned to show its warm back coil; the hero sits content by it; the soup is cold
 // =====================================================================
 SCENES.end = function () {
-  k_kitchenWall('ew');
+  k_kitchenWall('ew', { wx: 720, ww: 220 });
   k_counter('ec', 560);
   const tWarm = VW('end', 'ấm'), tHeat = VW('end', 'hơi'), tFood = VW('end', 'đồ'), tBack = VW('end', 'sau');
   k_fridge('efr', { side: 110, note: 1, fix: ev(ET('end') + 0.6, 0.8), coil: 0.6 + 0.4 * ev(tWarm, 0.4) });
@@ -314,9 +311,9 @@ SCENES.end = function () {
   for (let i = 0; i < nW; i++) k_heatWave(600 + i * 26, 430, 110, 'ehw' + i, { amp: 8 });
   k_risingMotes(620, 820, TT > tBack ? 4 : 2, 'emo', { spread: 40, h: 380, life: 2.4, r: 13 });
   // the soup: back on the counter, cold — no steam, a little frost
-  k_bowl(845, 1105, 110, 'ebowl', { cold: true });
+  k_bowl(855, 1105, 100, 'ebowl', { cold: true });
   // the hero, content, warming itself by the coil
-  const [hx, hy] = [660, 1060];
+  const [hx, hy] = [680, 1065];
   dotHero(hx, hy, HR, { key: 'hero', mood: 'happy' });
   // two little motes keep it company, circling slowly
   for (let i = 0; i < 2; i++) { const a = TT * 1.4 + i * Math.PI; heatMote(hx + Math.cos(a) * 125, hy - 40 + Math.sin(a) * 40, 14, 'eorb' + i); }
@@ -326,5 +323,7 @@ SCENES.end = function () {
   if (f2 > 0) inkCard('của đồ ăn', 790, 900, 62, { rot: 0.02, frac: f2, s: popS(tFood - 0.15) });
   // a tiny arrow from the card to the coil
   if (f1 > 0) ink([[640, 770], [610, 700]], { w: 4, key: 'earr', frac: f1 });
-  inkTag('sau lưng tủ');
+  // hard cut: the tag is drawn finished on the first frame (same place and look as inkTag)
+  const tg = 'sau lưng tủ', f = () => inkCard(tg, 70 + (handW(tg, 80) + 72) / 2, 330, 80, { rot: -0.04 });
+  if (DEFER) DEFER.push(f); else f();
 };
