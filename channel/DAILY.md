@@ -31,7 +31,7 @@ Gói Starter tạo song song được: gọi `creative_generate_speech` cho TẤ
 ## 7. Giao
 - `pieces/<slug>/deliver/<slug>-phude.mp4` (nén lại bản phụ đề: libx264 crf 24, aac 160k, +faststart) và `<slug>.mp4` (= renders/share.mp4). Video không commit (deliver/ và renders/ đã gitignore).
 - `LOG.md` với bảng PASS từng shot, các số đo, shot yếu nhất, điều chưa kiểm chứng (không nghe được bằng tai). Đánh dấu `[x]` chủ đề trong topics.md (ngày, slug, style, thời lượng).
-- **Drive:** đặt tên `YYYY-MM-DD — <Tiêu đề> (phụ đề).mp4` và `YYYY-MM-DD — <Tiêu đề>.mp4` (bản sao đổi tên trong deliver/), rồi `bash channel/upload-drive.sh <hai file>` (thư mục "Vạn vật vận hành như thế nào — Video"). Nếu script báo thiếu RCLONE_DRIVE_TOKEN: ghi rõ trong tin nhắn cuối là chưa lưu được lên Drive.
+- **Drive:** đặt tên `YYYY-MM-DD — <Tiêu đề> (phụ đề).mp4` và `YYYY-MM-DD — <Tiêu đề>.mp4` (bản sao đổi tên trong deliver/), rồi `bash channel/upload-drive.sh <hai file>` → My Drive / "Vạn vật vận hành như thế nào — Video" (token quyền hẹp drive.file: rclone chỉ thấy thư mục nó tự tạo). Nếu script báo thiếu RCLONE_DRIVE_TOKEN: ghi rõ trong tin nhắn cuối là chưa lưu được lên Drive.
 - Commit + push lên `claude/nifty-keller-b05bpw`.
 - Gửi hai file video bằng SendUserFile (`status: "proactive"`), kèm tin nhắn tiếng Việt ngắn: chủ đề, ý chính, style, độ dài, các số đo review, điều đã sửa, shot yếu nhất, credit ElevenLabs đã dùng / còn lại, chủ đề ngày mai.
 - Nếu một bước hỏng không cứu được (thiếu connector, export lỗi): vẫn commit những gì có, gửi tin nhắn nói rõ đã dừng ở đâu và cần anh làm gì.
