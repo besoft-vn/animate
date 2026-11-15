@@ -40,12 +40,12 @@ function m_drop(x, y, rx, ry, key) {
   ink(arcPts(x - rx * 0.1, y - ry * 0.1, Math.min(rx, ry) * 0.62, Math.PI * 1.08, Math.PI * 1.42, 10), { w: Math.max(3, rx * 0.08), color: C.white, key: key + 'gl', amt: 0.6 });
 }
 // a 6-armed frost crystal
-function m_frost(x, y, s, key, rot = 0) {
+function m_frost(x, y, s, key, rot = 0, col = C.white) {
   for (let k = 0; k < 6; k++) {
     const a = rot + k * Math.PI / 3, ex = x + Math.cos(a) * s, ey = y + Math.sin(a) * s;
-    ink([[x, y], [ex, ey]], { w: Math.max(2, s * 0.13), color: C.white, key: key + k, amt: 0.4 });
+    ink([[x, y], [ex, ey]], { w: Math.max(2.4, s * 0.14), color: col, key: key + k, amt: 0.4 });
     const bx = x + Math.cos(a) * s * 0.6, by = y + Math.sin(a) * s * 0.6;
-    for (const t of [-0.7, 0.7]) ink([[bx, by], [bx + Math.cos(a + t) * s * 0.35, by + Math.sin(a + t) * s * 0.35]], { w: Math.max(1.6, s * 0.09), color: C.skyL, key: key + k + t, amt: 0.3 });
+    for (const t of [-0.7, 0.7]) ink([[bx, by], [bx + Math.cos(a + t) * s * 0.35, by + Math.sin(a + t) * s * 0.35]], { w: Math.max(2, s * 0.1), color: col, key: key + k + t, amt: 0.3 });
   }
 }
 // an inked arrow along P (arrowhead at the end)
@@ -81,9 +81,9 @@ SCENES.evap = function () {
   const nb = Math.floor(40 * ev(tBoil, 0.6));
   for (let i = 0; i < nb; i++) {
     const S = RNG('ev_b', i), life = S.r(0.7, 1.3), ph = mod((TT - tBoil) / life + S.f(), 1), f = mod(S.f() + (TT - tBoil) * 0.035, 1);
-    const { p, n } = m_at(Q, f), off = S.n(14), r = 3 + 10 * ph;
+    const { p, n } = m_at(Q, f), off = S.n(12), r = 5 + 12 * ph;
     if (p[0] < -10 || p[0] > W + 10) continue;
-    ink(ellipsePts(p[0] + n[0] * off, p[1] + n[1] * off, r, r, 0, 14), { closed: true, w: 2.6, color: ph > 0.9 ? 'rgba(244,246,255,0.4)' : C.white, key: 'ev_bb' + i, amt: 0.5 });
+    ink(ellipsePts(p[0] + n[0] * off, p[1] + n[1] * off, r, r, 0, 14), { closed: true, w: 3.4, color: ph > 0.9 ? 'rgba(244,246,255,0.4)' : C.white, key: 'ev_bb' + i, amt: 0.5 });
   }
   if (TT >= tBoil) handText('sôi!', 940 - handW('sôi!', 64), 440, 64, C.white, { key: 'ev_soi', frac: ev(tBoil, 0.3), rot: -0.05 });
   // the shelf + the bowl of soup
@@ -134,7 +134,7 @@ SCENES.comp = function () {
   // the gas chamber: colour of its temperature, hatching denser as it's squeezed
   const squeeze = clamp((1120 - pTop) / 235);
   paint(rrectPts(X0, TOP, X1 - X0, pTop - TOP, 2), {
-    fill: tempCol(u), fillAl: 0.42, line: false, key: 'cp_gas',
+    fill: tempCol(u), fillAl: 0.6, line: false, key: 'cp_gas',
     tex: [{ k: 'hatch', c: tempCol(u), a: 0.8, gap: lerp(12, 6, squeeze), al: 0.7 }, { k: 'stipple', c: 'rgba(255,255,255,0.5)', n: 220, s: 2.4 }],
   });
   if (u > 0.6) for (let i = 0; i < 4; i++) { const yy = TOP + 40 + i * ((pTop - TOP - 60) / 3); ink([[X0 + 20, yy], [X0 + 60, yy - 10], [X0 + 100, yy]], { w: 3, color: 'rgba(255,220,190,0.5)', key: 'cp_hw' + i }); }
@@ -233,55 +233,62 @@ SCENES.cond = function () {
 //  8 · VALVE — ống mao: the drop squeezes into a hair-thin coiled tube, pressure falls, it bursts out as frosty spray
 // ---------------------------------------------------------------------
 const m_CAP = (() => {
-  const P = [[390, 760], [410, 760]];
-  for (let k = 0; k <= 200; k++) { const th = k / 200 * TAU * 4.5; P.push([410 + k / 200 * 170 + 20 * Math.sin(th), 760 + 38 - 38 * Math.cos(th)]); }
-  P.push([612, 780]);
+  // mouth (390,760) -> climbs -> a long horizontal helix along y 530 -> turns down -> exits at (840,660) into the puff
+  const P = m_round([[390, 760], [450, 760], [450, 560]], 40, 8).slice(0, -1);
+  const n = 260, loops = 7.5, xa = 450, xb = 850;
+  for (let k = 0; k <= n; k++) { const th = k / n * TAU * loops; P.push([xa + (xb - xa) * k / n + 16 * Math.sin(th), 530 + 30 * Math.cos(th)]); }
+  P.push(...m_round([[850, 500], [890, 500], [890, 630], [840, 662]], 40, 8).slice(1));
   return P;
 })();
 SCENES.valve = function () {
   const t0 = ET('valve'), t1 = EE('valve'), tIn = VW('valve', 'ống'), tDrop = VW('valve', 'tụt'), tCold = VW('valve', 'lạnh');
   darkWorld('valve');
-  // the fat pipe from the condenser, then the hair-thin capillary coil
-  pipe([[-40, 760], [230, 760]], { w: 54, u: 0.45, flow: 0.6, key: 'vl_fat' });
-  ink(m_CAP, { w: 11, color: C.peri, key: 'vl_capo', amt: 0.8 });
-  ink(m_CAP, { w: 5, color: tempCol(0.2), key: 'vl_cap', amt: 0.8 });
-  // slugs of liquid racing through the coil while the drop squeezes in
+  const fz = ev(tDrop + 0.2, 0.8);
+  // the fat pipe from the condenser, a funnel, then the hair-thin capillary
+  pipe([[-40, 760], [300, 760]], { w: 54, u: 0.5, flow: 0.6, key: 'vl_fat' });
+  paint([[296, 729], [392, 754], [392, 766], [296, 791]], { fill: tempCol(0.5), line: C.peri, w: 4, key: 'vl_fun', tex: [{ k: 'hatch', c: C.periD, a: 0.8, gap: 5, al: 0.5 }] });
+  ink(m_CAP, { w: 12, color: C.peri, key: 'vl_capo', amt: 0.7 });
+  ink(m_CAP, { w: 5, color: tempCol(lerp(0.35, 0, fz)), key: 'vl_cap', amt: 0.7 });
   const Qc = resample(m_CAP, false, 4), Lc = pathLen(Qc);
-  if (TT > tIn + 0.1 && TT < t1 - 0.4) for (let s = mod(TT * 520, 70); s < Lc; s += 70) {
-    const a = pointAt(Qc, s / Lc), b = pointAt(Qc, Math.min(1, (s + 22) / Lc));
+  // slugs of liquid racing through the tube while the drop squeezes in
+  if (TT > tIn + 0.1 && TT < t1 - 0.3) for (let s = mod(TT * 900, 80); s < Lc; s += 80) {
+    const a = pointAt(Qc, s / Lc), b = pointAt(Qc, Math.min(1, (s + 26) / Lc));
     ink([a, b], { w: 6, color: C.white, key: 'vl_sl' + Math.round(s), amt: 0.3 });
   }
-  // the pressure gauge on the capillary (below)
-  const GX = 520, GY = 1110, GR = 100;
-  ink([[GX, GY - GR], [GX, 795]], { w: 10, color: C.periD, key: 'vl_stem' });
+  // frost creeping along the tube once the pressure drops
+  { const S = RNG('vl_tf'); for (let i = 0; i < 70; i++) { const f = S.f(); if (f > 0.25 + 0.75 * fz || fz <= 0) continue; const p = pointAt(Qc, 1 - f), a = S.r(0, TAU), l = S.r(5, 11); ink([[p[0], p[1]], [p[0] + Math.cos(a) * l, p[1] + Math.sin(a) * l]], { w: 2.4, color: C.white, key: 'vl_tfi' + i, amt: 0.4 }); } }
+  handText('nhỏ xíu', 560, 440, 54, C.peri, { key: 'vl_nx', frac: ev(VW('valve', 'nhỏ'), 0.35), rot: -0.03 });
+  // the pressure gauge on the capillary
+  const GX = 300, GY = 1080, GR = 110;
+  ink([[GX, GY - GR], [GX, 930], [420, 900], [450, 790]], { w: 9, color: C.periD, key: 'vl_stem' });
   paint(ellipsePts(GX, GY, GR, GR, 0, 48), { fill: C.navy2, line: C.peri, w: 5, key: 'vl_g', tex: [{ k: 'hatch', c: C.periD, a: 0.8, gap: 6, al: 0.5, dens: (x, y) => clamp((x - GX + y - GY) / GR + 0.3) }, { k: 'pencil', c: C.peri, al: 0.2, per: 60 }] });
-  for (let i = 0; i <= 8; i++) { const a = 0.75 * Math.PI + i / 8 * 1.5 * Math.PI, r0 = GR * (i % 2 ? 0.74 : 0.66); ink([[GX + Math.cos(a) * r0, GY + Math.sin(a) * r0], [GX + Math.cos(a) * GR * 0.86, GY + Math.sin(a) * GR * 0.86]], { w: 3, color: C.peri, key: 'vl_tk' + i, amt: 0.3 }); }
-  const gv = springMove(tDrop, 0.88, 0.1, SPRING.playful) + (TT < tDrop ? Math.sin(TT * 20) * 0.015 : 0), ga = 0.75 * Math.PI + gv * 1.5 * Math.PI;
-  ink([[GX - Math.cos(ga) * 14, GY - Math.sin(ga) * 14], [GX + Math.cos(ga) * GR * 0.78, GY + Math.sin(ga) * GR * 0.78]], { w: 7, color: C.white, key: 'vl_nd', amt: 0.4 });
-  ctx.fillStyle = C.peri; ctx.beginPath(); ctx.arc(GX, GY, 11, 0, TAU); ctx.fill();
-  handText('áp suất', GX - GR - 30 - handW('áp suất', 54), GY + 20, 54, C.peri, { key: 'vl_ap' });
-  if (TT >= tDrop) m_arrow([[GX - GR - 60, GY - 95], [GX - GR - 60, GY - 20]], { key: 'vl_down', color: C.white, w: 6, head: 22, frac: ev(tDrop, 0.3) });
-  // the drop: holds at (300,760), then squeezes into the coil
+  for (let i = 0; i <= 8; i++) { const a = 0.75 * Math.PI + i / 8 * 1.5 * Math.PI, r0 = GR * (i % 2 ? 0.74 : 0.64); ink([[GX + Math.cos(a) * r0, GY + Math.sin(a) * r0], [GX + Math.cos(a) * GR * 0.86, GY + Math.sin(a) * GR * 0.86]], { w: 3.4, color: C.peri, key: 'vl_tk' + i, amt: 0.3 }); }
+  const gv = springMove(tDrop, 0.88, 0.08, SPRING.playful) + (TT < tDrop ? Math.sin(TT * 20) * 0.015 : 0), ga = 0.75 * Math.PI + gv * 1.5 * Math.PI;
+  ink([[GX - Math.cos(ga) * 16, GY - Math.sin(ga) * 16], [GX + Math.cos(ga) * GR * 0.8, GY + Math.sin(ga) * GR * 0.8]], { w: 8, color: C.white, key: 'vl_nd', amt: 0.4 });
+  ctx.fillStyle = C.peri; ctx.beginPath(); ctx.arc(GX, GY, 12, 0, TAU); ctx.fill();
+  handText('áp suất', 75, 935, 54, C.peri, { key: 'vl_ap' });
+  if (TT >= tDrop) m_arrow([[GX + GR + 45, GY - 70], [GX + GR + 45, GY + 40]], { key: 'vl_down', color: C.white, w: 7, head: 24, frac: ev(tDrop, 0.3) });
+  // the drop: holds at (300,760), then squeezes into the funnel
   const k = EZ.io(seg(TT, tIn, tIn + 1.4)), r = lerp(90, 0, k);
-  if (r > 3) { const rx = r * (1 + 0.15 * Math.sin(k * Math.PI)), cx = 390 - rx; m_drop(cx, 760, rx, r * (1 - 0.1 * Math.sin(k * Math.PI)), 'vl_drop'); }
-  // the spray: frosty particles out of the far end, and the cold puff growing to r 170 at (700,800)
-  const tS = tDrop + 0.1;
+  if (r > 3) { const rx = r * (1 + 0.18 * Math.sin(k * Math.PI)), cx = lerp(300, 380 - rx * 0.6, k); m_drop(cx, 760, rx, r * (1 - 0.12 * Math.sin(k * Math.PI)), 'vl_drop'); }
+  // the spray out of the far end, and the cold puff growing to r 170 at (700,800)
+  const tS = tDrop + 0.1, EX = 840, EY = 662;
   if (TT >= tS) {
-    for (let i = 0; i < 26; i++) {
-      const S = RNG('vl_sp', i), life = S.r(0.5, 0.9), ph = mod((TT - tS) / life + S.f(), 1), a = S.r(-0.7, 0.9), d = 20 + ph * S.r(160, 300);
-      const x = 612 + Math.cos(a) * d, y = 780 + Math.sin(a) * d, s = 3 + 4 * (1 - ph);
-      ink([[x - s, y], [x + s, y]], { w: 3, color: i % 3 ? C.white : C.cyan, key: 'vl_spp' + i, amt: 0.3 });
+    const g = springEase(TT - tS, 90, 19), pr = lerp(26, 170, g), px = lerp(EX, 700, g), py = lerp(EY, 800, g);
+    for (let i = 0; i < 30; i++) {
+      const S = RNG('vl_sp', i), life = S.r(0.5, 0.9), ph = mod((TT - tS) / life + S.f(), 1), a = S.r(0.9, 3.0), d = 30 + ph * S.r(200, 330);
+      const x = EX + Math.cos(a) * d, y = EY + Math.sin(a) * d, s = 5 + 6 * (1 - ph);
+      ink([[x - s, y - s * 0.3], [x + s, y + s * 0.3]], { w: 4, color: i % 3 ? C.white : C.cyan, key: 'vl_spp' + i, amt: 0.3 });
     }
-    const g = springEase(TT - tS, 90, 19), pr = lerp(24, 170, g), px = lerp(612, 700, g), py = lerp(782, 800, g);
-    const P = ellipsePts(px, py, pr, pr, 0, 64).map(([x, y], i) => { const b = 1 + 0.035 * Math.sin(i * 0.9 + TT * 4); return [px + (x - px) * b, py + (y - py) * b]; });
-    paint(P, { fill: C.skyL, line: C.white, w: 4, key: 'vl_puff', tex: [{ k: 'hatch', c: C.cyan, a: 0.8, gap: 6, al: 0.6, dens: (x, y) => clamp((x - px + y - py) / pr + 0.4) }, { k: 'stipple', c: C.white, n: 500, s: 3 }] });
-    for (let i = 0; i < 9; i++) {
-      const S = RNG('vl_cr', i), tc = tCold - 0.3 + i * 0.12, a = S.r(0, TAU), d = S.r(0.15, 0.8) * pr;
-      if (TT >= tc) m_frost(px + Math.cos(a) * d, py + Math.sin(a) * d, S.r(16, 30) * popS(tc), 'vl_fc' + i, S.r(0, 1) + TT * 0.3);
+    const P = ellipsePts(px, py, pr, pr, 0, 72).map(([x, y], i) => { const b = 1 + 0.03 * Math.sin(i * 0.785 + TT * 3); return [px + (x - px) * b, py + (y - py) * b]; });
+    paint(P, { fill: C.skyL, line: C.white, w: 5, key: 'vl_puff', tex: [{ k: 'hatch', c: C.teal, a: 0.8, gap: 6, al: 0.55, dens: (x, y) => clamp((x - px + y - py) / pr + 0.3) }, { k: 'stipple', c: C.white, n: 600, s: 3.4 }] });
+    for (let i = 0; i < 12; i++) {
+      const S = RNG('vl_cr', i), tc = tCold - 0.4 + i * 0.1, inside = i % 3 === 0, a = inside ? S.r(0, TAU) : S.r(2.1, 6.0), d = (inside ? S.r(0.1, 0.6) : S.r(1.12, 1.32)) * pr;
+      if (TT >= tc) m_frost(px + Math.cos(a) * d, py + Math.sin(a) * d, S.r(18, 32) * popS(tc), 'vl_fc' + i, S.r(0, 1) + TT * 0.3, inside ? C.teal : C.white);
     }
   }
   // the thermometer: the liquid's temperature falls to −12 °C
-  const val = springMove(tDrop + 0.15, 35, -12, SPRING.heavy);
-  thermo(940, 1180, val, '°C', { h: 260, key: 'vl_th', labelLeft: true });
+  const val = springMove(tDrop + 0.15, 22, -12, SPRING.heavy);
+  thermo(950, 1180, val, '°C', { h: 260, key: 'vl_th', labelLeft: true });
   inkTag('ống mao');
 };
