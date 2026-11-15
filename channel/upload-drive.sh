@@ -14,7 +14,34 @@ if ! command -v rclone >/dev/null; then
   T=$(mktemp -d); curl -sSfL https://downloads.rclone.org/rclone-current-linux-amd64.zip -o "$T/rc.zip"
   (cd "$T" && unzip -q rc.zip) && install -m 755 "$T"/rclone-*/rclone /usr/local/bin/rclone
 fi
-export RCLONE_CONFIG_GD_TYPE=drive RCLONE_CONFIG_GD_TOKEN="$RCLONE_DRIVE_TOKEN"
+# token: JSON ({"access_token":...}) như rclone cũ in ra, hoặc chuỗi base64 như rclone ≥ 1.7x in ra
+TOKEN_JSON=$(python3 - <<'PY'
+import base64, json, os, sys
+raw = os.environ["RCLONE_DRIVE_TOKEN"].strip()
+def tok(v):
+    if isinstance(v, str):
+        try: v = json.loads(v)
+        except Exception: return None
+    if isinstance(v, dict):
+        if "access_token" in v or "refresh_token" in v: return v
+        for k in ("token", "Token"):
+            if k in v: return tok(v[k])
+        for x in v.values():
+            t = tok(x)
+            if t: return t
+    return None
+t = tok(raw)
+if not t:
+    for dec in (base64.urlsafe_b64decode, base64.b64decode):
+        try:
+            t = tok(dec(raw + "=" * (-len(raw) % 4)).decode("utf-8")); 
+            if t: break
+        except Exception: pass
+if not t: sys.exit("RCLONE_DRIVE_TOKEN: không đọc được (không phải JSON token hay base64 của nó)")
+print(json.dumps(t))
+PY
+)
+export RCLONE_CONFIG_GD_TYPE=drive RCLONE_CONFIG_GD_TOKEN="$TOKEN_JSON"
 if [ -n "$FOLDER_ID" ]; then export RCLONE_CONFIG_GD_SCOPE=drive RCLONE_CONFIG_GD_ROOT_FOLDER_ID="$FOLDER_ID"; DEST="gd:"
 else export RCLONE_CONFIG_GD_SCOPE=drive.file; DEST="gd:$FOLDER_NAME/"; fi
 fail=0
