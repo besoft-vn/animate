@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lộ khoá API trong log AI agent</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  BESOFT — "Lộ khoá API trong log AI agent: bài học từ vụ Cursor" — 9:16, crosshatch, voiced (vi), 24fps, 120 BPM grid.
+//  Format F5 (fixed-hero journey): the constant is a RED KEY (a leaked secret) that hops link to link along the attack
+//  chain. Each "link" beat adds one chain link at the top of the frame. Paper world = people (a dev's desk, a chat box);
+//  navy world = inside systems. KHUNG HÌNH GỌN + no frozen stretch > 1.5 s (channel rules).
+//  Colour code: RED = a leaked secret / the attack; GREEN = safe / the fix; terracotta dot hero is NOT used.
+//  Payoff: a hard cut (SLAM) into "fake" (the malicious extension appears) in the pause after "link4".
+//  Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+// Vietnamese-capable handwriting: Pangolin (installed by channel/setup.sh), then system fallbacks with Vietnamese glyphs
+const HAND = '"Pangolin", "Segoe Print", "Comic Sans MS", "DejaVu Sans", sans-serif';
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'intro', 'link1', 'link2', 'link3', 'link4', 'fake', 'harm', 'lesson', 'fix'];
+const SLAM_ID = 'fake';
+const SLAM = snap8(VL('link4').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);
+
+// ---- the bridges' contract: where the RED KEY (keyProp, size KS) MUST be at each boundary (x, y = the key's ring centre).
+// Scenes keep it exactly there (unrotated) during [tc - 0.5, tc + 0.5]. Along the chain the key exits right, enters left.
+const KS = 1;                                                   // keyProp scale at bridges (ring radius 46)
+const BR = {
+  hookIntro:   { a: [700, 900], b: [540, 900] },
+  introLink1:  { a: [780, 900], b: [300, 820] },
+  link1Link2:  { a: [780, 820], b: [300, 820] },
+  link2Link3:  { a: [780, 820], b: [300, 820] },
+  link3Link4:  { a: [780, 820], b: [300, 820] },
+  // link4 -> fake: SLAM (hard cut, no bridge); fake is complete on its first frame
+  fakeHarm:    { a: [540, 900], b: [540, 900] },
+  harmLesson:  { a: [540, 900], b: [200, 700] },
+  lessonFix:   { a: [880, 700], b: [540, 900] },
+};
+// the attack chain (drawn small at the top of the link scenes and big in "lesson"): one label per link
+const CHAIN = ['khoá cấp cho Fireworks', 'kho nhật ký AI', 'khoá API chưa che', 'tài khoản xuất bản', 'tiện ích độc hại'];
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'vài chiếc khoá nằm sai chỗ', intro: 'Cursor bị xâm nhập', link1: 'khoá cấp cho Fireworks bị lộ',
+  link2: 'kho nhật ký AI agent', link3: 'khoá API chưa che', link4: 'tài khoản xuất bản tiện ích',
+  fake: 'Claude Code giả trên chợ tiện ích', harm: 'cài khoá đăng nhập từ xa', lesson: 'ghép lại thành đường tấn công', fix: 'đổi khoá, riêng tư, che dữ liệu',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1, -1),
+  cues: { slam: SLAM, click: SLAM },
+  acts: [
+    { name: '1 Mở',       role: 'build',   t0: 0,            t1: ET('link1') },
+    { name: '2 Chuỗi',    role: 'journey', t0: ET('link1'),  t1: ET('link4') },
+    { name: '3 Tài khoản', role: 'peak',   t0: ET('link4'),  t1: snap8(VL('link4').t1) },
+    { name: '4 Lặng',     role: 'silence', t0: snap8(VL('link4').t1), t1: SLAM - 0.125 },
+    { name: '5 Mã độc',   role: 'gift',    t0: SLAM,         t1: SLAM + 2.25 },
+    { name: '6 Bài học',  role: 'goodbye', t0: SLAM + 2.25,  t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;

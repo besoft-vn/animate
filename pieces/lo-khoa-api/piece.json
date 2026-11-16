@@ -1,0 +1,13 @@
+{
+  "name": "lo-khoa-api",
+  "title": "Lộ khoá API trong log AI agent: bài học từ vụ Cursor",
+  "series": "Besoft — Tin bảo mật",
+  "date": "2026-11-16",
+  "source": "https://besoft.vn/blog/lo-khoa-api-trong-log-ai-agent-bai-hoc-tu-vu-cursor",
+  "format": { "width": 1080, "height": 1920, "fps": 24, "bpm": 120 },
+  "storyFormat": "F5 fixed-hero journey (a red key hops along the attack chain), morph-joined, one slam",
+  "style": "crosshatch",
+  "scenes": ["src/props.js", "src/sc-desk.js", "src/sc-chain.js", "src/sc-harm.js"],
+  "voice": { "file": "voice/voice.wav", "music": -14 },
+  "review": { "safe": { "top": 240, "bottom": 420, "right": 140 }, "refs": {}, "wpsMax": 5.0 }
+}
