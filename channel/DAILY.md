@@ -36,6 +36,13 @@ Gói Starter tạo song song được: gọi `creative_generate_speech` cho TẤ
 - Mỗi cảnh luôn có chuyển động nhẹ, có chủ đích, gắn với lời đọc: sóng trôi, tia sáng chảy, nhân vật nhìn/đi/phản ứng, chú thích viết dần. Chỉ nhịp lặng trước payoff (≤ 1 s) được đứng yên.
 - Cảnh minh hoạ hiện tượng thiên nhiên: ưu tiên khung cảnh thật, dễ hình dung (vd. hoàng hôn trên biển) hơn sơ đồ trừu tượng; sơ đồ chỉ để chú thích thêm.
 
+## 5d. Âm thanh mềm (góp ý 16/11/2026: "âm thanh to đột ngột")
+- Nhịp lặng trước payoff KHÔNG im bặt: giữ một lớp nền mỏng (~−30 dB trong bản mix) + một âm dâng nhỏ báo trước.
+- Payoff là hợp âm nở mềm (attack ~0,3 s), không dùng tiếng "tách"/noise hit sắc, sub nhẹ. Đo RMS bản mix quanh cú cắt: không bước nhảy > ~12 dB trong 0,2 s.
+- Giọng: `voice.mjs` tự cân mọi câu về −16 LUFS (script.json `"level"`).
+- Review sẽ báo FAIL quy tắc "silence median ≤ peak − 15 dB": đó là chủ ý, bỏ qua.
+- Cú cắt cứng: camera liền mạch qua cú cắt (cùng độ zoom), cảnh mới hoàn chỉnh từ khung đầu (cả tag và caption).
+
 ## 6. Build, export, review, sửa
 `build.mjs` → `tile.mjs` (deterministic: true) → xem still các beat và mọi cầu nối → `export.mjs --share --no-captions` (KHÔNG làm bản phụ đề) → `review.mjs` → `python3 channel/stillcheck.py pieces/<slug>/renders/share.mp4 --ignore <đầu>-<cuối nhịp lặng>` (KHÔNG đoạn nào đứng yên > 1,5 s ngoài nhịp lặng cố ý — góp ý "có vài cảnh bị đơ"). Sửa tới khi: cuts/morphs on grid PASS, narration PASS, STORY ARC PASS, TEXT PASS (0 cắt/chồng, 0 dưới UI), dead beats PASS, loudest 100ms trong act payoff. Lặp nhạc bằng `--only-audio`. Xem `review/phone.jpg`.
 

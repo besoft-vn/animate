@@ -18,3 +18,5 @@ const BRIDGES = [
 ];
 // KHUNG HÌNH GỌN: lighter grain than the kit default
 STYLE.post = () => grain({ n: 700 });
+// KHÔNG ĐƠ: slow linear push-in where stillcheck found a quiet stretch (link1 opens on two still servers)
+CAMS.link1 = (t) => camOf({ z: 1 + 0.06 * seg(t, ET('link1'), EE('link1')), p: [540, 900], to: [540, 900] });

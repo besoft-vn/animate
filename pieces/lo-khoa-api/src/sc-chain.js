@@ -155,6 +155,8 @@ SCENES.link1 = function () {
   c_chain(1, tLo);
   c_at(250, 1140, c_pop(T0 + 0.1), () => c_server(80, 960, 340, 360, 'Cursor', 'c_s1'));
   c_at(750, 1140, c_pop(T0 + 0.35), () => c_server(580, 960, 340, 360, 'Fireworks AI', 'c_s2', { size: 46, crack: seg(TT, tLo, tLo + 0.3) }));
+  // KHÔNG ĐƠ: a live data cable between the two boxes, dashes always flowing
+  { const off = (TT * 120) % 40; ctx.save(); ctx.setLineDash([18, 22]); ctx.lineDashOffset = -off; ink([[420, 1150], [580, 1150]], { color: 'rgba(82,214,196,0.8)', w: 5, key: 'c_cab' }); ctx.restore(); }
   // the handover arc (dashed), written on with "cấp"
   const P0 = [300, 830], P1 = [500, 620], P2 = [700, 860], q = (u) => [lerp(lerp(P0[0], P1[0], u), lerp(P1[0], P2[0], u), u), lerp(lerp(P0[1], P1[1], u), lerp(P1[1], P2[1], u), u)];
   const arc = []; for (let i = 0; i <= 24; i++) arc.push(q(i / 24));
@@ -166,7 +168,7 @@ SCENES.link1 = function () {
   // the key
   let x, y, rot = 0, s = 1;
   const tA = tCap, tB = tCap + 0.9;
-  if (TT < tA) { [x, y] = c_path([[T0 + 0.5, 300, 820], [tA, 300, 830]]); s = 1 + 0.15 * Math.sin(Math.PI * seg(TT, tKhoa, tKhoa + 0.4)); }
+  if (TT < tA) { [x, y] = c_path([[T0 + 0.5, 300, 820], [tKhoa - 0.2, 300, 820], [tKhoa + 0.5, 250, 1000], [tA - 0.45, 250, 1000], [tA, 300, 830]]); s = 1 + 0.15 * Math.sin(Math.PI * seg(TT, tKhoa, tKhoa + 0.4)); }   // KHÔNG ĐƠ: the key drops into Cursor's box on 'khoá', rises on 'cấp'
   else if (TT < tB) { const u = EZ.io(seg(TT, tA, tB)); [x, y] = q(u); rot = -0.25 * Math.sin(Math.PI * u); }
   else [x, y, rot] = c_path([[tB, 700, 860, 0], [tB + 0.45, 690, 1165, 0], [tLo, 690, 1165, 0], [tLo + 0.6, 770, 880, -0.5], [T1 - 0.6, 780, 820, 0]]);
   const [bx, by] = TT < tLo ? c_bob(T0 + 0.5, tA) : c_bob(tLo + 0.6, T1 - 0.6, 7);
