@@ -25,6 +25,13 @@ Gói Starter tạo song song được: gọi `creative_generate_speech` cho TẤ
 - Bạn viết `src/head.html` (sao chép cấu trúc của `pieces/tu-lanh/src/head.html`: era từ VOICE, `snap8`, `IDS`, `BR` hợp đồng vị trí ở cầu nối, SLAM cắt cứng trên payoff trong khoảng lặng trước câu cuối, acts, narration), `src/bridges.js`, `src/props.js` (helper riêng của chủ đề), `src/score.js` (mẫu ở tu-lanh: payoff = stab + hợp âm phẳng ~2s mức 0.04, pad cuối ~0.016), `piece.json` (style, `"scenes"`, voice music −14, `captions.font: "Pangolin"`, `captions.size: 62`, `review.wpsMax: 5.0`).
 - Giao 2–3 agent hoạt hình chạy song song, mỗi agent sở hữu đúng một file `src/sc-*.js`, brief như ở tập tủ lạnh: đọc brief.md, head.html, props.js, STYLE.md + kit.js + demo của style; hợp đồng BR bắt buộc; nội dung chính y 380–1250, không gì quan trọng dưới y 1260 (phụ đề), chữ ≥ 50px trong x 60–940; tiền tố biến toàn cục riêng; build + still để tự xem; không sửa file của người khác.
 
+## 5b. Khung hình gọn (góp ý của anh, 16/11/2026: "nhiều hạt nhìn rối mắt")
+- Mỗi khung chỉ một điểm nhìn chính; nền phẳng, yên. KHÔNG rải hàng chục/hàng trăm hạt, chấm, phân tử, bụi, sao, mote nhỏ.
+- Khi cần diễn tả "rất nhiều" (phân tử, hạt nhiệt...): tối đa ~8–12 vật thể, mỗi cái đủ lớn (r ≥ 18px trên khung 1080) và cách nhau rõ; phần còn lại gợi bằng một mảng màu/hình khối, không bằng chấm.
+- Tắt hoặc giảm mạnh các lớp nhiễu trang trí: bụi `darkWorld` (`dust: 40`), `grain` nhẹ, lưới halftone riso thô ở mảng nền lớn → dùng tông phẳng.
+- Chuyển động phụ (mote bay, tia lấp lánh) chỉ ở vùng nhân vật đang được nói tới; tối đa 1 hiệu ứng hạt mỗi cảnh.
+- Agent hoạt hình phải tự xem still ở 360px rộng (`review/phone.jpg`) và hỏi: "có chỗ nào lấm tấm/rối không?" — có thì bớt.
+
 ## 6. Build, export, review, sửa
 `build.mjs` → `tile.mjs` (deterministic: true) → xem still các beat và mọi cầu nối → `export.mjs --share --no-captions` (KHÔNG làm bản phụ đề) → `review.mjs`. Sửa tới khi: cuts/morphs on grid PASS, narration PASS, STORY ARC PASS, TEXT PASS (0 cắt/chồng, 0 dưới UI), dead beats PASS, loudest 100ms trong act payoff. Lặp nhạc bằng `--only-audio`. Xem `review/phone.jpg`.
 
