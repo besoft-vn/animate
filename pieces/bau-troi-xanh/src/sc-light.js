@@ -79,23 +79,22 @@ SCENES.air = function () {
   label('ni-tơ', 170, 690, 44, { reveal: ev(VW('air', 'phân'), 0.35), key: 'l_an', col: SK.graph });
   label('ô-xi', 750, 552, 44, { reveal: ev(VW('air', 'phân') + 0.25, 0.35), key: 'l_ao', col: SK.graph });
   // the inset: a sketched box, one blue wavelength, a tiny molecule
-  const bx = 110, by = 1035, bw = 830, bh = 235, box = sketchBox(bx, by, bw, bh, 18);
+  const bx = 110, by = 1030, bw = 830, bh = 200, box = sketchBox(bx, by, bw, bh, 18);
   const kb = ev(tn - 0.2, 0.5);
   if (kb > 0) {
     gfill(box, SK.sheet, { a: clamp(kb * 2), key: 'l_aboxf', off: [6, 6] });
     gpencil(box, { key: 'l_aboxp', w: 2.4, a: 0.6, part: kb });
     gline(box, { key: 'l_abox', w: 4, part: ev(tn + 0.1, 0.4) });
   }
-  const WP = l_waveP(170, 710, by + 150, 540, 50), kw = ev(tn + 0.3, 0.7);
+  const WP = l_waveP(170, 710, by + 130, 540, 45), kw = ev(tn + 0.3, 0.7);
   if (kw > 0) gline(WP, { w: 7, col: COL.blue, key: 'l_awave', part: kw, amp: 1.2 });
-  l_bracket(170, 710, by + 62, ev(tw, 0.5), '1 bước sóng', 'l_abw', 42);
-  const mx = 840, my = by + 150, km = ev(tt, 0.4);
+  l_bracket(170, 710, by + 58, ev(tw, 0.5), '1 bước sóng', 'l_abw', 40);
+  const mx = 840, my = by + 135, km = ev(tt, 0.4);
   if (km > 0) {
     for (const s of [-1, 1]) { ctx.save(); ctx.globalAlpha = clamp(km * 2); ctx.fillStyle = SK.ink; ctx.beginPath(); ctx.arc(mx + s * 4, my, 4.5, 0, TAU); ctx.fill(); ctx.restore(); }
     gpencil(loopPts(mx, my, 30, 30, 0.12), { key: 'l_aring', w: 2.6, a: 0.85, part: km });
-    label('phân tử', mx, my + 72, 36, { reveal: ev(tt + 0.2, 0.3), key: 'l_apt' });
+    label('phân tử', mx, by + 62, 38, { reveal: ev(tt + 0.2, 0.3), key: 'l_apt' });
   }
-  label('nhỏ hơn ~1000 lần', 440, by + bh - 14, 44, { reveal: ev(tk, 0.45), key: 'l_a1000' });
   sparkle(mx, my, 46, seg(TT, tk + 0.1, tk + 0.6), 'l_aspk');            // the scene's one small particle effect
   // the hero: looks around, walks to the big molecule and stands on it
   const wk = EZ.io(seg(TT, tw0, tw1)), st = l_walk(tw0, tw1), hop = Math.sin(Math.PI * seg(TT, tw1 - 0.35, tw1));
@@ -104,7 +103,7 @@ SCENES.air = function () {
   const look = TT < tw0 ? [Math.sin(TT * 2.5), -0.6] : TT < tn ? [1, 0] : [0.2, 1];
   doodleHero(hx, hy, HR, { key: 'hero', legs: true, step: st, mood, look });
   viTag('không khí');
-  pageCaption(['phân tử khí', 'nhỏ xíu'], [[1, 'nhỏ xíu']], { at: 1.5 });
+  pageCaption(['phân tử khí', 'nhỏ hơn ~1000 lần'], [[1, '~1000 lần']], { at: tn - ET('air') });
 };
 
 // ---------------------------------------------------------------------
@@ -134,7 +133,7 @@ SCENES.scatter = function () {
   // 8 blue arrows, every direction
   for (let i = 0; i < 8; i++) {
     const a = (i * 45 + 22.5) * DEG, ca = Math.cos(a), sa = Math.sin(a);
-    const P = [[MX + ca * 165, MY + sa * 150], [MX + ca * 335, MY + sa * 320]];
+    const P = [[MX + ca * 165, MY + sa * 140], [MX + ca * 340, MY + sa * 265]];
     const k = ev(th + 0.03 + i * 0.045, 0.32);
     if (k > 0) arrowPencil(P, k, { col: COL.blue, w: 6, key: 'l_sar' + i });
   }
