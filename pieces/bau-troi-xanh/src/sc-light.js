@@ -123,7 +123,7 @@ SCENES.scatter = function () {
   if (rk > 0) gline(l_waveP(60, 940, MY, 300, 45, rph), { w: 7, col: COL.red, key: 'l_sred', part: rk, amp: 1.2 });
   // the blue wave train travels in from the left edge: its front reaches the molecule exactly on "hất", then it is used up
   if (TT >= tb && TT < th + 0.4) {
-    const fx = lerp(60, 445, seg(TT, tb, th)), bph = -90 * (TT - tb), P = l_waveP(60, 445, MY, 150, 42, bph).filter((p) => p[0] <= fx);
+    const fx = lerp(60, 445, seg(TT, tb, th)), bph = -90 * (TT - tb), P = l_waveP(60, 445, MY, 150, 50, bph).filter((p) => p[0] <= fx);
     if (P.length > 1) {
       ctx.save(); ctx.globalAlpha = 1 - ev(th, 0.4);
       gline(P, { w: 8, col: COL.blue, key: 'l_sblue', amp: 1.2 });
@@ -164,16 +164,16 @@ SCENES.scatter = function () {
   const [hx0, hy0] = BR.airScatter.b, LX = 835, LY = 600, PX = 750, fk = seg(TT, th, th + 0.6), land = Math.sin(Math.PI * seg(TT, th + 0.6, th + 0.85));
   const tl = th + 0.85, ws0 = tl + 0.55, ws1 = t6 - 0.1, wkk = EZ.io(seg(TT, ws0, ws1)), st = l_walk(ws0, ws1);
   let hx = lerp(hx0, LX, EZ.o2(fk)) + (PX - LX) * wkk, hy = lerp(hy0, LY, fk) - 260 * Math.sin(Math.PI * fk) - Math.abs(st) * 8;
-  if (TT < th) { const br = seg(TT, tb, th); hx -= 14 * br * (1 + 0.3 * Math.sin(TT * 9)); hy += 4 * Math.sin(TT * 7); }
+  if (TT < th) { const br = seg(TT, tb, th); hx -= 22 * br + 12 * Math.sin(TT * TAU); hy += 9 * Math.sin(TT * TAU + 1.2); }
   const hop = (t0) => Math.sin(Math.PI * seg(TT, t0, t0 + 0.4));
   hy -= 45 * (hop(t6 - 0.05) + hop(t6 + 1.65) + hop(t6 + 2.3));
   const flying = fk > 0 && fk < 1, mood = TT < th ? 'calm' : TT < t6 ? (TT < ws0 ? 'puzzled' : 'wow') : 'happy';
   const look = TT < th ? [-1, 0.5] : TT < ws0 ? [Math.sin(TT * 14), 0] : TT < t6 ? [-0.8, 0.8] : [-1, -0.3];
   const dizzy = TT > tl && TT < ws0 ? 0.18 * Math.sin((TT - tl) * 22) * (1 - seg(TT, tl, ws0)) : 0;
-  const lean = TT < th ? -0.12 * seg(TT, tb, th) : 0;
+  const lean = TT < th ? -0.2 * seg(TT, tb, th) + 0.08 * Math.sin(TT * TAU) : 0;
   let arms = null;
   if (flying) arms = [1.3, 1.3];
-  else if (TT < th && TT > th - 0.6) arms = [0.9, 0.9];
+  else if (TT < th && TT > tb) arms = TT > th - 0.6 ? [0.9, 0.9] : [0.2 + 0.35 * Math.sin(TT * TAU), -0.6];
   else if (TT >= t6 - 0.05) arms = [0.25 + 0.25 * Math.sin((TT - t6) * TAU / 0.9), -0.9];
   doodleHero(hx, hy, HR, { key: 'hero', legs: true, step: st, mood, look, rot: flying ? TAU * EZ.o2(fk) : lean + dizzy + 0.05 * st, sx: 1 + 0.12 * land, sy: 1 - 0.12 * land, arms });
   if (TT >= th + 0.6 && TT < ws0 + 0.3) label('!', LX - 95, LY - 70 - 10 * popS(th + 0.6), 90, { key: 'l_sbang', reveal: ev(th + 0.6, 0.1) });

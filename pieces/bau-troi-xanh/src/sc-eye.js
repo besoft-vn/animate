@@ -197,7 +197,7 @@ SCENES.sunset = function () {
   // ---- the sky: pale blue at noon; from "xiên" the warm sky spreads (written on slowly), deepening on "hất"
   const warm = ev(tX + 0.2, tH - tX - 0.2), deep = ev(tH - 0.1, tE6 - tH + 0.1);
   const SKY1 = [[60, 520], [1020, 520], [1020, SEA.y], [60, SEA.y]], SKY2 = [[60, SEA.y - 260], [1020, SEA.y - 260], [1020, SEA.y], [60, SEA.y]];
-  if (warm < 1) gfill(SKY1, COL.blueL, { a: 0.2 * (1 - EZ.io(warm)), off: [0, 0], key: 'e_snoon' });
+  if (warm < 1) { const k = 1 - EZ.io(warm); scribbleFill(SKY1, COL.blueL, { key: 'e_snoon', gap: 26, w: 6, a: 0.45 * k, base: 0.16 * k, ang: -0.5 }); }
   if (warm > 0) scribbleFill(SKY1, SEA.skyL, { key: 'seask1', gap: 22, w: 7, base: 0.35, part: warm });
   if (deep > 0) scribbleFill(SKY2, SEA.sky, { key: 'seask2', gap: 18, w: 7, base: 0.3, part: deep });
   // ---- the sea (swell lines drift on their own)
