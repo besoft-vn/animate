@@ -13,3 +13,4 @@ pieces/**/review/
 pieces/**/voice/*.scratch.wav
 pieces/**/voice/samples/
 pieces/**/deliver/
+pieces/**/voice/voice.wav

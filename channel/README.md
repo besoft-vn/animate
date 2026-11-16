@@ -30,3 +30,6 @@ Video ngắn tiếng Việt (9:16, 45–60 s) giải thích nguyên nhân, nguy�
 - `voice.mjs` nhận `"lang": "vi"` trong `script.json`: giọng tạm espeak-ng tiếng Việt, nhận dạng đa ngôn ngữ, chuẩn hoá chữ có dấu khi so khớp.
 - `review.wpsMax: 5.0` — tiếng Việt đơn âm tiết nên số "từ"/giây cao hơn tiếng Anh.
 - Gói ElevenLabs Starter (~40.000 ký tự/tháng, ~1 video ≈ 750 ký tự, cho phép thương mại). Tạo cả 10 câu song song được. (Gói Free chỉ cho 1 lượt/lần và không cho dùng thương mại.)
+
+## Quy trình merge
+Phiên quản lý làm việc trên nhánh của mình; sau mỗi thay đổi, tự review (cú pháp, không lộ bí mật, không file lớn/tạm, video vẫn build được) rồi chủ động merge vào `main` (chủ kênh cho phép 16/11/2026). Lịch chạy hằng ngày lấy quy tắc/công cụ từ `main`. `voice.wav` không commit (ghép lại từ các take mp3 bằng `voice.mjs`).
