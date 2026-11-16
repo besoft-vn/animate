@@ -43,7 +43,9 @@ function scratch(text, out) {
 // decode a take to 48 kHz mono s16, trimmed of the silence around it
 function decode(file) {
   const trim = 'silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.02';
-  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', file, '-af', `${trim},areverse,${trim},areverse`, '-ac', '1', '-ar', String(SR), '-f', 's16le', '-'], { maxBuffer: 1 << 30 });
+  // every take levelled to the same loudness, so no line jumps out of the mix (S.level LUFS, default -16; false = off)
+  const lvl = S.level === false ? '' : `,loudnorm=I=${S.level ?? -16}:TP=-2:LRA=7,aresample=${SR}`;
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', file, '-af', `${trim},areverse,${trim},areverse${lvl}`, '-ac', '1', '-ar', String(SR), '-f', 's16le', '-'], { maxBuffer: 1 << 30 });
   if (r.status !== 0) { console.error('could not decode', file, r.stderr.toString()); process.exit(1); }
   return r.stdout;
 }

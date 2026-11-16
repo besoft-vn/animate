@@ -101,8 +101,8 @@ SCENES.dome = function () {
   const rot = TT >= tE6 ? 0 : settle * 0.07 * Math.sin((TT - t0) * 2.0) + gx * 0.05;
   doodleHero(E_HERO_D[0], hy, HR, { key: 'hero', legs: true, mood: TT >= tK ? (TT >= tM ? 'happy' : 'wow') : 'calm', look: lk, rot,
     arms: TT >= tK ? [1.1, 1.1] : TT >= tA ? [0.2 + 0.3 * Math.sin((TT - tA) * 3), -0.9] : [-0.9, -0.9], sx: 1 - 0.04 * hop, sy: 1 + 0.05 * hop + (TT >= tE6 ? 0 : 0.015 * Math.sin(TT * 3)) });
-  viTag('trời xanh');
-  pageCaption(['ánh xanh từ', 'khắp trời'], [[1, 'khắp']], { at: VW('dome', 'ánh') - t0 });
+  viTagNow('trời xanh');   // hard cut in: complete on the first frame
+  pageCaption(['ánh xanh từ', 'khắp trời'], [[1, 'khắp']], { at: -1 });
 };
 
 // =====================================================================

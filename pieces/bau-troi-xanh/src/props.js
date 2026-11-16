@@ -62,3 +62,11 @@ function seaGlitter(x, o = {}) {
   const y = SEA.y, col = o.col || COL.orange;
   for (let i = 0; i < 7; i++) { const yy = y + 28 + i * 34, w = (40 + i * 22) * (0.75 + 0.25 * Math.sin(TT * 5 + i * 1.7)); gline([[x - w / 2, yy], [x + w / 2, yy]], { w: 6, col, key: (o.key || 'gl') + i }); }
 }
+// a tag already written (for a scene that opens on a hard cut: complete on its first frame)
+function viTagNowDraw(str) {
+  const size = 66, w = letterW(str, size, 'hand'), x = 84, y = 340;
+  tapeStrip(x + w / 2, y - size * 0.3, w + 70, -0.03, 'tagtape' + str, size * 1.15);
+  const [x0, x1] = handLetter(str, x, y, size, { face: 'hand', align: 'left', reveal: 1, key: 'tag' + str, jit: 0.7 });
+  underline(x0, x1, y + 20, { col: SK.red, w: 5, key: 'tagu' + str, part: 1 });
+}
+const viTagNow = (str) => { const f = () => viTagNowDraw(str); if (DEFER) DEFER.push(f); else f(); };

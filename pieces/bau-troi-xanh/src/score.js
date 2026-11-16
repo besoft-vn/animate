@@ -25,9 +25,12 @@
     if (st >= 5 && k % 4 === 0) sub(t, 0.05);
   });
   // the payoff: the click's chord stab on the SLAM, then a flat warm chord under the last line, the motif to close
-  ['D3', 'A3', 'D4', 'Fs4', 'A4', 'D5'].forEach((n, i) => pluck(SLAM + i * 0.006, nz(n), 0.34, (i - 2.5) * 0.15, 0.7, 5000, 0.4));
-  pad(SLAM, SLAM + 0.4, ['D3', 'A3', 'D4', 'Fs4', 'A4'], 0.45, { cut: 3400, att: 0.008, rel: 0.35, send: 0.3 });
-  pad(SLAM + 0.3, SLAM + 2.3, ['D3', 'A3', 'D4', 'Fs4', 'A4'], 0.04, { cut: 2200, att: 0.05, rel: 0.6, send: 0.4 });   // the flat warm chord, held through the payoff act
+  // SOFT payoff (owner feedback: "âm thanh to đột ngột"): a quiet swell inside the pause announces it, then the chord
+  // blooms (0.3 s attack) instead of a stab — the payoff is the warmest moment, not a bang
+  riser(SIL + 0.1, SLAM, 0.010);
+  pad(SIL - 0.1, SLAM + 0.4, ['D3', 'A3', 'E4'], 0.010, { type: 'triangle', cut: 600, att: 0.3, rel: 0.3 });   // a faint bed: the pause is quiet, never dead silent
+  ['D3', 'A3', 'D4', 'Fs4', 'A4', 'D5'].forEach((n, i) => pluck(SLAM + i * 0.03, nz(n), 0.11, (i - 2.5) * 0.15, 0.9, 2600, 0.45));
+  pad(SLAM, SLAM + 2.3, ['D3', 'A3', 'D4', 'Fs4', 'A4'], 0.05, { cut: 2000, att: 0.35, rel: 0.7, send: 0.45 });   // the warm chord blooms and holds through the payoff act
   pad(SLAM + 2.0, DURATION, ['D3', 'A3', 'D4', 'Fs4'], 0.016, { cut: 1000, att: 0.3, rel: 0.4, send: 0.45 });
   motif(DURATION - 1.6, 0.07);
 
@@ -43,5 +46,4 @@
   // bridge whooshes
   for (const id of ['white', 'waves', 'air', 'scatter', 'violet', 'sunset', 'end']) sweep(ET(id) - 0.45, ET(id), 0.008, 600, 2200, 0);
   // the slam: a bright transient + sub on the cut into the blue sky (the loudest moment)
-  noiseHit(SLAM, 0.03, 'highpass', 2500, 0.9, 0.45, 0);
-  sub(SLAM, 0.3);
+  sub(SLAM, 0.08);   // a soft low bloom under the chord (no click)

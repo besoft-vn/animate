@@ -22,5 +22,9 @@ STYLE.post = () => grain({ n: 260, dark: 'rgba(60,56,52,0.08)', light: 'rgba(255
 // continuous through the bridges (kit/morph.js maps bridge shapes through each era's camera); stops at the silence.
 const DRIFT = (t0, t1, z = 1.04) => (t) => camOf({ z: 1 + (z - 1) * EZ.io(seg(t, t0, t1)), p: [540, 900], to: [540, 900] });
 CAMS.hook = DRIFT(0, ET('white') + 0.5);
-CAMS.scatter = DRIFT(ET('scatter'), VL('scatter').t1);
+// scatter keeps drifting THROUGH the silence (a frozen camera reads as a stall) and the dome opens at the same zoom,
+// so the hard cut changes the picture, not the scale
+const SC_Z = (t) => 1 + 0.05 * seg(t, ET('scatter') + 0.5, SLAM);
+CAMS.scatter = (t) => camOf({ z: SC_Z(t), p: [540, 900], to: [540, 900] });
+CAMS.dome = (t) => camOf({ z: lerp(1.05, 1.0, EZ.io(seg(t, SLAM, SLAM + 3.0))), p: [540, 900], to: [540, 900] });
 CAMS.end = (t) => camOf({ z: 1 + 0.06 * seg(t, ET('end') + 0.5, DURATION - 1), p: [540, 900], to: [540, 900] });   // linear: no slow ease-in at 50–52 s
