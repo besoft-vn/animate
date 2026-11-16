@@ -32,8 +32,12 @@ Gói Starter tạo song song được: gọi `creative_generate_speech` cho TẤ
 - Chuyển động phụ (mote bay, tia lấp lánh) chỉ ở vùng nhân vật đang được nói tới; tối đa 1 hiệu ứng hạt mỗi cảnh.
 - Agent hoạt hình phải tự xem still ở 360px rộng (`review/phone.jpg`) và hỏi: "có chỗ nào lấm tấm/rối không?" — có thì bớt.
 
+## 5c. Không để cảnh đơ (góp ý 16/11/2026)
+- Mỗi cảnh luôn có chuyển động nhẹ, có chủ đích, gắn với lời đọc: sóng trôi, tia sáng chảy, nhân vật nhìn/đi/phản ứng, chú thích viết dần. Chỉ nhịp lặng trước payoff (≤ 1 s) được đứng yên.
+- Cảnh minh hoạ hiện tượng thiên nhiên: ưu tiên khung cảnh thật, dễ hình dung (vd. hoàng hôn trên biển) hơn sơ đồ trừu tượng; sơ đồ chỉ để chú thích thêm.
+
 ## 6. Build, export, review, sửa
-`build.mjs` → `tile.mjs` (deterministic: true) → xem still các beat và mọi cầu nối → `export.mjs --share --no-captions` (KHÔNG làm bản phụ đề) → `review.mjs`. Sửa tới khi: cuts/morphs on grid PASS, narration PASS, STORY ARC PASS, TEXT PASS (0 cắt/chồng, 0 dưới UI), dead beats PASS, loudest 100ms trong act payoff. Lặp nhạc bằng `--only-audio`. Xem `review/phone.jpg`.
+`build.mjs` → `tile.mjs` (deterministic: true) → xem still các beat và mọi cầu nối → `export.mjs --share --no-captions` (KHÔNG làm bản phụ đề) → `review.mjs` → `python3 channel/stillcheck.py pieces/<slug>/renders/share.mp4 --ignore <đầu>-<cuối nhịp lặng>` (KHÔNG đoạn nào đứng yên > 1,5 s ngoài nhịp lặng cố ý — góp ý "có vài cảnh bị đơ"). Sửa tới khi: cuts/morphs on grid PASS, narration PASS, STORY ARC PASS, TEXT PASS (0 cắt/chồng, 0 dưới UI), dead beats PASS, loudest 100ms trong act payoff. Lặp nhạc bằng `--only-audio`. Xem `review/phone.jpg`.
 
 ## 7. Giao (chỉ MỘT video, không có bản phụ đề)
 - `pieces/<slug>/deliver/YYYY-MM-DD — <Tiêu đề>.mp4` (= renders/share.mp4). Video không commit (deliver/ và renders/ đã gitignore).
