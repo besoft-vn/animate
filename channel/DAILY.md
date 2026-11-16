@@ -26,12 +26,12 @@ Gói Starter tạo song song được: gọi `creative_generate_speech` cho TẤ
 - Giao 2–3 agent hoạt hình chạy song song, mỗi agent sở hữu đúng một file `src/sc-*.js`, brief như ở tập tủ lạnh: đọc brief.md, head.html, props.js, STYLE.md + kit.js + demo của style; hợp đồng BR bắt buộc; nội dung chính y 380–1250, không gì quan trọng dưới y 1260 (phụ đề), chữ ≥ 50px trong x 60–940; tiền tố biến toàn cục riêng; build + still để tự xem; không sửa file của người khác.
 
 ## 6. Build, export, review, sửa
-`build.mjs` → `tile.mjs` (deterministic: true) → xem still các beat và mọi cầu nối → `export.mjs --share` → `review.mjs`. Sửa tới khi: cuts/morphs on grid PASS, narration PASS, STORY ARC PASS, TEXT PASS (0 cắt/chồng, 0 dưới UI), dead beats PASS, loudest 100ms trong act payoff. Lặp nhạc bằng `--only-audio`. Sau `--only-audio`, ghép lại bản phụ đề: `ffmpeg -i renders/final-captions.mp4 -i renders/final.mp4 -map 0:v -map 1:a -c copy` rồi thay file. Xem `review/phone.jpg`.
+`build.mjs` → `tile.mjs` (deterministic: true) → xem still các beat và mọi cầu nối → `export.mjs --share --no-captions` (KHÔNG làm bản phụ đề) → `review.mjs`. Sửa tới khi: cuts/morphs on grid PASS, narration PASS, STORY ARC PASS, TEXT PASS (0 cắt/chồng, 0 dưới UI), dead beats PASS, loudest 100ms trong act payoff. Lặp nhạc bằng `--only-audio`. Xem `review/phone.jpg`.
 
-## 7. Giao
-- `pieces/<slug>/deliver/<slug>-phude.mp4` (nén lại bản phụ đề: libx264 crf 24, aac 160k, +faststart) và `<slug>.mp4` (= renders/share.mp4). Video không commit (deliver/ và renders/ đã gitignore).
+## 7. Giao (chỉ MỘT video, không có bản phụ đề)
+- `pieces/<slug>/deliver/YYYY-MM-DD — <Tiêu đề>.mp4` (= renders/share.mp4). Video không commit (deliver/ và renders/ đã gitignore).
 - `LOG.md` với bảng PASS từng shot, các số đo, shot yếu nhất, điều chưa kiểm chứng (không nghe được bằng tai). Đánh dấu `[x]` chủ đề trong topics.md (ngày, slug, style, thời lượng).
-- **Drive:** đặt tên `YYYY-MM-DD — <Tiêu đề> (phụ đề).mp4` và `YYYY-MM-DD — <Tiêu đề>.mp4` (bản sao đổi tên trong deliver/), rồi `bash channel/upload-drive.sh <hai file>` → My Drive / "Vạn vật vận hành như thế nào — Video" (token quyền hẹp drive.file: rclone chỉ thấy thư mục nó tự tạo). Nếu script báo thiếu RCLONE_DRIVE_TOKEN: ghi rõ trong tin nhắn cuối là chưa lưu được lên Drive.
+- **Drive:** `bash channel/upload-drive.sh "pieces/<slug>/deliver/YYYY-MM-DD — <Tiêu đề>.mp4"` → My Drive / "Vạn vật vận hành như thế nào — Video" (token quyền hẹp drive.file: rclone chỉ thấy thư mục nó tự tạo). Script trả exit ≠ 0 nếu lỗi: ghi rõ trong tin nhắn báo là chưa lưu được lên Drive và lỗi gì.
 - Commit + push lên `claude/nifty-keller-b05bpw`.
-- Gửi hai file video bằng SendUserFile (`status: "proactive"`), kèm tin nhắn tiếng Việt ngắn: chủ đề, ý chính, style, độ dài, các số đo review, điều đã sửa, shot yếu nhất, credit ElevenLabs đã dùng / còn lại, chủ đề ngày mai.
-- Nếu một bước hỏng không cứu được (thiếu connector, export lỗi): vẫn commit những gì có, gửi tin nhắn nói rõ đã dừng ở đâu và cần anh làm gì.
+- **Báo cho anh khi xong (bắt buộc):** gửi video bằng SendUserFile với `status: "proactive"` (để thông báo đến điện thoại), kèm tin nhắn tiếng Việt ngắn: ✅ đã xong video ngày nào, chủ đề, ý chính, style, độ dài, đã lưu Drive hay chưa, các số đo review, điều đã sửa, shot yếu nhất, credit ElevenLabs đã dùng / còn lại, chủ đề ngày mai.
+- Nếu một bước hỏng không cứu được (thiếu giọng, export lỗi): vẫn commit những gì có và vẫn gửi tin nhắn (`status: "proactive"`) nói rõ ❌ đã dừng ở đâu và cần anh làm gì.

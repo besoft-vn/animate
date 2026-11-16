@@ -22,7 +22,7 @@ Video ngắn tiếng Việt (9:16, 45–60 s) giải thích nguyên nhân, nguy�
 5. **Khung dùng chung** (quản lý) rồi **giao cảnh** cho 2–3 agent hoạt hình song song.
 6. **Giọng thật**: connector ElevenLabs, `creative_generate_speech`, `model_id: eleven_v3` (multilingual_v2 phát âm sai thanh điệu tiếng Việt — đã kiểm chứng bằng Whisper), `generations_count: 1`, giọng mặc định **Tuan Khang – Emotional Narrator** (nam miền Bắc, truyền cảm; chọn 15/11/2026 sau khi so 5 giọng — mẫu ở `channel/voice-samples/`) (`GaEEAHHYlbueVlFfyrPr`). Tải từng take về `voice/<id>.mp3`, đặt `"file"` trong `script.json`, chạy lại `voice.mjs` (không `--scratch`) → hình tự khớp theo chữ.
    - Không có connector: đặt `ELEVENLABS_API_KEY` trong môi trường rồi `node <skill>/tools/tts-elevenlabs.mjs lines pieces/<slug>`.
-7. **Build, export, review**: `build.mjs` → `export.mjs --share` → `review.mjs`; sửa tới khi đạt; video giao là `renders/final-captions.mp4` (phụ đề tiếng Việt cháy sẵn) và `renders/share.mp4`.
+7. **Build, export, review**: `build.mjs` → `export.mjs --share` → `review.mjs`; sửa tới khi đạt; video giao là `renders/share.mp4` (chỉ một bản, không làm bản phụ đề — `export.mjs --no-captions`); lưu lên Drive và báo cho anh khi xong.
 8. **Ghi log + commit** lên nhánh làm việc; đánh dấu chủ đề trong `topics.md`.
 
 ## Ghi chú kỹ thuật tiếng Việt
