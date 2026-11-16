@@ -41,7 +41,7 @@ function e_sub(P, u0, u1) {
 //  A big blue sky dome over the horizon; the hero stands at the bottom, looking up; 7 molecules in the dome each
 //  send a blue arrow down into the hero's eyes. "khắp trời": the dome brightens, the arrows pulse into the eye.
 // =====================================================================
-const E_DOME = { cx: 520, cy: 1170, rx: 420, ry: 690 };
+const E_DOME = { cx: 520, cy: 1170, rx: 425, ry: 740 };
 const E_HERO_D = [560, 1060];
 // molecules: [x, y, rot]
 const E_MOLS = [[228, 1030, 0.5], [292, 836, -0.3], [398, 690, 0.9], [540, 610, 0.1], [668, 702, -0.8], [770, 850, 0.35], [826, 1036, -0.4]];
@@ -204,17 +204,16 @@ SCENES.sunset = function () {
     const PEEL = [[0.12, -1.9], [0.3, -1.25], [0.46, -2.15], [0.62, -1.4], [0.78, -1.95]];
     PEEL.forEach(([u, an], i) => {
       const t = tB + 0.15 + i * 0.28, k = ev(t, 0.3); if (k <= 0) return;
-      const Q = resample(LP, false, 6), p = Q[Math.round(u * (Q.length - 1))], L = 120;
-      e_arrow(e_bow([p[0] + Math.cos(an) * 14, p[1] + Math.sin(an) * 14], [p[0] + Math.cos(an) * L, p[1] + Math.sin(an) * L], 8, 8), { col: COL.blue, w: 5, key: 'e_peel' + i, part: k, head: 20 });
+      const Q = resample(LP, false, 6), p = Q[Math.round(u * (Q.length - 1))], L = 150;
+      e_arrow(e_bow([p[0] + Math.cos(an) * 14, p[1] + Math.sin(an) * 14], [p[0] + Math.cos(an) * L, p[1] + Math.sin(an) * L], 8, 8), { col: COL.blue, w: 6, key: 'e_peel' + i, part: k, head: 24 });
     });
     // "dày gấp hàng chục lần": the long road through the air
     const tp = ev(tD, 0.5);
     if (tp > 0) {
-      label('dày gấp', 410, 840, 58, { key: 'e_st1', reveal: tp });
-      const ww = letterW('hàng chục lần', 58, 'hand'), x0 = 410 - ww / 2, xs = letterW('hàng ', 58, 'hand'), xe = letterW('hàng chục', 58, 'hand');
-      highlight(x0 + xs, x0 + xe, 912, 32, ev(tC, 0.3), { key: 'e_sthi' });
-      label('hàng chục lần', 410, 922, 58, { key: 'e_st2', reveal: ev(tD + 0.35, 0.5) });
-      arrowPencil([[440, 950], [452, 990], [446, 1040]], ev(tD + 0.8, 0.3), { key: 'e_starw', w: 3 });
+      label('dày gấp', 420, 810, 72, { key: 'e_st1', reveal: tp });
+      const ww = letterW('hàng chục lần', 72, 'hand'), x0 = 420 - ww / 2, xs = letterW('hàng ', 72, 'hand'), xe = letterW('hàng chục', 72, 'hand');
+      highlight(x0 + xs, x0 + xe, 880, 40, ev(tC, 0.3), { key: 'e_sthi' });
+      label('hàng chục lần', 420, 895, 72, { key: 'e_st2', reveal: ev(tD + 0.35, 0.5) });
     }
   }
   if (sp > 0) sunDoodle(SUN[0], SUN[1], SUN[2], { col: COL.orange, key: 'e_lsun', part: sp, rays: ev(tX, 0.4) });
