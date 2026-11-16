@@ -33,8 +33,10 @@ async function api(p, init = {}) {
 async function tts(voice, model, text, lang, settings, ctx = {}) {
   const body = { text, model_id: model, voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.15, use_speaker_boost: true, ...(settings || {}) } };
   if (lang && /2_5|v3/.test(model)) body.language_code = lang;           // only the newer models take a language code
-  if (ctx.prev) body.previous_text = ctx.prev;                           // continuity of intonation across separate takes
-  if (ctx.next) body.next_text = ctx.next;
+  if (!/v3/.test(model)) {                                               // continuity across takes (eleven_v3 refuses it)
+    if (ctx.prev) body.previous_text = ctx.prev;
+    if (ctx.next) body.next_text = ctx.next;
+  }
   const r = await api(`/v1/text-to-speech/${voice}?output_format=mp3_44100_128`, { method: 'POST', body: JSON.stringify(body) });
   return Buffer.from(await r.arrayBuffer());
 }
@@ -67,11 +69,16 @@ if (cmd === 'sample') {
   const todo = S.lines.filter((l) => (only.length ? only.includes(l.id) : force || !l.file || !fs.existsSync(path.join(VDIR, l.file))));
   const chars = todo.reduce((a, l) => a + l.text.length, 0);
   console.log(`lines: ${todo.length} takes, ${chars} characters (≈ ${chars} credits), voice ${voice}, model ${model}, lang ${lang}`);
-  for (const l of todo) {
+  const one = async (l) => {   // up to 3 at a time (the plan's concurrency); retry a take once on 429
     const i = S.lines.indexOf(l);
-    const buf = await tts(voice, model, l.text, lang, S.tts?.settings, { prev: S.lines[i - 1]?.text, next: S.lines[i + 1]?.text });
-    l.file = `${l.id}.mp3`; fs.writeFileSync(path.join(VDIR, l.file), buf); console.log(`  ${l.id}: ${buf.length} bytes`);
-  }
+    for (let k = 0; ; k++) {
+      try {
+        const buf = await tts(voice, model, l.text, lang, S.tts?.settings, { prev: S.lines[i - 1]?.text, next: S.lines[i + 1]?.text });
+        l.file = `${l.id}.mp3`; fs.writeFileSync(path.join(VDIR, l.file), buf); console.log(`  ${l.id}: ${buf.length} bytes`); return;
+      } catch (e) { if (k < 2 && /^429/.test(e.message)) { await new Promise((r) => setTimeout(r, 4000)); continue; } throw e; }
+    }
+  };
+  const queue = [...todo]; await Promise.all(Array.from({ length: Math.min(3, queue.length) }, async () => { while (queue.length) await one(queue.shift()); }));
   S.tts = { ...(S.tts || {}), voice, model };
   fs.writeFileSync(SP, JSON.stringify(S, null, 1));
   console.log('updated script.json; next: node tools/voice.mjs ' + path.relative(process.cwd(), ROOT));

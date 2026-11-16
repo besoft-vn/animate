@@ -6,8 +6,9 @@ Tiêu chí: có một **quá trình thật** với các bước rõ ràng, có m
 ## Đã làm
 - [x] 2026-11-15 — Tủ lạnh làm lạnh như thế nào? → `pieces/tu-lanh/` (crosshatch, 58s, giọng Tuan Khang / eleven_v3)
 
+- [x] 2026-11-16 — Vì sao bầu trời màu xanh? → `pieces/bau-troi-xanh/` (bản lịch chạy dùng riso bị chê nhiều hạt, không push được; làm lại bằng sketchbook, khung hình gọn)
+
 ## Hàng chờ (gợi ý style)
-- [ ] Vì sao bầu trời màu xanh? (riso)
 - [ ] Lò vi sóng làm nóng thức ăn ra sao? (crosshatch)
 - [ ] Vì sao nồi cơm điện tự nhảy nút "giữ ấm"? (isometric)
 - [ ] Máy bay nặng hàng trăm tấn sao vẫn bay được? (sketchbook)
