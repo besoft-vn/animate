@@ -112,14 +112,14 @@ function e_eye(x, y, s, key, part = 1) {
     for (let i = 0; i < 4; i++) { const xx = x + (i - 1.5) * 26 * s; gline([[xx, y - 44 * s + Math.abs(i - 1.5) * 5 * s], [xx + (i - 1.5) * 6 * s, y - 62 * s + Math.abs(i - 1.5) * 8 * s]], { w: 3.5, key: key + 'l' + i, second: false, amp: 0.4, step: 5 }); }
   }
 }
-const E_CURVE = { x0: 330, x1: 920, y0: 1238, h: 190, pk: 700, wd: 200 };
+const E_CURVE = { x0: 330, x1: 920, y0: 1180, h: 180, pk: 700, wd: 200 };
 const e_sens = (x) => E_CURVE.y0 - E_CURVE.h * Math.exp(-(((x - E_CURVE.pk) / E_CURVE.wd) ** 2));
 SCENES.violet = function () {
   const t0 = ET('violet'), tT = VW('violet', 'tím'), tN = VW('violet', 'nắng'), tI = VW('violet', 'ít'), tE = VW('violet', 'mắt'), tK = VW('violet', 'kém');
   sketchPage({ grid: 'plain' });
   // ---- the bars: sunlight's blue vs violet
-  const base = 980, bx = [[270, 380], [450, 560]];
-  sunDoodle(168, 600, 40, { key: 'e_vsun', part: ev(tN - 0.2, 0.4), rays: ev(tN, 0.4) });
+  const base = 920, bx = [[270, 380], [450, 560]];
+  if (TT >= tN - 0.2) sunDoodle(168, 540, 40, { key: 'e_vsun', part: ev(tN - 0.2, 0.4), rays: ev(tN, 0.4) });
   gline([[230, base], [610, base + 3]], { w: 5, key: 'e_vbase', part: ev(tN, 0.35) });
   const hL = 330 * EZ.o3(ev(tN + 0.25, 0.5)), hT = 120 * EZ.o3(ev(tI, 0.45));
   [[0, hL, COL.blue, 'lam'], [1, hT, COL.violet, 'tím']].forEach(([i, h, col, name]) => {
@@ -131,7 +131,7 @@ SCENES.violet = function () {
   });
   // ---- the eye and its sensitivity curve
   const ep = ev(tE - 0.1, 0.4);
-  if (ep > 0) e_eye(178, 1150, 1, 'e_veye', ep);
+  if (ep > 0) e_eye(178, 1095, 1, 'e_veye', ep);
   gline([[E_CURVE.x0, E_CURVE.y0], [E_CURVE.x1, E_CURVE.y0 + 2]], { w: 4, key: 'e_vax', part: ev(tE + 0.2, 0.4), col: SK.graph, second: false });
   const CP = []; for (let x = E_CURVE.x0; x <= E_CURVE.x1 - 20; x += 10) CP.push([x, e_sens(x)]);
   const cp = ev(tE + 0.45, 0.7);
