@@ -1,0 +1,73 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2.0,
+ "tts": {
+  "provider": "elevenlabs-connector",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Tủ lạnh không hề tạo ra hơi lạnh.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "turn",
+   "text": "Nó làm một việc lạ hơn: bê hơi nóng trong tủ, đổ ra ngoài bếp.",
+   "after": 0.6,
+   "file": "turn.mp3"
+  },
+  {
+   "id": "sweat",
+   "text": "Bí mật thì bạn đã biết rồi: mồ hôi bay hơi, mang hơi nóng đi, nên da thấy mát.",
+   "after": 0.6,
+   "file": "sweat.mp3"
+  },
+  {
+   "id": "loop",
+   "text": "Trong tủ có một vòng ống kín, chứa chất làm lạnh sôi ở khoảng âm mười hai độ.",
+   "after": 0.5,
+   "file": "loop.mp3"
+  },
+  {
+   "id": "evap",
+   "text": "Ở dàn lạnh, nó sôi lên, hút hơi nóng từ đồ ăn của bạn.",
+   "after": 0.5,
+   "file": "evap.mp3"
+  },
+  {
+   "id": "comp",
+   "text": "Máy nén ép hơi ấy lại. Bị nén, nó nóng lên, nóng hơn cả căn bếp.",
+   "after": 0.5,
+   "file": "comp.mp3"
+  },
+  {
+   "id": "cond",
+   "text": "Nên ở dàn nóng sau lưng tủ, nhiệt tự chảy ra phòng, và hơi ngưng lại thành lỏng.",
+   "after": 0.5,
+   "file": "cond.mp3"
+  },
+  {
+   "id": "valve",
+   "text": "Qua một ống mao nhỏ xíu, áp suất tụt mạnh, chất lỏng lạnh buốt trở lại.",
+   "after": 0.6,
+   "file": "valve.mp3"
+  },
+  {
+   "id": "cycle",
+   "text": "Vòng ấy cứ quay mãi, cho tới khi trong tủ chỉ còn bốn độ.",
+   "after": 1.6,
+   "file": "cycle.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Vì thế sau lưng tủ lạnh luôn ấm: đó chính là hơi nóng từ đồ ăn của bạn.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}

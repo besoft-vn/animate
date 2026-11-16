@@ -1,0 +1,67 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "tts": {
+  "provider": "elevenlabs-connector",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Nắng mặt trời màu trắng, vậy sao bầu trời lại xanh?",
+   "after": 0.6,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "white",
+   "text": "Vì ánh sáng trắng thật ra là cả cầu vồng trộn lại với nhau.",
+   "after": 0.5,
+   "file": "white.mp3"
+  },
+  {
+   "id": "waves",
+   "text": "Mỗi màu là một làn sóng: đỏ thì sóng dài, xanh lam thì sóng ngắn.",
+   "after": 0.5,
+   "file": "waves.mp3"
+  },
+  {
+   "id": "air",
+   "text": "Không khí đầy những phân tử khí, nhỏ hơn bước sóng ánh sáng cả nghìn lần.",
+   "after": 0.5,
+   "file": "air.mp3"
+  },
+  {
+   "id": "scatter",
+   "text": "Gặp chúng, sóng xanh ngắn bị hất văng tứ phía, mạnh hơn màu đỏ gần sáu lần.",
+   "after": 1.6,
+   "file": "scatter.mp3"
+  },
+  {
+   "id": "dome",
+   "text": "Nên nhìn về hướng nào, ánh xanh cũng từ khắp trời dội vào mắt bạn.",
+   "after": 0.6,
+   "file": "dome.mp3"
+  },
+  {
+   "id": "violet",
+   "text": "Còn màu tím? Nắng có ít tím hơn, và mắt ta lại kém nhạy với nó.",
+   "after": 0.5,
+   "file": "violet.mp3"
+  },
+  {
+   "id": "sunset",
+   "text": "Lúc hoàng hôn, nắng đi xiên qua lớp khí dày gấp hàng chục lần, phần lớn màu xanh bị hất đi dọc đường.",
+   "after": 0.5,
+   "file": "sunset.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Chỉ còn cam và đỏ tới được mắt bạn. Cùng một bầu trời, chỉ khác đường đi của ánh sáng.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}

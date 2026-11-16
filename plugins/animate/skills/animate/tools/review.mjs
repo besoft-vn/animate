@@ -207,9 +207,10 @@ if (T.narration && T.narration.length) {
   console.log(' #   t0-t1          words  wps   shot  line');
   const boundaries = [...new Set([...T.cuts, ...T.shots.map((s) => s.t0)])].map((c) => ({ c, f: Math.round(c * T.fps) }));
   let densityOk = true, hitsOk = true, prevEnd = -1;
+  const WPS_MAX = PIECE.review?.wpsMax ?? 3.5;   // words/s; monosyllabic languages (vi: one syllable per word) want ~5
   T.narration.forEach((n, i) => {
     const words = n.text.trim().split(/\s+/).length, wps = words / (n.t1 - n.t0);
-    const ok = wps <= 3.5 && n.t0 >= prevEnd && n.t1 <= loopT;
+    const ok = wps <= WPS_MAX && n.t0 >= prevEnd && n.t1 <= loopT;
     densityOk = densityOk && ok; prevEnd = n.t1;
     console.log(`${String(i + 1).padStart(2)}  ${n.t0.toFixed(2)}-${n.t1.toFixed(2)}s  ${String(words).padStart(5)}  ${wps.toFixed(2)}  ${String(info.shotOf[Math.min(T.frames - 1, Math.round(n.t0 * T.fps))]).padStart(4)}  "${n.text}"${ok ? '' : '  <-- too dense / overlapping'}`);
     for (const h of n.hits || []) {
@@ -220,7 +221,7 @@ if (T.narration && T.narration.length) {
     }
   });
   const totalWords = T.narration.reduce((n, l) => n + l.text.trim().split(/\s+/).length, 0);
-  console.log(`narration: ${totalWords} words, density ${densityOk ? 'PASS' : 'FAIL'} (<= 3.5 words/s, no overlaps), word hits ${hitsOk ? 'PASS' : 'FAIL'} (<= 2 frames from a cut)`);
+  console.log(`narration: ${totalWords} words, density ${densityOk ? 'PASS' : 'FAIL'} (<= ${WPS_MAX} words/s, no overlaps), word hits ${hitsOk ? 'PASS' : 'FAIL'} (<= 2 frames from a cut)`);
 }
 
 // ---- story arc: does the picture pace and the sound follow the acts?

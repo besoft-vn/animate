@@ -1,0 +1,73 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Không cần một lỗ hổng phức tạp nào. Chỉ cần vài chiếc khoá nằm sai chỗ.",
+   "after": 0.6,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "intro",
+   "text": "Giữa tháng mười một, Cursor, trình soạn code tích hợp AI, xác nhận bị xâm nhập.",
+   "after": 0.5,
+   "file": "intro.mp3"
+  },
+  {
+   "id": "link1",
+   "text": "Mắt xích đầu tiên: một khoá truy cập mà Cursor cấp cho Fireworks AI, bị lộ từ phía Fireworks.",
+   "after": 0.5,
+   "file": "link1.mp3"
+  },
+  {
+   "id": "link2",
+   "text": "Khoá đó mở được một kho lưu trữ, chứa nhật ký làm việc của AI agent.",
+   "after": 0.5,
+   "file": "link2.mp3"
+  },
+  {
+   "id": "link3",
+   "text": "Trong nhật ký có cả những khoá API người dùng từng dán vào, chưa hề được che.",
+   "after": 0.5,
+   "file": "link3.mp3"
+  },
+  {
+   "id": "link4",
+   "text": "Từ đó, kẻ tấn công vào thêm vài dịch vụ, và lấy được một tài khoản có quyền xuất bản tiện ích.",
+   "after": 1.6,
+   "file": "link4.mp3"
+  },
+  {
+   "id": "fake",
+   "text": "Ngày hai mươi chín tháng mười, một bản Claude Code độc hại nằm trên chợ tiện ích của Cursor suốt khoảng mười một giờ.",
+   "after": 0.5,
+   "file": "fake.mp3"
+  },
+  {
+   "id": "harm",
+   "text": "Nó cài khoá đăng nhập từ xa của kẻ tấn công, và có thể đã tới tay tối đa năm nghìn người.",
+   "after": 0.6,
+   "file": "harm.mp3"
+  },
+  {
+   "id": "lesson",
+   "text": "Mỗi mắt xích đều bình thường. Ghép lại, chúng thành một đường tấn công.",
+   "after": 0.6,
+   "file": "lesson.mp3"
+  },
+  {
+   "id": "fix",
+   "text": "Bí mật đã dán vào AI là đã rời khỏi tay bạn. Hãy đổi khoá, bật chế độ riêng tư, và che dữ liệu trước khi gửi.",
+   "after": 0.3,
+   "file": "fix.mp3"
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "tu-lanh",
+  "title": "Tủ lạnh làm lạnh như thế nào?",
+  "series": "Vạn vật vận hành như thế nào",
+  "date": "2026-11-15",
+  "format": { "width": 1080, "height": 1920, "fps": 24, "bpm": 120 },
+  "storyFormat": "F5 fixed-hero journey (the hero dot is a bit of heat), morph-joined, one slam on the payoff",
+  "style": "crosshatch",
+  "scenes": ["src/props.js", "src/sc-kitchen.js", "src/sc-loop.js", "src/sc-machine.js"],
+  "voice": { "file": "voice/voice.wav", "music": -14 },
+  "captions": { "font": "Pangolin", "size": 62 },
+  "review": { "safe": { "top": 240, "bottom": 420, "right": 140 }, "refs": {}, "wpsMax": 5.0 }
+}

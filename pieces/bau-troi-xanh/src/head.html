@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vì sao bầu trời màu xanh?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Vì sao bầu trời màu xanh?" — 9:16, sketchbook, voiced (vi), 24fps, 120 BPM grid.
+//  Format F5 (fixed-hero journey): the sketchbook hero (terracotta doodle) follows sunlight from the sun into the air.
+//  KHUNG HÌNH GỌN (user feedback): few, large objects; no fields of dots/specks; at most ~10 molecules, r >= 18.
+//  Colour code: terracotta = the hero only; yellow highlighter = the sun / sunlight; LIGHT_BLUE = blue light & the blue
+//  sky; LIGHT_RED = red light; violet only in the "violet" beat; orange only at sunset. Graphite/ink draw everything else.
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). The payoff era "dome" starts on the
+//  SLAM: a hard cut inside the 1.6s pause after "scatter". Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+// Vietnamese-capable handwriting: Pangolin (installed by channel/setup.sh), then system fallbacks with Vietnamese glyphs
+const HAND = '"Pangolin", "Segoe Print", "Comic Sans MS", "DejaVu Sans", sans-serif';
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'white', 'waves', 'air', 'scatter', 'dome', 'violet', 'sunset', 'end'];
+const SLAM_ID = 'dome';
+// era starts: 0, then the 8th after the previous line ends + 0.3s; the payoff era starts on the SLAM (a hard cut on the
+// big hit, inside the pause after "scatter", before the line that names the answer)
+const SLAM = snap8(VL('scatter').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- colours (beyond the kit's SK palette)
+const COL = { blue: '#4a86c8', blueL: '#9cc3ea', red: '#d9473a', redL: '#f0a49a', violet: '#8a63c9', orange: '#ef8a3c', sun: '#f7d64a' };
+// ---- the bridges' contract: where the hero (doodleHero radius HR) or the bridge object MUST be at each boundary.
+// Scenes keep it exactly there during [tc - 0.5, tc + 0.5]. Sun bridges: a circle (x, y, r).
+const HR = 70;
+const BR = {
+  hookWhite:   { a: [760, 460, 110], b: [300, 560, 110] },       // the sun in the sky -> the sun as the light source
+  whiteWaves:  { a: [540, 1120], b: [180, 1000] },              // hero
+  wavesAir:    { a: [880, 1000], b: [200, 820] },               // hero
+  airScatter:  { a: [540, 820],  b: [540, 820] },               // hero on the molecule
+  // scatter -> dome: SLAM (hard cut, no bridge); dome is complete on its first frame
+  domeViolet:  { a: [560, 1060], b: [560, 1060] },              // hero
+  violetSunset:{ a: [800, 560],  b: [800, 560] },               // hero
+  sunsetEnd:   { a: [200, 1060, 120], b: [200, 1060, 120] },    // the low orange sun -> the same sun over the end scene
+};
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'nắng trắng, sao trời xanh?', white: 'ánh trắng = cầu vồng trộn lại', waves: 'đỏ sóng dài, xanh sóng ngắn',
+  air: 'phân tử khí nhỏ xíu', scatter: 'sóng xanh bị hất văng', dome: 'xanh từ khắp trời vào mắt',
+  violet: 'tím: ít nắng, mắt kém nhạy', sunset: 'hoàng hôn: đường xiên dài', end: 'cùng bầu trời, khác đường đi',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1, -1),
+  cues: { slam: SLAM, click: SLAM },
+  acts: [
+    { name: '1 Câu hỏi',  role: 'build',   t0: 0,          t1: ET('air') },
+    { name: '2 Không khí', role: 'journey', t0: ET('air'),  t1: ET('scatter') },
+    { name: '3 Hất văng', role: 'peak',    t0: ET('scatter'), t1: snap8(VL('scatter').t1) },
+    { name: '4 Lặng',     role: 'silence', t0: snap8(VL('scatter').t1), t1: SLAM - 0.125 },
+    { name: '5 Trời xanh', role: 'gift',   t0: SLAM,       t1: SLAM + 2.25 },
+    { name: '6 Tím, hoàng hôn', role: 'goodbye', t0: SLAM + 2.25, t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;
