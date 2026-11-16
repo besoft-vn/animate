@@ -176,7 +176,7 @@ SCENES.sunset = function () {
   gfill(band, COL.blueL, { a: 0.22, off: [0, 0], key: 'e_sband' });
   gpencil(S, { key: 'e_shell', w: 3, a: 0.75 });
   gline(G, { w: 6, key: 'e_earth' });
-  label('lớp khí', 905, 1110, 42, { col: SK.graph, key: 'e_slk' });
+  label('lớp khí', 830, 1100, 46, { col: SK.graph, key: 'e_slk' });
   // the hero: from the bridge spot, hops down onto the Earth (it is the observer)
   const P0 = BR.violetSunset.b, P1 = [760, 1149], tJ = t0 + 0.55;
   const r = e_hop(tJ, 0.55, P0, P1, 90), hp = TT < tJ ? P0 : r, arc = TT < tJ ? 0 : r[2];

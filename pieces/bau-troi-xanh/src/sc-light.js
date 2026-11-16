@@ -159,7 +159,7 @@ SCENES.scatter = function () {
   const flying = fk > 0 && fk < 1, mood = TT < th ? 'calm' : TT < t6 ? 'wow' : 'happy';
   const look = TT < th ? [-1, 0.5] : TT < t6 ? [-0.8, 0.8] : [-1, -0.2];
   doodleHero(hx, hy, HR, { key: 'hero', legs: true, mood, look, rot: flying ? TAU * EZ.o2(fk) : 0, sx: 1 + 0.12 * land, sy: 1 - 0.12 * land, arms: flying ? [1.3, 1.3] : null });
-  if (TT >= th + 0.6) label('!', LX + 95, LY - 70 - 10 * popS(th + 0.6), 90, { key: 'l_sbang', reveal: ev(th + 0.6, 0.1) });
+  if (TT >= th + 0.6) label('!', LX - 95, LY - 70 - 10 * popS(th + 0.6), 90, { key: 'l_sbang', reveal: ev(th + 0.6, 0.1) });
   TT = TS;
   viTag('tán xạ');
   pageCaption(['sóng xanh', 'bị hất văng'], [[1, 'hất văng']], { at: th + 0.2 - ET('scatter') });
