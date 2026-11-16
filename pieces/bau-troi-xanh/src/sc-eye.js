@@ -54,13 +54,18 @@ SCENES.dome = function () {
   const t0 = ET('dome'), tK = VW('dome', 'khắp'), tM = VW('dome', 'mắt'), tH = VW('dome', 'hướng'), tN = VW('dome', 'nào');
   sketchPage({ grid: 'plain' });
   const D = e_domePts(), closed = [...D, [E_DOME.cx - E_DOME.rx, E_DOME.cy]];
-  // the sky: a soft blue scribble from frame 1, brightening on "khắp trời"
-  const br = EZ.o2(ev(tK, 0.8));
+  // the sky: a soft blue scribble from frame 1, brightening on "khắp trời"; between, it breathes in slow waves
+  // (a wash that swells every 1.6 s, stronger from "ánh xanh") so the held payoff never freezes
+  const br = EZ.o2(ev(tK, 0.8)), tA = VW('dome', 'ánh');
   scribbleFill(closed, COL.blueL, { key: 'e_sky1', gap: 22, w: 5, a: 0.6, base: 0.26, ang: -0.55 });
-  if (br > 0) {
-    gfill(closed, COL.blueL, { a: 0.32 * br, off: [0, 0], key: 'e_skyw' });
-    scribbleFill(closed, COL.blue, { key: 'e_sky2', gap: 30, w: 4.5, a: 0.32, base: 0, ang: 0.7, part: br });
-  }
+  const wave = 0.5 - 0.5 * Math.cos(TAU * (TT - t0) / 1.6), wamp = lerp(0.1, 0.2, ev(tA, 0.5));
+  gfill(closed, COL.blueL, { a: wamp * wave + 0.3 * br, off: [0, 0], key: 'e_skyw' });
+  // a band of brighter blue sweeps up the dome from the horizon to the top, once per wave
+  const sw = ((TT - t0) / 1.6) % 1, syb = E_DOME.cy - sw * (E_DOME.ry + 160);
+  ctx.save(); gclip(closed);
+  gfill([[60, syb], [1000, syb - 40], [1000, syb + 120], [60, syb + 160]], COL.blue, { a: 0.1 * (0.5 + 0.5 * ev(tA, 0.5)) * Math.sin(Math.PI * sw), off: [0, 0], key: 'e_skyb' });
+  ctx.restore();
+  if (br > 0) scribbleFill(closed, COL.blue, { key: 'e_sky2', gap: 30, w: 4.5, a: 0.32, base: 0, ang: 0.7, part: br });
   gline(D, { w: 6, key: 'e_dome' });
   // the horizon
   gline([[70, 1172], [330, 1168], [700, 1174], [1000, 1169]], { w: 6, key: 'e_hor' });
@@ -74,21 +79,24 @@ SCENES.dome = function () {
     const A = [x + ux * 46, y + uy * 46], Bp = [eye[0] - ux * 104, eye[1] - uy * 104];
     const P = e_bow(A, Bp, (i % 2 ? 1 : -1) * 10);
     e_arrow(P, { col: COL.blue, w: 5.5, key: 'e_da' + i, halo: true });
-    // the pulse: one short thick blue dash travelling along the arrow (gentle before "khắp", livelier after)
-    const look = TT < tH ? -1 : TT < tN ? (i < 3 ? 1 : 0) : TT < tK ? (i > 3 ? 1 : 0) : 1;
-    if (look) {
-      const sp = TT < tK ? 0.7 : 1.15, u = ((TT - t0) * sp + i * 0.37) % 1, len = 0.22;
-      const S = e_sub(P, Math.max(0, u - len), u);
-      if (S) gline(S, { w: TT < tK ? 9 : 12, col: COL.blue, key: 'e_dp' + i, second: false, amp: 0.6, step: 6 });
+    // the pulse: short thick blue dashes keep travelling down every arrow (calm before "khắp", livelier after)
+    const sp = TT < tK ? 0.6 : 1.0, len = 0.22;
+    for (const k of [0, 0.5]) {
+      const u = ((TT - t0) * sp + i * 0.37 + k) % 1, S = e_sub(P, Math.max(0, u - len), u);
+      if (S) gline(S, { w: TT < tK ? 10 : 12, col: COL.blue, key: 'e_dp' + i + k, second: false, amp: 0.6, step: 6 });
     }
     molecule(x, y, 24, { rot, key: 'e_m' + i });
   });
-  // the hero on the horizon, looking up; looks left on "hướng", right on "nào", up and amazed on "khắp"
-  const lk = TT < tH ? [0, -1] : TT < tN ? [-0.9, -0.7] : TT < tK ? [0.9, -0.7] : [0, -1];
-  const hop = Math.sin(Math.PI * ev(tK, 0.4)) * 0.9 + Math.sin(Math.PI * ev(tM, 0.35)) * 0.6;
-  const hy = TT >= EE('dome') - 0.6 ? E_HERO_D[1] : E_HERO_D[1] - 34 * hop;
-  doodleHero(E_HERO_D[0], hy, HR, { key: 'hero', legs: true, mood: TT >= tK ? (TT >= tM ? 'happy' : 'wow') : 'calm', look: lk,
-    arms: TT >= tK ? [1.1, 1.1] : [-0.9, -0.9], sx: 1 - 0.04 * hop, sy: 1 + 0.05 * hop });
+  // the hero on the horizon, looking up; its gaze sweeps the sky (left on "hướng", right on "nào", back and forth
+  // through "ánh xanh cũng từ"), up and amazed on "khắp"; a slow sway keeps it alive, settled from EE - 0.6
+  const tE6 = EE('dome') - 0.6, settle = 1 - ev(tE6 - 0.4, 0.4);
+  const gx = TT < tH ? 0.35 * Math.sin((TT - t0) * 2.2) : TT < tN ? -0.9 : TT < tK ? 0.9 * Math.cos((TT - tN) * 2.4) : 0.25 * Math.sin((TT - tK) * 1.8);
+  const lk = [gx, TT < tK ? -0.75 : -1];
+  const hop = Math.sin(Math.PI * ev(tK, 0.4)) * 0.9 + Math.sin(Math.PI * ev(tM, 0.35)) * 0.6 + Math.sin(Math.PI * ev(tA, 0.35)) * 0.5;
+  const hy = TT >= tE6 ? E_HERO_D[1] : E_HERO_D[1] - 34 * hop;
+  const rot = TT >= tE6 ? 0 : settle * 0.07 * Math.sin((TT - t0) * 2.0) + gx * 0.05;
+  doodleHero(E_HERO_D[0], hy, HR, { key: 'hero', legs: true, mood: TT >= tK ? (TT >= tM ? 'happy' : 'wow') : 'calm', look: lk, rot,
+    arms: TT >= tK ? [1.1, 1.1] : TT >= tA ? [0.2 + 0.3 * Math.sin((TT - tA) * 3), -0.9] : [-0.9, -0.9], sx: 1 - 0.04 * hop, sy: 1 + 0.05 * hop + (TT >= tE6 ? 0 : 0.015 * Math.sin(TT * 3)) });
   viTag('trời xanh');
   pageCaption(['ánh xanh từ', 'khắp trời'], [[1, 'khắp']], { at: VW('dome', 'ánh') - t0 });
 };
@@ -161,66 +169,112 @@ SCENES.violet = function () {
   pageCaption(['nắng ít tím,', 'mắt kém nhạy'], [[1, 'kém']], { at: tI - t0 });
 };
 
+
 // =====================================================================
-//  SUNSET (41.5–49.5) — the Earth's curve and its shell of air. Noon light comes straight down (short way
-//  through the air); the low orange sun's light goes slanting through it (a long way): blue gets knocked out
-//  along the road, orange arrives.
+//  SUNSET (41.5–49.5) — a sunset over the sea (the same sea as "end"). The hero lands on a rock at right.
+//  Noon: a ghost sun high up, its light comes straight down — a SHORT way through the thick air near the sea.
+//  "xiên": the orange sun sinks onto the horizon; its light runs LOW and LONG through that air to the hero.
+//  "chục": "dày gấp / hàng chục lần". "hất": blue arrows peel up off the long beam, it turns orange/red, the sky warms.
 // =====================================================================
-const E_EARTH = { cx: 560, cy: 2700, r: 1500, ra: 1720 };
-const e_arcPts = (r, x0 = 20, x1 = 1060) => { const P = []; for (let x = x0; x <= x1; x += 20) P.push([x, E_EARTH.cy - Math.sqrt(r * r - (x - E_EARTH.cx) ** 2)]); return P; };
+const E_SS = { hero: [840, 1110], hr: HR * 0.8, ghost: [840, 450, 62], airTop: 905 };
+// the thick air near the sea: one band from the left edge to the right, top edge gently wavy, bottom = the horizon
+const E_AIR = (() => { const P = []; for (let x = 70; x <= 1010; x += 40) P.push([x, E_SS.airTop + 10 * Math.sin(x / 150)]); P.push([1010, SEA.y - 2], [70, SEA.y - 2]); return P; })();
+// the long low beam: from the low sun's rays to the hero, bowing up a little above the sea
+const E_LONG = e_bow([348, 1030], [E_SS.hero[0] - E_SS.hr - 10, E_SS.hero[1] - 8], -46, 26);
+const E_PEEL = [[0.14, -1.75, 150], [0.29, -1.35, 170], [0.44, -1.9, 160], [0.58, -1.45, 175], [0.72, -1.8, 150], [0.85, -1.4, 135]];
+function e_rock() {
+  const P = [[748, 1214], [760, 1196], [786, 1186], [840, 1182], [896, 1186], [924, 1198], [936, 1216]];
+  gfill([...P, [748, 1222]], SK.sheet, { a: 1, off: [0, 0], key: 'e_rkf' });
+  litHatch([...P, [748, 1222]], { key: 'e_rkh', gap: 9, lx: 0.4, ly: 0.9 });
+  gline(P, { w: 5, key: 'e_rko' });
+  gpencil([[770, 1226], [920, 1228]], { key: 'e_rkw', w: 3, a: 0.6 });
+}
 SCENES.sunset = function () {
-  const t0 = ET('sunset'), tX = VW('sunset', 'xiên'), tD = VW('sunset', 'dày'), tC = VW('sunset', 'chục'), tB = VW('sunset', 'xanh'), tH = VW('sunset', 'hất'), tNo = VW('sunset', 'nắng');
+  const t0 = ET('sunset'), tNo = VW('sunset', 'nắng'), tX = VW('sunset', 'xiên'), tL = VW('sunset', 'lớp'), tD = VW('sunset', 'dày');
+  const tHg = VW('sunset', 'hàng'), tC = VW('sunset', 'chục'), tP = VW('sunset', 'phần'), tB = VW('sunset', 'xanh'), tH = VW('sunset', 'hất');
+  const tDg = VW('sunset', 'đường'), tE6 = EE('sunset') - 0.6;
   sketchPage({ grid: 'plain' });
-  // the shell of air (a faint blue band) and the Earth's curve
-  const G = e_arcPts(E_EARTH.r), S = e_arcPts(E_EARTH.ra), band = [...S, ...G.slice().reverse()];
-  gfill(band, COL.blueL, { a: 0.22, off: [0, 0], key: 'e_sband' });
-  gpencil(S, { key: 'e_shell', w: 3, a: 0.75 });
-  gline(G, { w: 6, key: 'e_earth' });
-  label('lớp khí', 830, 1100, 46, { col: SK.graph, key: 'e_slk' });
-  // the hero: from the bridge spot, hops down onto the Earth (it is the observer)
-  const P0 = BR.violetSunset.b, P1 = [760, 1149], tJ = t0 + 0.55;
-  const r = e_hop(tJ, 0.55, P0, P1, 90), hp = TT < tJ ? P0 : r, arc = TT < tJ ? 0 : r[2];
-  const hr = lerp(HR, 45, EZ.io(ev(tJ, 0.55)));
-  // noon: a small yellow sun straight overhead, its light short and straight down
-  const noon = [760, 500], np = ev(tNo - 0.15, 0.4);
-  const fade = 1 - 0.45 * ev(tH, 0.5);
-  ctx.save(); ctx.globalAlpha = fade;
-  if (np > 0) {
-    sunDoodle(noon[0], noon[1], 52, { key: 'e_nsun', part: np, rays: np });
-    gline([[760, 590], [761, 1098]], { w: 6, col: COL.sun, key: 'e_npath', part: ev(tNo + 0.1, 0.4), second: false, amp: 0.8 });
-    e_arrow([[761, 1040], [760, 1094]], { col: COL.sun, w: 6, key: 'e_nhead', part: ev(tNo + 0.45, 0.1), head: 22 });
+  // ---- the sky: pale blue at noon; from "xiên" the warm sky spreads (written on slowly), deepening on "hất"
+  const warm = ev(tX + 0.2, tH - tX - 0.2), deep = ev(tH - 0.1, tE6 - tH + 0.1);
+  const SKY1 = [[60, 520], [1020, 520], [1020, SEA.y], [60, SEA.y]], SKY2 = [[60, SEA.y - 260], [1020, SEA.y - 260], [1020, SEA.y], [60, SEA.y]];
+  if (warm < 1) gfill(SKY1, COL.blueL, { a: 0.2 * (1 - EZ.io(warm)), off: [0, 0], key: 'e_snoon' });
+  if (warm > 0) scribbleFill(SKY1, SEA.skyL, { key: 'seask1', gap: 22, w: 7, base: 0.35, part: warm });
+  if (deep > 0) scribbleFill(SKY2, SEA.sky, { key: 'seask2', gap: 18, w: 7, base: 0.3, part: deep });
+  // ---- the sea (swell lines drift on their own)
+  seaHorizon({ sky: false });
+  // ---- the thick air: one translucent blue band along the sea, drawn on "lớp khí"; it thins as the blue is knocked out
+  const ap = ev(tL - 0.1, 0.6), af = 1 - 0.55 * ev(tH + 0.2, 1.0);
+  if (ap > 0) {
+    scribbleFill(E_AIR, COL.blue, { key: 'e_air', gap: 26, w: 9, a: 0.3 * af, base: 0.13 * af, ang: -0.12, part: ap });
+    gpencil(E_AIR.slice(0, -2), { key: 'e_airl', w: 3, a: 0.6 * af, part: ap });
+    label('lớp khí dày', 640, 1000, 46, { col: SK.graph, key: 'e_airt', reveal: ev(tL + 0.3, 0.4) * (1 - ev(tP, 0.4)) });
   }
-  ctx.restore();
-  // sunset: the low orange sun at BR.sunsetEnd, its light slanting a long way through the air
-  const SUN = BR.sunsetEnd.a, sp = ev(tX - 0.2, 0.45);
-  const LP = e_bow([SUN[0] + 128, SUN[1] + 26], [hp[0] - 58, P1[1] - 6], -14, 24);
-  const lp = ev(tX + 0.2, 0.7);
+  // ---- the noon ghost: dashed graphite sun high up, a dashed path down, and a SHORT yellow beam through the air
+  const g = E_SS.ghost, gp = ev(tNo - 0.1, 0.45), gdim = 1 - 0.5 * ev(tX, 0.5);
+  if (gp > 0) {
+    ctx.save(); ctx.globalAlpha = gdim; ctx.setLineDash([16, 14]);
+    gpencil(loopPts(g[0], g[1], g[2], g[2], 0.04), { key: 'e_ghost', w: 3.5, a: 0.8, part: gp });
+    gpencil([[g[0], g[1] + g[2] + 22], [g[0], E_SS.airTop - 14]], { key: 'e_ghl', w: 3, a: 0.6, part: ev(tNo + 0.2, 0.3) });
+    ctx.setLineDash([]);
+    e_arrow([[g[0], E_SS.airTop - 6], [g[0] + 1, E_SS.hero[1] - E_SS.hr - 16]], { col: COL.sun, w: 8, key: 'e_nbeam', part: ev(tNo + 0.45, 0.3), head: 22 });
+    ctx.restore();
+    if (TT < tNo + 0.4) { const tip = writeEnd(loopPts(g[0], g[1], g[2], g[2], 0.04), gp); pencilTool(tip[0], tip[1], -0.75, 0.8); }
+  }
+  // ---- the low orange sun: sinks into place on "xiên", then keeps settling a few px; exactly at BR.sunsetEnd from EE-0.6
+  const [sx, sy0, sr] = BR.sunsetEnd.a, sp = ev(tX - 0.3, 0.9);
+  if (sp > 0) {
+    const sy = TT >= tE6 ? sy0 : lerp(sy0 - 190, sy0 - 18, EZ.o3(sp)) + 18 * EZ.io(ev(tX + 0.6, tE6 - tX - 0.6));
+    ctx.save(); ctx.beginPath(); ctx.rect(-200, -200, W + 400, SEA.y - 2 + 200); ctx.clip();
+    ctx.globalAlpha = clamp(sp * 2);
+    sunDoodle(sx, sy, sr, { col: COL.orange, key: 'e_lsun', rays: ev(tX, 0.5) });
+    ctx.restore();
+    seaGlitter(sx, { key: 'e_gl', col: COL.orange });
+  }
+  // ---- the long low beam: yellow on "xiên", a light pulse runs along it; on "hất" it turns orange, red at the hero
+  const lp = ev(tX + 0.25, 0.8);
   if (lp > 0) {
-    gline(LP, { w: 7, col: COL.sun, key: 'e_lpath', part: lp, second: false, amp: 0.8 });
-    // blue peels off along the road ("xanh bị hất đi"), the light turns orange behind it
-    const op = ev(tB, tH + 0.9 - tB);
-    if (op > 0) { gline(LP, { w: 7, col: COL.orange, key: 'e_lpo', part: op, second: false, amp: 0.8 }); }
-    e_arrow(LP.slice(-4), { col: op >= 1 ? COL.orange : COL.sun, w: 7, key: 'e_lhead', part: ev(tX + 0.85, 0.1), head: 26 });
-    const PEEL = [[0.12, -1.9], [0.3, -1.25], [0.46, -2.15], [0.62, -1.4], [0.78, -1.95]];
-    PEEL.forEach(([u, an], i) => {
-      const t = tB + 0.15 + i * 0.28, k = ev(t, 0.3); if (k <= 0) return;
-      const Q = resample(LP, false, 6), p = Q[Math.round(u * (Q.length - 1))], L = 150;
-      e_arrow(e_bow([p[0] + Math.cos(an) * 14, p[1] + Math.sin(an) * 14], [p[0] + Math.cos(an) * L, p[1] + Math.sin(an) * L], 8, 8), { col: COL.blue, w: 6, key: 'e_peel' + i, part: k, head: 24 });
-    });
-    // "dày gấp hàng chục lần": the long road through the air
-    const tp = ev(tD, 0.5);
-    if (tp > 0) {
-      label('dày gấp', 420, 810, 72, { key: 'e_st1', reveal: tp });
-      const ww = letterW('hàng chục lần', 72, 'hand'), x0 = 420 - ww / 2, xs = letterW('hàng ', 72, 'hand'), xe = letterW('hàng chục', 72, 'hand');
-      highlight(x0 + xs, x0 + xe, 880, 40, ev(tC, 0.3), { key: 'e_sthi' });
-      label('hàng chục lần', 420, 895, 72, { key: 'e_st2', reveal: ev(tD + 0.35, 0.5) });
+    gline(E_LONG, { w: 8, col: COL.sun, key: 'e_long', part: lp, second: false, amp: 0.8 });
+    const op = ev(tH, 1.0), rp = ev(tH + 0.5, 0.7);
+    if (op > 0) gline(E_LONG, { w: 8, col: COL.orange, key: 'e_longo', part: op, second: false, amp: 0.8 });
+    if (rp > 0) { const R = e_sub(E_LONG, 0.55, 0.55 + 0.45 * rp); if (R) gline(R, { w: 8, col: COL.red, key: 'e_longr', second: false, amp: 0.8 }); }
+    if (lp >= 1) {
+      // the pulse: light travelling the long road (calm, one every 1.5 s)
+      const u = ((TT - tX) / 1.5) % 1, S = e_sub(E_LONG, Math.max(0, u - 0.12), u);
+      if (S) gline(S, { w: 15, col: op > 0.5 ? COL.orange : COL.sun, key: 'e_lpul', second: false, amp: 0.6, step: 6 });
     }
+    e_arrow(E_LONG.slice(-4), { col: rp >= 1 ? COL.red : op >= 1 ? COL.orange : COL.sun, w: 8, key: 'e_lhead', part: ev(tX + 0.95, 0.12), head: 26 });
+    // "hất": ≤ 6 blue arrows peel UP off the long beam
+    const Q = resample(E_LONG, false, 6);
+    E_PEEL.forEach(([u, an, L], i) => {
+      const k = ev(tH - 0.15 + i * 0.2, 0.35); if (k <= 0) return;
+      const p = Q[Math.round(u * (Q.length - 1))];
+      e_arrow(e_bow([p[0] + Math.cos(an) * 16, p[1] + Math.sin(an) * 16], [p[0] + Math.cos(an) * L, p[1] + Math.sin(an) * L], 10, 8),
+        { col: COL.blue, w: 6, key: 'e_peel' + i, part: k, head: 22, halo: true });
+    });
   }
-  if (sp > 0) sunDoodle(SUN[0], SUN[1], SUN[2], { col: COL.orange, key: 'e_lsun', part: sp, rays: ev(tX, 0.4) });
-  // the hero (the observer): looks up at noon, then left to the low sun; amazed on "chục", content at the end
-  const look = TT < tJ + 0.5 ? [0.2, 0.8] : TT < tX ? [0, -1] : [-1, -0.2];
-  const mood = TT < tC ? 'calm' : TT < tH + 0.6 ? 'wow' : 'happy';
-  doodleHero(hp[0], hp[1], hr, { key: 'hero', legs: true, mood, look, sx: 1 - 0.05 * arc, sy: 1 + 0.07 * arc });
+  // ---- "dày gấp / hàng chục lần" above the air
+  const tp = ev(tD, 0.45);
+  if (tp > 0) {
+    const X = 470, Y1 = 700, Y2 = 790;
+    label('dày gấp', X, Y1, 76, { key: 'e_st1', reveal: tp });
+    const ww = letterW('hàng chục lần', 76, 'hand'), x0 = X - ww / 2, xs = letterW('hàng ', 76, 'hand'), xe = letterW('hàng chục', 76, 'hand');
+    highlight(x0 + xs, x0 + xe, Y2 - 20, 42, ev(tC + 0.2, 0.3), { key: 'e_sthi' });
+    label('hàng chục lần', X, Y2, 76, { key: 'e_st2', reveal: ev(tHg - 0.05, 0.5) });
+  }
+  // ---- the hero: arrives at the bridge spot, hops down onto the rock; looks up at noon, left at the low sun,
+  //      follows the light along the road, amazed on "chục" and "hất", content at the end
+  e_rock();
+  const P0 = BR.violetSunset.b, P1 = E_SS.hero, tJ = t0 + 0.5;
+  const r = e_hop(tJ, 0.6, P0, P1, 80), hp = TT < tJ ? P0 : r, arc = TT < tJ ? 0 : r[2];
+  const hr = lerp(HR, E_SS.hr, EZ.io(ev(tJ, 0.6)));
+  const land = Math.sin(Math.PI * ev(tJ + 0.6, 0.25));
+  const hop2 = Math.sin(Math.PI * ev(tC, 0.35)) * 0.7 + Math.sin(Math.PI * ev(tDg, 0.35)) * 0.8;
+  const look = TT < tNo ? [0.2, 0.8] : TT < tX ? [0, -1] : TT < tP ? [-1, -0.25]
+    : TT < tH ? [-1 + 0.5 * (0.5 - 0.5 * Math.cos((TT - tP) * 2.6)), -0.3 - 0.4 * (0.5 - 0.5 * Math.cos((TT - tP) * 2.6))] : [-0.7, -0.9];
+  const mood = TT < tC ? 'calm' : TT < tC + 0.7 ? 'wow' : TT < tH ? 'calm' : TT < tH + 0.8 ? 'wow' : 'happy';
+  const arms = TT >= tH && TT < tDg ? [0.9, -0.6] : TT >= tDg ? [1.1, 1.1] : null;
+  doodleHero(hp[0], hp[1] - 26 * hop2, hr, { key: 'hero', legs: true, mood, look, arms,
+    sx: 1 - 0.05 * arc + 0.06 * land - 0.03 * hop2, sy: 1 + 0.07 * arc - 0.08 * land + 0.05 * hop2 + 0.015 * Math.sin(TT * 3) });
   viTag('hoàng hôn');
   pageCaption(['nắng đi xiên,', 'xanh bị hất đi'], [[0, 'xiên']], { at: tX - t0 + 0.3 });
 };
