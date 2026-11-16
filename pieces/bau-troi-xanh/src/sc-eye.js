@@ -58,10 +58,14 @@ SCENES.dome = function () {
   // (a wash that swells every 1.6 s, stronger from "ánh xanh") so the held payoff never freezes
   const br = EZ.o2(ev(tK, 0.8)), tA = VW('dome', 'ánh');
   scribbleFill(closed, COL.blueL, { key: 'e_sky1', gap: 22, w: 5, a: 0.6, base: 0.26, ang: -0.55 });
-  const wave = 0.5 - 0.5 * Math.cos(TAU * (TT - t0) / 1.6), wamp = lerp(0.1, 0.2, ev(tA, 0.5));
-  gfill(closed, COL.blueL, { a: wamp * wave + 0.3 * br, off: [0, 0], key: 'e_skyw' });
+  // two halves breathe a quarter-wave apart (period 2 s), so some of the sky is always swelling or easing
+  const wamp = lerp(0.2, 0.28, ev(tA, 0.5)), ph = TAU * (TT - t0) / 2.0;
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, E_DOME.cx, H); ctx.clip();
+  gfill(closed, COL.blueL, { a: wamp * (0.5 - 0.5 * Math.cos(ph)) + 0.3 * br, off: [0, 0], key: 'e_skyw' }); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(E_DOME.cx, 0, W, H); ctx.clip();
+  gfill(closed, COL.blueL, { a: wamp * (0.5 - 0.5 * Math.sin(ph)) + 0.3 * br, off: [0, 0], key: 'e_skyw' }); ctx.restore();
   // a band of brighter blue sweeps up the dome from the horizon to the top, once per wave
-  const sw = ((TT - t0) / 1.6) % 1, syb = E_DOME.cy - sw * (E_DOME.ry + 160);
+  const sw = ((TT - t0) / 2.0) % 1, syb = E_DOME.cy - sw * (E_DOME.ry + 160);
   ctx.save(); gclip(closed);
   gfill([[60, syb], [1000, syb - 40], [1000, syb + 120], [60, syb + 160]], COL.blue, { a: 0.1 * (0.5 + 0.5 * ev(tA, 0.5)) * Math.sin(Math.PI * sw), off: [0, 0], key: 'e_skyb' });
   ctx.restore();
@@ -200,6 +204,9 @@ SCENES.sunset = function () {
   if (warm < 1) { const k = 1 - EZ.io(warm); scribbleFill(SKY1, COL.blueL, { key: 'e_snoon', gap: 26, w: 6, a: 0.45 * k, base: 0.16 * k, ang: -0.5 }); }
   if (warm > 0) scribbleFill(SKY1, SEA.skyL, { key: 'seask1', gap: 22, w: 7, base: 0.35, part: warm });
   if (deep > 0) scribbleFill(SKY2, SEA.sky, { key: 'seask2', gap: 18, w: 7, base: 0.3, part: deep });
+  // the warm light keeps rising from the horizon through "phần lớn màu xanh…" (a wash whose top edge climbs)
+  const rise = EZ.io(ev(tP - 0.2, tE6 - tP + 0.2));
+  if (rise > 0) { const yt = lerp(SEA.y, 540, rise); gfill([[60, yt + 30], [540, yt], [1020, yt + 24], [1020, SEA.y], [60, SEA.y]], SEA.sky, { a: 0.3, off: [0, 0], key: 'e_srise' }); }
   // ---- the sea (swell lines drift on their own)
   seaHorizon({ sky: false });
   // ---- the thick air: one translucent blue band along the sea, drawn on "lớp khí"; it thins as the blue is knocked out
@@ -268,7 +275,7 @@ SCENES.sunset = function () {
   const r = e_hop(tJ, 0.6, P0, P1, 80), hp = TT < tJ ? P0 : r, arc = TT < tJ ? 0 : r[2];
   const hr = lerp(HR, E_SS.hr, EZ.io(ev(tJ, 0.6)));
   const land = Math.sin(Math.PI * ev(tJ + 0.6, 0.25));
-  const hop2 = Math.sin(Math.PI * ev(tC, 0.35)) * 0.7 + Math.sin(Math.PI * ev(tDg, 0.35)) * 0.8;
+  const hop2 = Math.sin(Math.PI * ev(tC, 0.35)) * 0.7 + Math.sin(Math.PI * ev(tB, 0.3)) * 0.4 + Math.sin(Math.PI * ev(tDg, 0.35)) * 0.8;
   const look = TT < tNo ? [0.2, 0.8] : TT < tX ? [0, -1] : TT < tP ? [-1, -0.25]
     : TT < tH ? [-1 + 0.5 * (0.5 - 0.5 * Math.cos((TT - tP) * 2.6)), -0.3 - 0.4 * (0.5 - 0.5 * Math.cos((TT - tP) * 2.6))] : [-0.7, -0.9];
   const mood = TT < tC ? 'calm' : TT < tC + 0.7 ? 'wow' : TT < tH ? 'calm' : TT < tH + 0.8 ? 'wow' : 'happy';

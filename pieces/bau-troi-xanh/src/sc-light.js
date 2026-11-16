@@ -32,22 +32,22 @@ const l_walk = (t0, t1) => (TT > t0 && TT < t1 ? Math.sin((TT - t0) * TAU * 2.2)
 SCENES.waves = function () {
   sketchPage({ grid: 'plain' });
   const tg = VW('waves', 'làn'), tr = VW('waves', 'đỏ'), td = VW('waves', 'dài'), tb = VW('waves', 'xanh'), tn = VW('waves', 'sóng', 3) - 0.2;
-  const X0 = 150, X1 = 930, RY = 640, BY = 872;
+  const X0 = 150, X1 = 930, RY = 630, BY = 878;
   const tw0 = ET('waves') + 0.5, tw1 = EE('waves') - 0.6, [hx0, hy0] = BR.whiteWaves.b, [hx1] = BR.wavesAir.a;
   // every wave travels to the right at the same speed from the moment it is drawn (light keeps moving)
   const ph = -62 * Math.max(0, TT - tg);
   // the ground the hero walks on
   gpencil([[110, 1106], [400, 1100], [700, 1108], [960, 1102]], { key: 'l_wgnd', w: 3, a: 0.7, part: ev(ET('waves') + 0.3, 0.6) });
   // "làn sóng": a graphite construction wave, then the red ink goes over it (same phase, so the ink lies on the pencil)
-  const rDone = tr + 0.9, GP = l_waveP(X0, X1, RY, 300, 78, ph);
+  const rDone = tr + 0.9, GP = l_waveP(X0, X1, RY, 300, 70, ph);
   if (TT < rDone + 0.4) gpencil(GP, { key: 'l_wguide', w: 2.6, a: 0.75 * (1 - ev(rDone, 0.4)), part: ev(tg, 0.8) });
-  const RP = l_waveP(X0, X1, RY, 300, 78, ph), rk = ev(tr, 0.9);
+  const RP = l_waveP(X0, X1, RY, 300, 70, ph), rk = ev(tr, 0.9);
   if (rk > 0) gline(RP, { w: 8, col: COL.red, key: 'l_wred', part: rk, amp: 1.2 });
   l_bracket(X0, X0 + 300, RY - 128, ev(td, 0.5), 'dài', 'l_bd');
   // the blue wave, short
-  const BP = l_waveP(X0, X1, BY, 150, 44, ph), bk = ev(tb, 0.8);
+  const BP = l_waveP(X0, X1, BY, 150, 42, ph), bk = ev(tb, 0.8);
   if (bk > 0) gline(BP, { w: 8, col: COL.blue, key: 'l_wblue', part: bk, amp: 1.2 });
-  l_bracket(X0, X0 + 150, BY - 94, ev(tn, 0.5), 'ngắn', 'l_bn');
+  l_bracket(X0, X0 + 150, BY - 94, ev(tn, 0.5), 'ngắn', 'l_bn', 56);
   // the pencil that writes the waves on
   for (const [P, t, d] of [[GP, tg, 0.8], [RP, tr, 0.9], [BP, tb, 0.8]])
     if (TT >= t && TT < t + d + 0.15) { const e = writeEnd(P, ev(t, d)); pencilTool(e[0], e[1], -0.75, 1); }
@@ -138,7 +138,7 @@ SCENES.scatter = function () {
   for (let i = 0; i < 8; i++) {
     const a = (i * 45 + 22.5) * DEG, ca = Math.cos(a), sa = Math.sin(a), ta = th + 0.03 + i * 0.045;
     const go = TT > ta + 0.32 ? 0.5 - 0.5 * Math.cos(TAU * (TT - ta - 0.32) / 1.4) : 0, d = (sa > 0.5 ? 18 : 38) * go;
-    const P = [[MX + ca * (165 + d * 0.6), MY + sa * (140 + d * 0.6)], [MX + ca * (340 + d), MY + sa * (265 + d)]];
+    const P = [[MX + ca * (165 + d * 0.6), MY + sa * (140 + d * 0.6)], [MX + ca * (340 + d), MY + sa * ((sa > 0.5 ? 235 : 265) + d)]];
     const k = ev(ta, 0.32);
     if (k > 0) arrowPencil(P, k, { col: COL.blue, w: 6, key: 'l_sar' + i });
   }
