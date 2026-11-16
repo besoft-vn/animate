@@ -18,3 +18,9 @@ const BRIDGES = [
 ];
 // KHUNG HÌNH GỌN: the kit's boiling page grain (1800 specks a frame) reads as noise on a phone — keep it faint
 STYLE.post = () => grain({ n: 260, dark: 'rgba(60,56,52,0.08)', light: 'rgba(255,253,245,0.10)' });
+// KHÔNG ĐƠ: a slow push-in (≤ 4%) on scenes with quiet stretches, so the frame always breathes. Centred on the frame,
+// continuous through the bridges (kit/morph.js maps bridge shapes through each era's camera); stops at the silence.
+const DRIFT = (t0, t1, z = 1.04) => (t) => camOf({ z: 1 + (z - 1) * EZ.io(seg(t, t0, t1)), p: [540, 900], to: [540, 900] });
+CAMS.hook = DRIFT(0, ET('white') + 0.5);
+CAMS.scatter = DRIFT(ET('scatter'), VL('scatter').t1);
+CAMS.end = (t) => camOf({ z: 1 + 0.06 * seg(t, ET('end') + 0.5, DURATION - 1), p: [540, 900], to: [540, 900] });   // linear: no slow ease-in at 50–52 s
