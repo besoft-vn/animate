@@ -28,4 +28,5 @@ const DRIFT = (t0, t1, z = 1.04) => (t) => camOf({ z: 1 + (z - 1) * EZ.io(seg(t,
 const JO_Z = (t) => 1 + 0.05 * seg(t, ET('jostle') + 0.5, SLAM);
 CAMS.jostle = (t) => camOf({ z: JO_Z(t), p: [540, 900], to: [540, 900] });
 CAMS.heat = (t) => camOf({ z: lerp(1.05, 1.0, EZ.io(seg(t, SLAM, SLAM + 3.0))), p: [540, 900], to: [540, 900] });
-CAMS.end = (t) => camOf({ z: 1 + 0.05 * seg(t, ET('end') + 0.5, DURATION - 1), p: [540, 900], to: [540, 900] });
+// centred right of the panel display, so the push never carries the "0:00" under the phone UI (x > 940)
+CAMS.end = (t) => camOf({ z: 1 + 0.05 * seg(t, ET('end') + 0.5, DURATION - 1), p: [880, 900], to: [880, 900] });

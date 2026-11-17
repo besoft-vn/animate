@@ -31,7 +31,7 @@ function fieldArrow(x, y, len, ang, o = {}) {
 }
 // the two hydrogen "ears" of a water molecule (104.5° apart) pointing toward angle ang. Returns the + end point.
 function _hEars(x, y, r, ang, o) {
-  const d = r * 0.98, hr = r * 0.46, line = o.dark ? C.peri : C.ink;
+  const d = r * 1.12, hr = r * 0.44, line = o.dark ? C.peri : C.ink;
   for (const s of [-1, 1]) {
     const a = ang + s * 0.912, hx = x + Math.cos(a) * d, hy = y + Math.sin(a) * d;
     paint(ellipsePts(hx, hy, hr, hr, 0, 20), { fill: o.hFill || '#f4f1ea', key: (o.key || 'm') + 'h' + s, line, w: o.dark ? 3 : 2.6, tex: [{ k: 'hatch', a: 0.8, gap: 5, al: 0.3 }] });
@@ -124,7 +124,8 @@ function ovenFront(o = {}) {
     ctx.save(); ctx.globalAlpha = 0.18; ink([[CAV.x + 60, CAV.y + 80], [CAV.x + 220, CAV.y + 40]], { w: 16, color: '#fff', key: key + 'shine' }); ctx.restore();
     ink([[CAV.x + CAV.w - 10, CAV.y + 160], [CAV.x + CAV.w - 10, CAV.y + CAV.h - 160]], { w: 12, key: key + 'handle', color: '#5a4a3c' });
   }
-  // panel: a small display + a dial + a button
+  // panel: a small display + a dial + a button (the cut-away shows the magnetron there instead)
+  if (cut) return;
   paint(rrectPts(PANEL.x + 20, PANEL.y + 40, PANEL.w - 40, 90, 12), { fill: '#2c3a33', key: key + 'disp', w: 3 });
   if (o.display) handText(o.display, PANEL.x + 34, PANEL.y + 104, 50, '#9fe3a8', { key: key + 'dt' });
   paint(ellipsePts(PANEL.x + PANEL.w / 2, PANEL.y + 260, 56, 56, 0, 30), { fill: '#d8d0c0', key: key + 'dial', w: 3.5, tex: [{ k: 'hatch', a: 0.8, gap: 5, al: 0.4, dens: (px, py) => clamp((px - PANEL.x - 60) / 100) }] });
