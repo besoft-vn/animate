@@ -127,7 +127,7 @@ function ovenFront(o = {}) {
   // panel: a small display + a dial + a button (the cut-away shows the magnetron there instead)
   if (cut) return;
   paint(rrectPts(PANEL.x + 20, PANEL.y + 40, PANEL.w - 40, 90, 12), { fill: '#2c3a33', key: key + 'disp', w: 3 });
-  if (o.display) handText(o.display, PANEL.x + 34, PANEL.y + 104, 50, '#9fe3a8', { key: key + 'dt' });
+  if (o.display) handText(o.display, PANEL.x + 26, PANEL.y + 100, 42, '#9fe3a8', { key: key + 'dt' });
   paint(ellipsePts(PANEL.x + PANEL.w / 2, PANEL.y + 260, 56, 56, 0, 30), { fill: '#d8d0c0', key: key + 'dial', w: 3.5, tex: [{ k: 'hatch', a: 0.8, gap: 5, al: 0.4, dens: (px, py) => clamp((px - PANEL.x - 60) / 100) }] });
   const da = o.dial ?? -0.6;
   ink([[PANEL.x + PANEL.w / 2, PANEL.y + 260], [PANEL.x + PANEL.w / 2 + Math.cos(da) * 44, PANEL.y + 260 + Math.sin(da) * 44]], { w: 6, key: key + 'dn' });

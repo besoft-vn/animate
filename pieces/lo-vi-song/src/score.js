@@ -23,9 +23,9 @@
     if (st >= 1 && k % 2 === 0) bass(t, nz(Math.floor(k / 8) % 2 ? 'B2' : 'E2'), 0.09 + st * 0.01);
   });
   // SOFT payoff (owner feedback "âm thanh to đột ngột"): a faint bed + small swell through the pause, then a blooming chord
-  pad(SIL - 0.1, SLAM + 0.4, ['E3', 'B3', 'Fs4'], 0.010, { type: 'triangle', cut: 600, att: 0.3, rel: 0.3 });
-  riser(SIL + 0.1, SLAM, 0.010);
-  ['E3', 'B3', 'E4', 'Gs4', 'B4', 'E5'].forEach((n, i) => pluck(SLAM + i * 0.03, nz(n), 0.11, (i - 2.5) * 0.15, 0.9, 2600, 0.45));
+  pad(SIL - 0.4, SLAM + 0.4, ['E3', 'B3', 'Fs4'], 0.016, { type: 'triangle', cut: 600, att: 0.3, rel: 0.3 });
+  riser(SIL - 0.1, SLAM, 0.013);
+  ['E3', 'B3', 'E4', 'Gs4', 'B4', 'E5'].forEach((n, i) => pluck(SLAM + 0.05 + i * 0.06, nz(n), 0.065, (i - 2.5) * 0.15, 0.9, 2600, 0.45));
   pad(SLAM, SLAM + 2.3, ['E3', 'B3', 'E4', 'Gs4', 'B4'], 0.05, { cut: 2000, att: 0.35, rel: 0.7, send: 0.45 });
   pad(SLAM + 2.0, DURATION, ['E3', 'B3', 'E4', 'Gs4'], 0.016, { cut: 1000, att: 0.3, rel: 0.4, send: 0.45 });
   motif(DURATION - 1.6, 0.07);

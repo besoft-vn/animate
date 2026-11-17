@@ -103,7 +103,9 @@ const HT_RING = 60;                                                 // ≈ 1/5 o
 function HT_front() {                                               // the radius of the still-cold core
   const tOut = VW('depth', 'lớp'), tCore = VW('depth', 'lõi'), tEnd = EE('depth');
   const ring = HT_R - HT_RING * EZ.io(seg(TT, tOut - 0.1, tOut + 0.7));
-  return lerp(ring, 0, EZ.i2(seg(TT, tCore - 0.1, tEnd - 0.6)) ** 0.8);
+  // KHÔNG ĐƠ: the front already creeps a little while the "1 cm" is named, then speeds up on "lõi"
+  const u = 0.18 * EZ.io(seg(TT, tOut + 0.8, tCore)) + 0.82 * EZ.i2(seg(TT, tCore - 0.1, tEnd - 0.6)) ** 0.8;
+  return lerp(ring, 0, u);
 }
 SCENES.depth = function () {
   paperSheet('dpp', { ruled: false });
@@ -156,13 +158,13 @@ SCENES.depth = function () {
     if (DEFER) DEFER.push(f); else f();
   }
   // the warm front creeps in: ink arrows riding just outside it, pointing to the core
-  const ar = ev(tCore, 0.3) * clamp((rf - 20) / 40);
+  const tAr = VW('depth', 'lớp') + 0.9, ar = ev(tAr, 0.3) * clamp((rf - 20) / 40);
   if (ar > 0) {
     const big = 1 + 0.25 * Math.sin(Math.PI * seg(TT, tLan - 0.1, tLan + 0.4));
     for (let i = 0; i < 4; i++) {
       const a = Math.PI / 4 + i * Math.PI / 2, ca = Math.cos(a), sa = Math.sin(a), ro = rf + 55 * big, ri = Math.max(14, rf - 25);
       ctx.save(); ctx.globalAlpha = ar;
-      HT_arrow([HT_CX + ca * ro, HT_CY + sa * ro], [HT_CX + ca * ri, HT_CY + sa * ri], 'dpin' + i, { head: 22, w: 6.5, frac: ev(tCore + i * 0.08, 0.35) });
+      HT_arrow([HT_CX + ca * ro, HT_CY + sa * ro], [HT_CX + ca * ri, HT_CY + sa * ri], 'dpin' + i, { head: 22, w: 6.5, frac: ev(tAr + i * 0.08, 0.35) });
       ctx.restore();
     }
   }
