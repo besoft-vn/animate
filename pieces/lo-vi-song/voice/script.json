@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Lò vi sóng không có lửa, cũng chẳng có dây đốt nóng, vậy mà thức ăn tự nóng lên.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "magnet",
+   "text": "Ở góc lò, ống magnetron phát ra vi sóng, một loại sóng vô tuyến.",
+   "after": 0.5,
+   "file": "magnet.mp3"
+  },
+  {
+   "id": "bounce",
+   "text": "Vi sóng dội qua lại giữa các vách kim loại, tràn khắp khoang lò.",
+   "after": 0.5,
+   "file": "bounce.mp3"
+  },
+  {
+   "id": "water",
+   "text": "Thức ăn chứa nhiều nước, mà mỗi phân tử nước có một đầu hơi dương, một đầu hơi âm.",
+   "after": 0.5,
+   "file": "water.mp3"
+  },
+  {
+   "id": "flip",
+   "text": "Điện trường của vi sóng đổi chiều hàng tỷ lần mỗi giây, kéo chúng xoay theo.",
+   "after": 0.5,
+   "file": "flip.mp3"
+  },
+  {
+   "id": "jostle",
+   "text": "Vô số phân tử nước xoay qua xoay lại, chen lấn, va vào nhau.",
+   "after": 1.6,
+   "file": "jostle.mp3"
+  },
+  {
+   "id": "heat",
+   "text": "Sự rung lắc hỗn loạn ấy chính là nhiệt.",
+   "after": 0.6,
+   "file": "heat.mp3"
+  },
+  {
+   "id": "depth",
+   "text": "Vi sóng chỉ thấm vào lớp ngoài chừng một xăng-ti-mét, phần lõi nóng dần nhờ nhiệt lan vào.",
+   "after": 0.5,
+   "file": "depth.mp3"
+  },
+  {
+   "id": "table",
+   "text": "Sóng có chỗ mạnh chỗ yếu, nên đĩa xoay đưa món ăn đi khắp lượt.",
+   "after": 0.5,
+   "file": "table.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Lần tới hâm cơm, hãy nhớ: hơi nóng sinh ra từ chính những giọt nước trong cơm.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}

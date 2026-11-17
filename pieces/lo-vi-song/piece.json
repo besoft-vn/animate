@@ -1,0 +1,13 @@
+{
+  "name": "lo-vi-song",
+  "title": "Lò vi sóng làm nóng thức ăn ra sao?",
+  "series": "Vạn vật vận hành như thế nào",
+  "date": "2026-11-17",
+  "format": { "width": 1080, "height": 1920, "fps": 24, "bpm": 120 },
+  "storyFormat": "F5 fixed-hero journey (the hero dot is one water molecule in the rice), morph-joined, one slam on the payoff",
+  "style": "crosshatch",
+  "scenes": ["src/props.js", "src/sc-oven.js", "src/sc-molecule.js", "src/sc-heat.js"],
+  "voice": { "file": "voice/voice.wav", "music": -14 },
+  "captions": { "font": "Pangolin", "size": 62 },
+  "review": { "safe": { "top": 240, "bottom": 420, "right": 140 }, "refs": {}, "wpsMax": 5.0 }
+}
