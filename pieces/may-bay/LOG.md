@@ -24,3 +24,8 @@
 - Shot yếu nhất: "speed" — biểu đồ ×1/×2 khá nhỏ, nửa trên khung trống lúc đầu; "takeoff" mũi tên lực nâng đặt ở đầu thân chứ không ngay trên cánh; đuôi máy bay lấn vào vùng phải (x > 940) ở hook/engine/takeoff (không có chữ ở đó).
 - Chưa kiểm chứng: không nghe được bằng tai (chỉ đo RMS/LUFS và Whisper).
 - Drive: đã lưu (My Drive / Vạn vật vận hành như thế nào — Video).
+
+## Sửa 18/11 (phiên quản lý) — góp ý "máy bay bay ngược", không có review hình
+- Nguyên nhân: planeSide() xoay `rotate(-rot)` và máy bay quay mũi TRÁI; cảnh takeoff viết như mũi phải → "nâng mũi" thành chúc mũi + lùi 40 px; end chúc mũi. Sửa dấu (rot âm = ngóc mũi), lăn về phía trước.
+- Review độc lập (agent mới, không đọc code, chỉ contact sheet + lời): 1 MUST-FIX (lực nâng = trọng lượng lúc rời đất, trái lời "vượt") + 8 NICE. Đã sửa: lực nâng ≈1,45× trọng lượng (169 vs 120 px), lực nâng/trọng lượng cùng đường thẳng ở gốc cánh, trọng lượng từ trọng tâm, lực đẩy (xanh lam) từ động cơ, không che bánh chính, đường băng tăng tốc 150→1200 px/s (trước đó 450→1700 bị răng cưa thành "đều"), luồng khí ở hook, áp suất cao cam/thấp xanh, cặp lực bằng nhau ở cánh, lực nâng hiện cùng trọng lượng khi bay bằng, nhãn trọng lượng có nền giấy. Re-review: tất cả FIXED.
+- Kiểm tra: TEXT PASS, stillcheck PASS, STORY ARC 5/6 (silence — chủ ý), −14 LUFS. Drive: đã lưu "(bản sửa)".

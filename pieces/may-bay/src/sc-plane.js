@@ -138,8 +138,10 @@ SCENES.takeoff = function () {
   const tNose = VW('takeoff', 'nâng'), tLift = VW('takeoff', 'lực'), tOver = VW('takeoff', 'vượt'), tWt = VW('takeoff', 'trọng'), tOff = VW('takeoff', 'rời');
   // rolling fast: the runway dashes race to the right (plane moves left)
   // accelerating: ~450 px/s at the start -> ~1700 px/s by liftoff (24 fps: < 0.35 dash period per frame), then held
-  const rt = TT - E, ra = Math.min(rt, 5);
-  runway({ slide: -(450 * ra + 125 * ra * ra + 1700 * Math.max(0, rt - 5)) });
+  // (the dashes repeat every 220 px and we draw on 2s = 12 steps/s: above ~1300 px/s a step passes half a dash period and
+  //  the eye reads it as slower — the old 450→1700 ramp aliased into "constant". Ramp 150 → 1200 px/s instead.)
+  const rt = TT - E, t1 = (1200 - 150) / 210, ra = Math.min(rt, t1);
+  runway({ slide: -(150 * ra + 105 * ra * ra + 1200 * Math.max(0, rt - t1)) });
   // nose up on "nâng mũi" (about the main wheels), wheels leave on "rời", climbing ~120 px, gear up
   const climb = 125 * EZ.io(seg(TT, tOff, END - 0.2)) + 4 * Math.sin(TT * 2.2) * seg(TT, tOff + 0.5, tOff + 1.5);
   // planeSide rotates by -rot and the nose points LEFT: a NEGATIVE rot lifts the nose (fixed 18/11 — it used to pitch nose-down)
@@ -159,6 +161,7 @@ SCENES.takeoff = function () {
   const wa = ev(E + 0.6, 0.45), wk = Math.sin(Math.PI * ev(tWt, 0.4)) * 3;   // a little shake on "trọng" (not longer)
   forceArrow(cg[0] + wk, cg[1] + 16, cg[0] + wk, cg[1] + 16 + WL, { key: 'p_tw', part: wa, w: 38, head: 52 });
   p_cgDot(cg[0], cg[1], popS(E + 0.6), 'p_tcg');
+  if (ev(E + 0.9, 0.6) > 0) { const lw = letterW('trọng lượng', 52); gfill(sketchBox(cg[0] + 36, cg[1] + 74, lw + 26, 66, 10), SK.sheet, { a: 0.92, off: [0, 0], key: 'p_twlb' }); }
   label('trọng lượng', cg[0] + 48, cg[1] + 118, 52, { align: 'left', reveal: ev(E + 0.9, 0.6), key: 'p_twl' });
   const lg = WL * (0.6 + 0.85 * EZ.back(ev(tOver, 0.4))) + 5 * Math.sin(TT * 3) * ev(tOver + 0.4, 0.3);
   forceArrow(cg[0], roof[1] - 6, cg[0], roof[1] - 6 - lg, { key: 'p_tl', col: COL.lift, part: ev(tLift, 0.4), w: 46 });
@@ -215,7 +218,7 @@ SCENES.end = function () {
   const cg = planePt(p_CG[0], p_CG[1], PLANE.x, py, PLANE.s, rot), roof = planePt(p_CG[0], -62, PLANE.x, py, PLANE.s, rot), NL = 160;
   forceArrow(cg[0], cg[1] + 16, cg[0], cg[1] + 16 + NL, { key: 'p_nw', part: ev(tStream - 0.5, 0.45), w: 36, head: 50 });
   p_cgDot(cg[0], cg[1], popS(tStream - 0.5), 'p_ncg');
-  forceArrow(cg[0], roof[1] - 6, cg[0], roof[1] - 6 - NL, { key: 'p_nl', col: COL.lift, part: EZ.o2(ev(tHold, 0.5)), w: 40, head: 50 });
+  forceArrow(cg[0], roof[1] - 6, cg[0], roof[1] - 6 - NL, { key: 'p_nl', col: COL.lift, part: EZ.o2(ev(tStream - 0.5, 0.45)), w: 40, head: 50 });   // with the weight: in level flight the air holds it all
   // the hero, happy in the stream: holds the bridge spot, then drifts gently (a slow loop), settling for the last second
   const d = seg(TT, E + 0.5, E + 1.5) * calm, ph = (TT - E - 0.5) * 1.2;
   const hx = hx0 + 22 * Math.sin(ph) * d, hy = hy0 + 12 * Math.sin(ph * 2) * d + 0 * bob, br = p_breath();
