@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lò vi sóng làm nóng thức ăn ra sao?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Lò vi sóng làm nóng thức ăn ra sao?" — 9:16, crosshatch, voiced (vi), 24fps, 120 BPM grid.
+//  Format F5 (fixed-hero journey): the hero dot IS one water molecule in a bowl of rice (dotHero + two small H ears,
+//  propsheroMol). We see the cold oven, the magnetron's waves bouncing, then dive into the rice: the field flips,
+//  the molecules spin and jostle -> SLAM (hard cut) -> that jostling IS heat; heat soaks inward; the turntable; the
+//  same oven at the end, the rice now steaming.
+//  KHUNG HÌNH GỌN: few, large objects; no fields of dots/specks; at most ~10 molecules on screen, r >= 18.
+//  Colour code (one colour = one meaning): TERRACOTTA = the hero molecule AND heat (warm glow, steam tint, hot spots);
+//  YELLOW (C.yellow) = microwaves / the electric field ONLY; CYAN = cold (cold rice, cold thermometer). The other water
+//  molecules are periwinkle/cream and warm toward terracotta (tempCol) as they heat. Ink/paper draw everything else.
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). The payoff era "heat" starts on the
+//  SLAM: a hard cut inside the 1.6s pause after "jostle". Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+// Vietnamese-capable handwriting: Pangolin (installed by channel/setup.sh), then system fallbacks with Vietnamese glyphs
+const HAND = '"Pangolin", "Segoe Print", "Comic Sans MS", "DejaVu Sans", sans-serif';
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'magnet', 'bounce', 'water', 'flip', 'jostle', 'heat', 'depth', 'table', 'end'];
+const SLAM_ID = 'heat';
+// era starts: 0, then the 8th after the previous line ends + 0.3s; the payoff era starts on the SLAM (a hard cut on the
+// soft chord bloom, inside the pause after "jostle", before the line that names the answer)
+const SLAM = snap8(VL('jostle').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- colours beyond the kit's C palette
+const COL = { wave: '#f0c55a', waveD: '#c99a2a', cold: '#6fb6c9', steam: 'rgba(217,119,87,0.45)', rice: '#fbf6ea', metal: '#cfcabd', metalD: '#9d978a' };
+// ---- the oven, in the same place in hook / magnet / bounce / end: a counter-top microwave seen from the front.
+// OVEN = the whole box; CAV = the cooking cavity (behind the door window); PANEL = the control strip on the right;
+// BOWL = the rice bowl on the turntable inside the cavity (centre x, rim y, radius). Scenes draw with props.ovenFront().
+const OVEN = { x: 80, y: 560, w: 920, h: 680 };
+const CAV = { x: 130, y: 610, w: 620, h: 580 };
+const PANEL = { x: 790, y: 610, w: 170, h: 580 };
+const BOWL = { x: 440, y: 1060, r: 150 };
+// ---- the bridges' contract: where the hero (dotHero radius HR) or the bridge object MUST be at each boundary.
+// Scenes keep it exactly there during [tc - 0.5, tc + 0.5]. Circles are (x, y, r). Cameras: identity (or CAMS-mapped,
+// same zoom on both sides) within 0.5s of a boundary.
+const HR = 80;
+const BR = {
+  hookMagnet:  { a: 'cav', b: 'cav' },                            // the oven cavity rect CAV (window -> cut-away)
+  magnetBounce:{ a: 'cav', b: 'cav' },                            // the same cavity
+  bounceWater: { a: [440, 960],  b: [540, 860] },                 // hero pops up out of the rice -> hero in the navy close-up
+  waterFlip:   { a: [540, 860],  b: [540, 860] },                 // hero
+  flipJostle:  { a: [540, 860],  b: [540, 860] },                 // hero
+  // jostle -> heat: SLAM (hard cut, no bridge); heat is complete on its first frame
+  heatDepth:   { a: [540, 900, 300], b: [540, 900, 300] },        // the steaming rice mound seen as a circle -> a cross-section disc
+  depthTable:  { a: [540, 900, 300], b: [540, 900, 300] },        // the cross-section disc -> the turntable plate seen from above
+  tableEnd:    { a: [540, 900, 300], b: [440, 1060, 150] },       // the plate from above -> the bowl BOWL inside the oven (hook framing)
+};
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'lò không nóng, cơm tự nóng', magnet: 'magnetron phát vi sóng', bounce: 'vi sóng dội khắp khoang lò',
+  water: 'phân tử nước: đầu +, đầu −', flip: 'điện trường đảo chiều tỷ lần/giây', jostle: 'xoay, chen, va nhau',
+  heat: 'rung lắc = nhiệt', depth: 'vào sâu vài cm, rồi lan vào lõi', table: 'đĩa xoay: đi qua chỗ mạnh, chỗ yếu',
+  end: 'hơi nóng sinh ra từ giọt nước',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1).filter((t) => t !== SLAM),
+  cues: { slam: SLAM, bloom: SLAM },
+  acts: [
+    { name: '1 Lò lạnh',   role: 'build',   t0: 0,            t1: ET('water') },
+    { name: '2 Phân tử',   role: 'journey', t0: ET('water'),  t1: ET('jostle') },
+    { name: '3 Chen lấn',  role: 'peak',    t0: ET('jostle'), t1: snap8(VL('jostle').t1) },
+    { name: '4 Lặng',      role: 'silence', t0: snap8(VL('jostle').t1), t1: SLAM - 0.125 },
+    { name: '5 Nhiệt!',    role: 'gift',    t0: SLAM,         t1: SLAM + 2.25 },
+    { name: '6 Lan vào, đĩa xoay', role: 'goodbye', t0: SLAM + 2.25, t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;

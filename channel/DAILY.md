@@ -46,6 +46,13 @@ Gói Starter tạo song song được: gọi `creative_generate_speech` cho TẤ
 ## 6. Build, export, review, sửa
 `build.mjs` → `tile.mjs` (deterministic: true) → xem still các beat và mọi cầu nối → `export.mjs --share --no-captions` (KHÔNG làm bản phụ đề) → `review.mjs` → `python3 channel/stillcheck.py pieces/<slug>/renders/share.mp4 --ignore <đầu>-<cuối nhịp lặng>` (KHÔNG đoạn nào đứng yên > 1,5 s ngoài nhịp lặng cố ý — góp ý "có vài cảnh bị đơ"). Sửa tới khi: cuts/morphs on grid PASS, narration PASS, STORY ARC PASS, TEXT PASS (0 cắt/chồng, 0 dưới UI), dead beats PASS, loudest 100ms trong act payoff. Lặp nhạc bằng `--only-audio`. Xem `review/phone.jpg`.
 
+## 6b. Review độc lập (bắt buộc — góp ý 18/11/2026: "máy bay bay ngược", không ai review)
+Các kiểm tra tự động chỉ đo kỹ thuật (thời gian, chữ, âm thanh, đơ); chúng KHÔNG biết hình có đúng vật lý/logic. Sau khi export:
+1. Tạo contact sheet ~1 khung / 2 s: `still.mjs pieces/<slug> <t1,t2,...> <dir>/sheet.png --scale 0.33` và file lời đọc kèm thời gian (từ voice.json).
+2. Giao cho MỘT agent MỚI (không phải agent hoạt hình, KHÔNG được đọc source code, chỉ nhìn hình + nghe lời) với checklist: hướng chuyển động (vật đi đúng chiều, mũi/đầu đi trước, nền trượt ngược chiều), mũi tên lực (đúng chiều, đúng chỗ, đúng độ lớn theo lời), hướng/tư thế (lộn ngược, soi gương, ngóc/chúc sai), lời ↔ hình (nhãn đúng vật, con số khớp), khẳng định khoa học gây hiểu nhầm, nhất quán giữa các cảnh. Agent trả danh sách MUST-FIX / NICE-TO-HAVE kèm thời điểm và cách sửa.
+3. Sửa mọi MUST-FIX, export lại, cho agent review xem lại đúng các chỗ đó. Ghi danh sách + cách sửa vào LOG.md.
+4. Lưu ý code: nhiều helper vẽ dùng `rotate(-rot)` hoặc vật quay mặt TRÁI — luôn kiểm tra dấu góc bằng một still trước khi tin.
+
 ## 7. Giao (chỉ MỘT video, không có bản phụ đề)
 - `pieces/<slug>/deliver/YYYY-MM-DD — <Tiêu đề>.mp4` (= renders/share.mp4). Video không commit (deliver/ và renders/ đã gitignore).
 - `LOG.md` với bảng PASS từng shot, các số đo, shot yếu nhất, điều chưa kiểm chứng (không nghe được bằng tai). Đánh dấu `[x]` chủ đề trong topics.md (ngày, slug, style, thời lượng).

@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Một chiếc máy bay nặng hàng trăm tấn, vậy mà thứ nâng nó lên lại là không khí.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "engine",
+   "text": "Động cơ chỉ đẩy máy bay lao về phía trước, chứ không hề nhấc nó lên.",
+   "after": 0.5,
+   "file": "engine.mp3"
+  },
+  {
+   "id": "wing",
+   "text": "Việc nhấc là của đôi cánh: hơi cong, và nghiêng lên một góc nhỏ đón gió.",
+   "after": 0.5,
+   "file": "wing.mp3"
+  },
+  {
+   "id": "bend",
+   "text": "Khi máy bay lao nhanh, cánh bẻ cong dòng không khí, hắt nó chúi xuống phía sau.",
+   "after": 0.5,
+   "file": "bend.mp3"
+  },
+  {
+   "id": "pressure",
+   "text": "Phía trên cánh, áp suất giảm; phía dưới cánh, áp suất tăng.",
+   "after": 0.5,
+   "file": "pressure.mp3"
+  },
+  {
+   "id": "push",
+   "text": "Cánh đẩy không khí xuống, thì không khí cũng đẩy ngược cánh lên.",
+   "after": 1.6,
+   "file": "push.mp3"
+  },
+  {
+   "id": "lift",
+   "text": "Cú đẩy ngược ấy chính là lực nâng.",
+   "after": 0.6,
+   "file": "lift.mp3"
+  },
+  {
+   "id": "speed",
+   "text": "Bay nhanh gấp đôi, lực nâng mạnh gấp bốn, nên máy bay phải chạy đà thật nhanh.",
+   "after": 0.5,
+   "file": "speed.mp3"
+  },
+  {
+   "id": "takeoff",
+   "text": "Đủ nhanh, phi công nâng mũi lên, lực nâng vượt trọng lượng, và bánh xe rời đường băng.",
+   "after": 0.5,
+   "file": "takeoff.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Lần tới thấy máy bay trên trời, hãy nhớ: nó đang được cả một dòng không khí đỡ lên.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}
