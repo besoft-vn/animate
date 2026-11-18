@@ -116,8 +116,10 @@ SCENES.takeoff = function () {
   runway({ slide: -1 * (900 * (TT - E) + 120 * (TT - E) ** 2) });
   // nose up on "nâng mũi" (about the main wheels), wheels leave on "rời", climbing ~120 px, gear up
   const climb = 125 * EZ.io(seg(TT, tOff, END - 0.2)) + 4 * Math.sin(TT * 2.2) * seg(TT, tOff + 0.5, tOff + 1.5);
-  const rot = 0.12 * EZ.io(ev(tNose, 0.8)) - 0.03 * EZ.io(seg(TT, tOff + 1, END)), gear = 1 - EZ.io(seg(TT, tOff + 0.6, tOff + 2.4));
-  const px = px0 + 40 * EZ.io(ev(tNose, 1.0)), py = py0 - climb, vib = TT < tOff ? 1.5 * Math.sin(TT * 40) : 0;
+  // planeSide rotates by -rot and the nose points LEFT: a NEGATIVE rot lifts the nose (fixed 18/11 — it used to pitch nose-down)
+  const rot = -(0.12 * EZ.io(ev(tNose, 0.8)) - 0.03 * EZ.io(seg(TT, tOff + 1, END))), gear = 1 - EZ.io(seg(TT, tOff + 0.6, tOff + 2.4));
+  const px = px0 - 40 * EZ.io(ev(tNose, 1.0)), py = py0 - climb;   // it rolls FORWARD (left), never back
+  const vib = TT < tOff ? 1.5 * Math.sin(TT * 40) : 0;
   planeSide(px, py + vib, ps, { rot, gear, exhaust: 1 });
   // weight: a graphite arrow pressing DOWN onto the roof (behind the wing), "trọng lượng"
   const wP = planePt(170, -62, px, py, ps, rot), wa = ev(E + 0.6, 0.45), wpulse = 1 + 0.12 * Math.sin(Math.PI * ev(tWt, 0.4));
@@ -158,7 +160,7 @@ SCENES.end = function () {
   gpencil([[rx, 1222], [rx + 190, 1220]], { key: 'p_nrw', w: 3, a: 0.5 });
   for (let i = 0; i < 3; i++) gpencil([[rx + 20 + i * 60, 1228], [rx + 46 + i * 60, 1228]], { key: 'p_nrd' + i, w: 2.5, a: 0.45 });
   // the plane, up high: gentle bob, tiny pitch
-  const bob = 7 * Math.sin((TT - E) * 1.6) * calm, rot = 0.04 + 0.008 * Math.sin((TT - E) * 1.1) * calm;
+  const bob = 7 * Math.sin((TT - E) * 1.6) * calm, rot = -(0.04 + 0.008 * Math.sin((TT - E) * 1.1) * calm);   // nose slightly UP (negative rot, nose LEFT)
   const py = p_EY + bob;
   planeSide(PLANE.x, py, PLANE.s, { rot, gear: 0, exhaust: 0.5 });
   // the stream: 3 blue down-flow strokes under the wing, written on from "nhớ", swelling on "dòng", chevrons ride them
