@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Máy bay nặng hàng trăm tấn sao vẫn bay được?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Máy bay nặng hàng trăm tấn sao vẫn bay được?" — 9:16, sketchbook, voiced (vi), 24fps, 120 BPM.
+//  Format F5 (fixed-hero journey): the sketchbook hero (terracotta doodle) IS one small parcel of air. It meets the
+//  heavy plane, rides the airflow over the wing, gets flung down behind it -> SLAM -> the push back is LIFT; then
+//  speed², the takeoff, and the same plane at the end, now in the sky, held up by the stream of air the hero is in.
+//  The plane always faces LEFT (nose left), so in every cross-section the air flows LEFT -> RIGHT past the wing.
+//  KHUNG HÌNH GỌN: one subject per frame, bare paper; ≤ 6 airflow lines, no fields of dots/specks/motes.
+//  Colour code (one colour = one meaning): TERRACOTTA = the hero (an air parcel) only; BLUE (COL.air / COL.airL) = air
+//  and airflow (streamlines, pressure zones, the air pushed down); YELLOW highlighter (COL.lift) = LIFT only (the big
+//  up arrow) — and the one highlighted caption word; graphite/ink = the plane, thrust, weight, everything else.
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). The payoff era "lift" starts on the
+//  SLAM: a hard cut inside the 1.6s pause after "push". Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+// Vietnamese-capable handwriting: Pangolin (installed by channel/setup.sh), then system fallbacks with Vietnamese glyphs
+const HAND = '"Pangolin", "Segoe Print", "Comic Sans MS", "DejaVu Sans", sans-serif';
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'engine', 'wing', 'bend', 'pressure', 'push', 'lift', 'speed', 'takeoff', 'end'];
+const SLAM_ID = 'lift';
+const SLAM = snap8(VL('push').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- colours (beyond the kit's SK palette)
+const COL = { air: '#4a86c8', airL: '#9cc3ea', airD: '#2f5f95', lift: '#f7d64a', liftD: '#c9a21c', sky: '#cfe2f2', ground: '#b9ad97' };
+// ---- shared geometry (props.js draws them):
+// PLANE: the side-view airliner (nose LEFT) in hook / engine / takeoff / end: centre (x, y), scale s (1 = ~820 px long).
+// RUNWAY_Y: the runway line in hook / engine / takeoff. WING: the big wing cross-section (airfoil) in wing / bend /
+// pressure / push / lift: centre, chord c, angle of attack aoa (rad, nose up), leading edge on the LEFT.
+const PLANE = { x: 520, y: 980, s: 1 };                       // wheels on RUNWAY_Y when s = 1, rot = 0, gear = 1
+const RUNWAY_Y = 1120;
+const WING = { x: 540, y: 900, c: 680, aoa: 0.14 };
+// ---- the bridges' contract: where the hero (doodleHero radius HR) MUST be at each boundary.
+// Scenes keep it exactly there during [tc - 0.5, tc + 0.5]. Cameras: identity (or CAMS-mapped, same zoom on both
+// sides) within 0.5s of a boundary.
+const HR = 62;
+const BR = {
+  hookEngine:     { a: [760, 1058], b: [760, 1058] },   // the hero beside the engine, on the runway, under the wing
+  engineWing:     { a: [180, 700],  b: [125, 700] },    // the hero ahead of the plane's nose -> ahead of the airfoil
+  wingBend:       { a: [125, 700],  b: [125, 700] },    // ahead of the leading edge, in the oncoming air
+  bendPressure:   { a: [930, 1060], b: [540, 640] },    // flung down behind the wing -> sitting in the low zone above it
+  pressurePush:   { a: [540, 640],  b: [540, 640] },
+  // push -> lift: SLAM (hard cut, no bridge); lift is complete on its first frame
+  liftSpeed:      { a: [820, 560],  b: [180, 600] },    // beside the lift arrow -> at the left of the speed chart
+  speedTakeoff:   { a: [860, 600],  b: [760, 1058] },   // the right of the chart -> by the engine on the runway again
+  takeoffEnd:     { a: [600, 1080], b: [600, 1080] },   // riding under the climbing wing -> under the wing in the sky
+};
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'hàng trăm tấn, nâng bằng không khí', engine: 'động cơ chỉ đẩy tới', wing: 'cánh: hơi cong, có góc tấn',
+  bend: 'cánh bẻ dòng khí chúi xuống', pressure: 'trên thấp, dưới cao', push: 'đẩy khí xuống ↔ khí đẩy cánh lên',
+  lift: 'lực nâng!', speed: 'nhanh ×2 → nâng ×4', takeoff: 'nâng mũi, rời đường băng', end: 'không khí đỡ máy bay',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1).filter((t) => t !== SLAM),
+  cues: { slam: SLAM, bloom: SLAM },
+  acts: [
+    { name: '1 Máy bay nặng', role: 'build',   t0: 0,           t1: ET('bend') },
+    { name: '2 Dòng khí',     role: 'journey', t0: ET('bend'),  t1: ET('push') },
+    { name: '3 Đẩy xuống',    role: 'peak',    t0: ET('push'),  t1: snap8(VL('push').t1) },
+    { name: '4 Lặng',         role: 'silence', t0: snap8(VL('push').t1), t1: SLAM - 0.125 },
+    { name: '5 Lực nâng!',    role: 'gift',    t0: SLAM,        t1: SLAM + 2.25 },
+    { name: '6 Tốc độ, cất cánh', role: 'goodbye', t0: SLAM + 2.25, t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;
