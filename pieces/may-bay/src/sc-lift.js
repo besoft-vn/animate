@@ -5,7 +5,8 @@
 // =====================================================================
 const L_FLOWS = [-360, -130, 150, 300];                         // 4 flow lines past the wing (≤ 6)
 const L_UPX = 560, L_UPY0 = 838;                                // the up arrow stands on the wing's top surface here
-const L_DN = [840, 990];                                        // the blue down arrow starts under the trailing edge
+const L_LEN = 300, L_W = 90;                                    // ONE force pair: wing pushes air down = air pushes wing up (same length, same width)
+const L_DNX = 780, L_DNY0 = () => w_underY(L_DNX) + 4;         // the blue down arrow hangs from the wing's underside here
 // the outline of a forceArrow (same shape as props' forceArrow), for the graphite ghost
 function l_arrowPts(x0, y0, x1, y1, w) {
   const D = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / D, uy = (y1 - y0) / D, hl = Math.min(w * 1.6, D * 0.6), sl = D - hl, nx = -uy, ny = ux;
@@ -40,12 +41,12 @@ SCENES.push = function () {
   l_flows(down, TT);
   airfoil();
   // the BLUE arrow: the air pushed down (grows on "không khí xuống", then breathes a little)
-  const kd = EZ.o2(ev(tk, 0.7)), br = TT > tk + 0.7 ? 8 * Math.sin(TAU * (TT - tk - 0.7) / 1.3) : 0;
-  forceArrow(L_DN[0], L_DN[1], 870, 1240 + br, { col: COL.air, w: 62, part: kd, key: 'l_dn' });
+  const kd = EZ.o2(ev(tk, 0.7)), br = TT > tk + 0.7 ? 5 * Math.sin(TAU * (TT - tk - 0.7) / 1.3) : 0;
+  forceArrow(L_DNX, L_DNY0(), L_DNX, L_DNY0() + L_LEN + br, { col: COL.air, w: L_W, part: kd, key: 'l_dn' });
   // the graphite GHOST of the push back up (not yellow yet): pencilled on over "đẩy ngược cánh lên"
   const kg = ev(tn, VE('push', 'lên') - tn);
   if (kg > 0) {
-    const G = l_arrowPts(L_UPX, L_UPY0, L_UPX, 470, 70);
+    const G = l_arrowPts(L_UPX, L_UPY0, L_UPX, L_UPY0 - L_LEN, L_W);   // the same size as the blue push
     gpencil(G, { key: 'l_ghost', w: 3.4, a: 0.85, part: kg, closed: true, amp: 1.4 });
     gpencil([[L_UPX - 18, L_UPY0 - 40], [L_UPX - 18, 600]], { key: 'l_ghh', w: 2.4, a: 0.5 * seg(kg, 0.6, 1), part: seg(kg, 0.6, 1) });
   }
@@ -66,19 +67,19 @@ SCENES.push = function () {
 
 // ---------------------------------------------------------------------
 //  LIFT — opens COMPLETE on the slam: the same wing, a HUGE yellow arrow up (where the ghost was), "LỰC NÂNG",
-//  the blue arrow down smaller. The arrow pulses, the hero cheers and hops over to BR.liftSpeed.a.
+//  the blue arrow down the SAME size (equal and opposite). The arrow pulses, the hero cheers and hops over to BR.liftSpeed.a.
 // ---------------------------------------------------------------------
 SCENES.lift = function () {
   sketchPage({ grid: 'plain' });
   const e0 = ET('lift'), e1 = EE('lift'), u = TT - e0, tl = VW('lift', 'lực');
   l_flows(1.3, TT);
   airfoil();
-  // the air pushed down: smaller now, still breathing
-  forceArrow(L_DN[0], L_DN[1], 858, 1150 + 5 * Math.sin(TAU * u / 1.3), { col: COL.air, w: 42, key: 'l_dn2' });
-  // LIFT: the huge yellow arrow, a slow pulse (stronger once "lực nâng" is spoken)
-  const pk = 1 + seg(TT, tl, tl + 0.3) * 0.8;
-  const tip = 395 - 9 * pk * Math.sin(TAU * u / 1.2);
-  forceArrow(L_UPX, L_UPY0, L_UPX, tip, { col: COL.lift, w: 106, key: 'l_up' });
+  // the equal-and-opposite pair: blue (wing pushes air DOWN) and yellow LIFT (air pushes wing UP), same length,
+  // pulsing together (stronger once "lực nâng" is spoken)
+  const pk = 1 + seg(TT, tl, tl + 0.3) * 0.8, pl = 9 * pk * Math.sin(TAU * u / 1.2);
+  forceArrow(L_DNX, L_DNY0(), L_DNX, L_DNY0() + L_LEN + pl, { col: COL.air, w: L_W, key: 'l_dn2' });
+  const tip = L_UPY0 - L_LEN - pl;
+  forceArrow(L_UPX, L_UPY0, L_UPX, tip, { col: COL.lift, w: L_W, key: 'l_up' });
   sparkle(L_UPX, tip - 30, 70, seg(TT, e0, e0 + 0.55), 'l_lspk');            // the one small effect: on the slam
   // the label, already written (the hard cut)
   label('LỰC NÂNG', 70, 640, 86, { align: 'left', key: 'l_lbl' });
