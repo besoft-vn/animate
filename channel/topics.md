@@ -8,10 +8,10 @@ Tiêu chí: có một **quá trình thật** với các bước rõ ràng, có m
 
 - [x] 2026-11-16 — Vì sao bầu trời màu xanh? → `pieces/bau-troi-xanh/` (bản lịch chạy dùng riso bị chê nhiều hạt, không push được; làm lại bằng sketchbook, khung hình gọn)
 - [x] 2026-11-17 — Lò vi sóng làm nóng thức ăn ra sao? → `pieces/lo-vi-song/` (crosshatch, 57s, giọng Tuan Khang / eleven_v3)
+- [x] 2026-11-18 — Máy bay nặng hàng trăm tấn sao vẫn bay được? → `pieces/may-bay/` (sketchbook, 59s, giọng Tuan Khang / eleven_v3)
 
 ## Hàng chờ (gợi ý style)
 - [ ] Vì sao nồi cơm điện tự nhảy nút "giữ ấm"? (isometric)
-- [ ] Máy bay nặng hàng trăm tấn sao vẫn bay được? (sketchbook)
 - [ ] Vì sao ta ngáp — và vì sao ngáp lây? (cut-paper)
 - [ ] Màn hình cảm ứng biết ngón tay bạn ở đâu? (isometric)
 - [ ] Sét hình thành như thế nào? (riso)

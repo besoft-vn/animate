@@ -35,7 +35,7 @@ SCENES.push = function () {
   const tn = VW('push', 'đẩy', 2), tl = VW('push', 'lên');
   // the light low-pressure zone from the previous scene fades out as the arrows take over
   const za = 0.7 * (1 - ev(e0 + 0.6, 0.7));
-  if (za > 0.02) airZone(540, 700, 260, 80, { a: za, key: 'l_pz' });
+  if (za > 0.02) airZone(540, 690, 340, 115, { a: 0.55 * za, key: 'w_zlo' });
   const down = 1 + 0.3 * EZ.io(seg(TT, tk, tx + 0.4));
   l_flows(down, TT);
   airfoil();

@@ -136,11 +136,12 @@ SCENES.pressure = function () {
   const u = 0.17 * (TT - t0) + 0.5;
   // the zones (under everything): light above, deeper below
   const kz1 = ev(tt, 0.7), kz2 = ev(td, 0.7);
-  if (kz1 > 0) airZone(540, 690, 340, 115, { part: kz1, key: 'w_zlo', a: 0.55 });
+  // KHÔNG ĐƠ: the low zone breathes slowly once it is down (it never sits frozen while the voice explains it)
+  const br = 22 * Math.sin((Math.floor(TT * 12) / 12 - tt) * 2.6) * seg(TT, tt + 0.7, tt + 1.2) * (1 - seg(TT, EE('pressure') - 0.9, EE('pressure') - 0.5));
+  if (kz1 > 0) airZone(540, 690, 340 + br, 115 + br * 0.8, { part: kz1, key: 'w_zlo', a: 0.55 });
   if (kz2 > 0) airZone(540, 1040, 340, 105, { part: kz2, col: COL.air, key: 'w_zhi', a: 0.7 });
-  // two flow lines keep the air moving past (top and bottom, out of the zones' way)
-  w_flow(-330, 0, { down: 1.5, u, a: 0.75 });
-  w_flow(340, 3, { down: 1.5, u, a: 0.75 });
+  // one flow line keeps the air moving past, above the low zone (a lower one would run into the caption)
+  w_flow(-400, 0, { down: 1.5, u, a: 0.8 });
   airfoil({ key: 'w_foil' });
   // three short blue arrows pushing UP on the underside, pulsing
   [380, 540, 700].forEach((x, i) => {
@@ -149,11 +150,11 @@ SCENES.pressure = function () {
     const p = TT > ta0 + 0.35 ? 0.5 - 0.5 * Math.cos(TAU * (TT - ta0 - 0.35) / 1.2) : 0;
     arrowPencil([[x, yU + 110 - 4 * p], [x, yU + 22 - 10 * p]], k, { col: COL.airD, w: 6, key: 'w_pa' + i });
   });
-  label('áp suất thấp', 540, 490, 62, { reveal: ev(ta, 0.6), key: 'w_llo', col: COL.airD });
+  label('áp suất thấp', 540, 445, 62, { reveal: ev(ta, 0.6), key: 'w_llo', col: COL.airD });
   label('áp suất cao', 540, 1215, 62, { reveal: ev(td + 0.45, 0.6), key: 'w_lhi', col: COL.airD });
   // the hero sits in the low zone, a little stretched up (only away from the boundaries)
   const e = w_env('pressure'), [hx, hy] = BR.pressurePush.a, st = e * seg(TT, ta, ta + 0.6);
-  const by = 5 * Math.sin((TT - t0) * 2.3) * e;
+  const by = (12 * Math.sin((TT - t0) * 2.6) - 70 * EZ.io(seg(TT, ta, ta + 0.9)) * (1 - EZ.io(seg(TT, td + 0.3, td + 1.2)))) * e;   // lifted toward the low zone's top while it is named
   const mood = TT < ta ? 'calm' : TT < td ? 'wow' : 'happy';
   const look = TT < td ? [0.3 * Math.sin((TT - t0) * 1.7), -0.8] : [0, 1];
   heroAir(hx, hy + by, HR, { key: 'hero', mood, look, sx: 1 - 0.05 * st, sy: 1 + 0.08 * st });
