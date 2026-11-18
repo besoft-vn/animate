@@ -40,21 +40,21 @@ SCENES.hook = function () {
   // "nặng": a luggage tag tied to the roof — "hàng trăm tấn" with a graphite down arrow; it sways gently
   const tg = ev(tHeavy, 0.4);
   if (tg > 0) {
-    const ax = planePt(-140, -60)[0], ay = planePt(-140, -60)[1], sw = 0.035 * Math.sin(TT * 1.9) * tg, tx = 300, ty = 470;
-    gpencil([[ax, ay], [tx + 260, ty + 120]], { key: 'p_hstr', w: 3, a: 0.75, part: tg });
-    ctx.save(); ctx.translate(tx + 260, ty + 120); ctx.rotate(sw); ctx.translate(-(tx + 260), -(ty + 120));
-    const TAG = [[tx, ty], [tx + 470, ty], [tx + 520, ty + 60], [tx + 470, ty + 120], [tx, ty + 120]];
+    const ax = planePt(120, -60)[0], ay = planePt(120, -60)[1], sw = 0.035 * Math.sin(TT * 1.9) * tg, tx = 220, ty = 470;
+    gpencil([[ax, ay], [tx + 300, ty + 120]], { key: 'p_hstr', w: 3, a: 0.75, part: tg });
+    ctx.save(); ctx.translate(tx + 300, ty + 120); ctx.rotate(sw); ctx.translate(-(tx + 300), -(ty + 120));
+    const TAG = [[tx, ty], [tx + 560, ty], [tx + 620, ty + 60], [tx + 560, ty + 120], [tx, ty + 120]];
     const k2 = popS(tHeavy + 0.05);
-    ctx.translate(tx + 260, ty + 60); ctx.scale(k2, k2); ctx.translate(-(tx + 260), -(ty + 60));
+    ctx.translate(tx + 300, ty + 60); ctx.scale(k2, k2); ctx.translate(-(tx + 300), -(ty + 60));
     gfill(TAG, SK.sheet, { key: 'p_htagf' });
     gline(TAG, { key: 'p_htag', w: 4.5, closed: true });
-    gline(loopPts(tx + 478, ty + 60, 11, 11, 0.1), { key: 'p_hhole', w: 3.5, second: false });
+    gline(loopPts(tx + 580, ty + 60, 11, 11, 0.1), { key: 'p_hhole', w: 3.5, second: false });
     forceArrow(tx + 50, ty + 22, tx + 50, ty + 104, { w: 26, head: 34, key: 'p_hwa', part: ev(tHeavy + 0.2, 0.3) });
-    label('hàng trăm tấn', tx + 92, ty + 82, 62, { align: 'left', reveal: ev(VW('hook', 'hàng'), 0.6), key: 'p_htagl' });
+    label('hàng trăm tấn', tx + 96, ty + 82, 60, { align: 'left', reveal: ev(VW('hook', 'hàng'), 0.6), key: 'p_htagl' });
     ctx.restore();
   }
   // "nâng": a dashed graphite question — what lifts it? (pencil up arrow from the wing + "?")
-  const qa = ev(tLift, 0.45), wingTop = planePt(-60, -64);
+  const qa = ev(tLift, 0.45), wingTop = planePt(-90, -64);
   if (qa > 0) {
     ctx.save(); ctx.setLineDash([18, 14]);
     p_pencilArrow([wingTop[0] - 40, wingTop[1] - 10], [wingTop[0] - 40, wingTop[1] - 190], qa, 'p_hqa', { a: 0.75 });
@@ -93,16 +93,16 @@ SCENES.engine = function () {
   label('lực đẩy', 735, 615, 64, { reveal: ev(tPush + 0.4, 0.5), key: 'p_ethl' });
   // "không hề nhấc": a pencilled UP arrow from the engine ... crossed out once with a red X
   const ua = ev(tNot - 0.15, 0.4), top = planePt(-40, -62), ux = top[0];
-  if (ua > 0) p_pencilArrow([ux, top[1] - 8], [ux, top[1] - 200], ua, 'p_eup', { w: 5, a: 0.8, head: 40 });
+  if (ua > 0) p_pencilArrow([ux, top[1] - 8], [ux, top[1] - 200], ua, 'p_eup', { w: 7, a: 0.9, head: 46 });
   const xa = ev(tLiftW, 0.18), xb = ev(tLiftW + 0.18, 0.18), cy = top[1] - 104;
-  if (xa > 0) gline([[ux - 70, cy - 70], [ux + 70, cy + 70]], { key: 'p_ex1', w: 9, col: SK.red, part: xa, second: false });
-  if (xb > 0) gline([[ux + 70, cy - 70], [ux - 70, cy + 70]], { key: 'p_ex2', w: 9, col: SK.red, part: xb, second: false });
+  if (xa > 0) gline([[ux - 52, cy - 52], [ux + 52, cy + 52]], { key: 'p_ex1', w: 9, col: SK.red, part: xa, second: false });
+  if (xb > 0) gline([[ux + 52, cy - 52], [ux - 52, cy + 52]], { key: 'p_ex2', w: 9, col: SK.red, part: xb, second: false });
   // the hero: on the bridge spot, watching the exhaust; on "lao" it is swept along under the nose and up ahead of it
   const mv = EZ.io(seg(TT, tGo, tNot + 0.4));
-  const bx = (1 - mv) ** 2 * h0x + 2 * mv * (1 - mv) * 260 + mv * mv * h1x, by = (1 - mv) ** 2 * h0y + 2 * mv * (1 - mv) * 1090 + mv * mv * h1y;
+  const bx = (1 - mv) ** 2 * h0x + 2 * mv * (1 - mv) * 140 + mv * mv * h1x, by = (1 - mv) ** 2 * h0y + 2 * mv * (1 - mv) * 1170 + mv * mv * h1y;
   const moving = mv > 0 && mv < 1, br = p_breath(), hop = Math.sin(Math.PI * ev(tPush, 0.3));
   const look = TT < tGo ? [0.9, 0.1] : moving ? [-1, -0.3] : TT < tNot ? [0.8, 0] : [1, -0.6];
-  heroAir(bx, by, HR, { key: 'hero', wind: moving ? 1 : 0, dir: Math.atan2(h1y - 1090, h1x - 260) * mv + Math.PI * (1 - mv), mood: TT >= tLiftW ? 'puzzled' : moving ? 'wow' : 'calm', look, sx: br.sx * (1 - 0.05 * hop), sy: br.sy * (1 + 0.07 * hop) });
+  heroAir(bx, by, HR, { key: 'hero', wind: moving ? 1 : 0, dir: Math.atan2(2 * (1 - mv) * (1170 - h0y) + 2 * mv * (h1y - 1170), 2 * (1 - mv) * (140 - h0x) + 2 * mv * (h1x - 140)), mood: TT >= tLiftW ? 'puzzled' : moving ? 'wow' : 'calm', look, sx: br.sx * (1 - 0.05 * hop), sy: br.sy * (1 + 0.07 * hop) });
   viTag('động cơ');
   pageCaption(['động cơ chỉ đẩy', 'không nhấc lên'], [[0, 'đẩy']], { at: 1.2 });
 };
@@ -110,14 +110,14 @@ SCENES.engine = function () {
 // ---- TAKEOFF: "Đủ nhanh, phi công nâng mũi lên, lực nâng vượt trọng lượng, và bánh xe rời đường băng."
 SCENES.takeoff = function () {
   sketchPage({ grid: 'plain' });
-  const [px, py0, ps] = p_PL(), E = ET('takeoff'), END = EE('takeoff'), [h0x, h0y] = BR.speedTakeoff.b, [h1x, h1y] = BR.takeoffEnd.a;
+  const [px0, py0, ps] = p_PL(), E = ET('takeoff'), END = EE('takeoff'), [h0x, h0y] = BR.speedTakeoff.b, [h1x, h1y] = BR.takeoffEnd.a;
   const tNose = VW('takeoff', 'nâng'), tLift = VW('takeoff', 'lực'), tOver = VW('takeoff', 'vượt'), tWt = VW('takeoff', 'trọng'), tOff = VW('takeoff', 'rời');
   // rolling fast: the runway dashes race to the right (plane moves left)
   runway({ slide: -1 * (900 * (TT - E) + 120 * (TT - E) ** 2) });
   // nose up on "nâng mũi" (about the main wheels), wheels leave on "rời", climbing ~120 px, gear up
   const climb = 125 * EZ.io(seg(TT, tOff, END - 0.2)) + 4 * Math.sin(TT * 2.2) * seg(TT, tOff + 0.5, tOff + 1.5);
   const rot = 0.12 * EZ.io(ev(tNose, 0.8)) - 0.03 * EZ.io(seg(TT, tOff + 1, END)), gear = 1 - EZ.io(seg(TT, tOff + 0.6, tOff + 2.4));
-  const py = py0 - climb, vib = TT < tOff ? 1.5 * Math.sin(TT * 40) : 0;
+  const px = px0 + 40 * EZ.io(ev(tNose, 1.0)), py = py0 - climb, vib = TT < tOff ? 1.5 * Math.sin(TT * 40) : 0;
   planeSide(px, py + vib, ps, { rot, gear, exhaust: 1 });
   // weight: a graphite arrow pressing DOWN onto the roof (behind the wing), "trọng lượng"
   const wP = planePt(170, -62, px, py, ps, rot), wa = ev(E + 0.6, 0.45), wpulse = 1 + 0.12 * Math.sin(Math.PI * ev(tWt, 0.4));
@@ -152,9 +152,9 @@ SCENES.end = function () {
   const tSee = VW('end', 'thấy'), tSky = VW('end', 'trời'), tRem = VW('end', 'nhớ'), tStream = VW('end', 'dòng'), tHold = VW('end', 'đỡ');
   const calm = 1 - seg(TT, END - 1.6, END - 0.9);                       // the last ~1 s resolves (everything settles)
   // the far ground: one faint line low, a tiny runway sliding slowly right (the plane flies left)
-  const gs = 40 * (TT - E) * calm + 40 * (END - 1.25 - E) * (1 - calm);
+  const gs = 14 * ((TT - E) * calm + (END - 1.25 - E) * (1 - calm));
   gpencil([[60, 1238], [1020, 1232]], { key: 'p_ngr', w: 3, a: 0.45 });
-  const rx = 640 + gs;
+  const rx = 560 + gs;
   gpencil([[rx, 1222], [rx + 190, 1220]], { key: 'p_nrw', w: 3, a: 0.5 });
   for (let i = 0; i < 3; i++) gpencil([[rx + 20 + i * 60, 1228], [rx + 46 + i * 60, 1228]], { key: 'p_nrd' + i, w: 2.5, a: 0.45 });
   // the plane, up high: gentle bob, tiny pitch
