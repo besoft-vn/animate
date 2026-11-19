@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Nồi cơm điện không hề hẹn giờ, vậy mà nó biết đúng lúc cơm vừa cạn nước.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "magnet",
+   "text": "Ấn nút nấu, một nam châm được đẩy lên, hít chặt vào miếng ferit dưới đáy nồi.",
+   "after": 0.5,
+   "file": "magnet.mp3"
+  },
+  {
+   "id": "heat",
+   "text": "Lực hút ấy giữ cho mạch điện đóng, và mâm nhiệt bắt đầu nóng lên.",
+   "after": 0.5,
+   "file": "heat.mp3"
+  },
+  {
+   "id": "boil",
+   "text": "Nước sôi ở một trăm độ, và chừng nào còn nước, đáy nồi cứ đứng quanh mức đó.",
+   "after": 0.5,
+   "file": "boil.mp3"
+  },
+  {
+   "id": "steam",
+   "text": "Nhiệt cấp thêm chỉ biến nước thành hơi, chứ không làm đáy nồi nóng hơn.",
+   "after": 0.5,
+   "file": "steam.mp3"
+  },
+  {
+   "id": "dry",
+   "text": "Khi gạo hút hết nước và hơi bay đi, đáy nồi khô lại, nhiệt độ vọt lên.",
+   "after": 0.5,
+   "file": "dry.mp3"
+  },
+  {
+   "id": "curie",
+   "text": "Đến khoảng một trăm linh ba độ, miếng ferit bỗng mất từ tính.",
+   "after": 1.6,
+   "file": "curie.mp3"
+  },
+  {
+   "id": "click",
+   "text": "Nam châm rơi xuống, và nút nhảy sang giữ ấm.",
+   "after": 0.6,
+   "file": "click.mp3"
+  },
+  {
+   "id": "warm",
+   "text": "Mạch nấu ngắt, chỉ còn chút nhiệt nhỏ giữ cho cơm ấm.",
+   "after": 0.5,
+   "file": "warm.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Vậy đấy: nồi cơm không đếm phút, nó chờ giọt nước cuối cùng biến mất.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}

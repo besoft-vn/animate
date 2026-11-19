@@ -1,0 +1,3 @@
+SCENES.magnet = function () { cutaway({ water: 0.9, mag: 1, field: 1, cook: 1, heat: 0.6 }); thermoLens(540, 660, 240, 3, { water: 0.9, mag: 1, field: 1, cook: 1, heat: 0.6 }); heroDrop(...BR.magnetHeat.a, HR); };
+SCENES.heat = SCENES.magnet; SCENES.curie = function () { cutaway({ water: 0, rice: 0.9, mag: 1, field: 0.4, ferHot: 1, cook: 1, heat: 1 }); heroDrop(...BR.dryCurie.a, HR, { steam: 1 }); };
+SCENES.click = function () { cutaway({ water: 0, rice: 0.9, mag: 0, warm: 1, ferHot: 1 }); thermoLens(540, 660, 240, 3, { water: 0, rice: 0.9, mag: 0, warm: 1, ferHot: 1 });heroDrop(...BR.dryCurie.a, HR, { steam: 1 }); };

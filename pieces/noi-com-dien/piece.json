@@ -1,0 +1,13 @@
+{
+  "name": "noi-com-dien",
+  "title": "Vì sao nồi cơm điện tự nhảy nút giữ ấm?",
+  "series": "Vạn vật vận hành như thế nào",
+  "date": "2026-11-19",
+  "format": { "width": 1080, "height": 1920, "fps": 24, "bpm": 120 },
+  "storyFormat": "F5 fixed-hero journey (the hero is one drop of water), morph-joined, one slam on the payoff (the click)",
+  "style": "isometric",
+  "scenes": ["src/props.js", "src/sc-cooker.js", "src/sc-switch.js", "src/sc-water.js"],
+  "voice": { "file": "voice/voice.wav", "music": -14 },
+  "captions": { "font": "Pangolin", "size": 62 },
+  "review": { "safe": { "top": 240, "bottom": 420, "right": 140 }, "refs": {}, "wpsMax": 5.0 }
+}

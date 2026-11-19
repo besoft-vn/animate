@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vì sao nồi cơm điện tự nhảy nút giữ ấm?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Vì sao nồi cơm điện tự nhảy nút giữ ấm?" — 9:16, isometric, voiced (vi), 24fps, 120 BPM.
+//  Format F5 (fixed-hero journey): the hero is ONE DROP OF WATER (blue teardrop, two dark eyes). It sits on the
+//  cooker, dives into the pot (the cutaway), boils at 100 °C, is the last drop to turn to steam -> the pot bottom heats
+//  up -> the ferrite loses its magnetism -> SLAM: the magnet drops, the knob pops to "giữ ấm". The end is the start,
+//  changed: the same cooker, now on "giữ ấm", the hero as a small steam cloud above the vent.
+//  KHUNG HÌNH GỌN: one subject per frame, white ground, hairlines; ≤ 5 big bubbles, no fields of dots.
+//  Colour (one colour = one meaning): BLUE = water / steam / the hero; ORANGE = heat / hot; DARK accent = the magnet
+//  and its pull; grey hairlines = everything else.
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). The payoff era "click" starts on the
+//  SLAM: a hard cut inside the 1.6s pause after "curie". Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'magnet', 'heat', 'boil', 'steam', 'dry', 'curie', 'click', 'warm', 'end'];
+const SLAM_ID = 'click';
+const SLAM = snap8(VL('curie').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- the bridges' contract: where the hero (heroDrop radius HR, centre of its body) MUST be at each boundary.
+// Scenes keep it exactly there during [tc - 0.5, tc + 0.5]. Cameras: identity within 0.5s of a boundary.
+// The hero is a DROP until it boils off in "dry"; from "dry"'s end on it is STEAM (heroSteamAt in props.js).
+const HR = 54;
+const BR = {
+  hookMagnet:  { a: [540, 468], b: [540, 720] },   // sitting on the lid of the cooker (outside) -> in the water (cutaway)
+  magnetHeat:  { a: [540, 720], b: [540, 720] },   // in the water, right above the thermostat
+  heatBoil:    { a: [540, 720], b: [540, 720] },
+  boilSteam:   { a: [540, 720], b: [540, 720] },
+  steamDry:    { a: [540, 720], b: [540, 720] },
+  dryCurie:    { a: [760, 360], b: [760, 360] },   // boiled off: a steam cloud above the vent (cutaway)
+  // curie -> click: SLAM (hard cut, no bridge); click is complete on its first frame, hero still at [760, 360]
+  clickWarm:   { a: [760, 360], b: [690, 400] },   // cutaway -> outside: the steam cloud above the cooker's vent
+  warmEnd:     { a: [690, 400], b: [690, 400] },
+};
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'không hẹn giờ, vẫn biết lúc cạn nước', magnet: 'ấn nút: nam châm hít ferit', heat: 'mạch đóng, mâm nhiệt nóng',
+  boil: 'còn nước: kẹt ở 100°C', steam: 'nhiệt chỉ biến nước thành hơi', dry: 'hết nước: nhiệt độ vọt lên',
+  curie: '≈103°C: ferit mất từ tính', click: 'cạch! nhảy sang giữ ấm', warm: 'chỉ còn nhiệt giữ ấm', end: 'chờ giọt nước cuối cùng',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1).filter((t) => t !== SLAM),
+  cues: { slam: SLAM, bloom: SLAM },
+  acts: [
+    { name: '1 Nút nấu',      role: 'build',   t0: 0,           t1: ET('boil') },
+    { name: '2 Nước 100°C',   role: 'journey', t0: ET('boil'),  t1: ET('curie') },
+    { name: '3 Ferit nóng',   role: 'peak',    t0: ET('curie'), t1: snap8(VL('curie').t1) },
+    { name: '4 Lặng',         role: 'silence', t0: snap8(VL('curie').t1), t1: SLAM - 0.125 },
+    { name: '5 Cạch!',        role: 'gift',    t0: SLAM,        t1: SLAM + 2.25 },
+    { name: '6 Giữ ấm',       role: 'goodbye', t0: SLAM + 2.25, t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;
