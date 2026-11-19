@@ -21,8 +21,8 @@
     if (st >= 1 && k % 2 === 0) bass(t, nz(Math.floor(k / 8) % 2 ? 'E2' : 'A2'), 0.09 + st * 0.01);
   });
   // SOFT payoff: a faint bed + small swell through the pause, then a blooming chord (no stab)
-  pad(SIL - 0.6, SLAM + 0.4, ['A3', 'E4', 'B4'], 0.022, { type: 'triangle', cut: 600, att: 0.3, rel: 0.3 });
-  riser(SIL - 0.1, SLAM, 0.013);
+  pad(SIL - 0.6, SLAM + 0.4, ['A3', 'E4', 'B4'], 0.009, { type: 'triangle', cut: 600, att: 0.3, rel: 0.3 });
+  riser(SIL - 0.1, SLAM, 0.007);
   ['A3', 'E4', 'A4', 'C#5', 'E5', 'A5'].forEach((n, i) => pluck(SLAM + 0.05 + i * 0.06, nz(n), 0.065, (i - 2.5) * 0.15, 0.9, 2600, 0.45));
   pad(SLAM, SLAM + 2.3, ['A3', 'E4', 'A4', 'C#5', 'E5'], 0.05, { cut: 2000, att: 0.35, rel: 0.7, send: 0.45 });
   pad(SLAM + 2.0, DURATION, ['A3', 'E4', 'A4', 'C#5'], 0.016, { cut: 1000, att: 0.3, rel: 0.4, send: 0.45 });
