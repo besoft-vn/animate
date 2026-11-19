@@ -35,16 +35,17 @@ SCENES.hook = function () {
   if (cs > 0) {
     const fl0 = tSu, fl1 = tSu + 1.65, n = 11;
     const k = TT < fl0 ? 0 : Math.min(n, Math.floor(n * seg(TT, fl0, fl1) + 1e-6)), u = TT < fl0 || k >= n ? 1 : mod(n * seg(TT, fl0, fl1), 1);
-    const page = (yr, key) => {
+    const cover = k < n ? 236 * (1 - EZ.i2(u)) : 0;   // how far the tearing page still hangs down
+    const page = (yr, key, txt) => {
       paint(rrectPts(-160, -66, 320, 236, 10), { fill: C.cream, key: 'v_pg' + key, w: 3, tex: [{ k: 'pencil', c: '#e8d6b0', al: 0.6, per: 80 }] });
-      monoText(String(yr), -96, 50, 80, yr === 2026 ? C.red : C.ink, { key: 'v_yr' + yr });
+      if (txt) monoText(String(yr), -96, 50, 80, yr === 2026 ? C.red : C.ink, { key: 'v_yr' + yr });
     };
-    ctx.save(); ctx.translate(250, 600); ctx.rotate(-0.04); ctx.scale(cs, cs);
+    ctx.save(); ctx.translate(228, 548); ctx.rotate(-0.04); ctx.scale(cs * 0.82, cs * 0.82);
     paint(rrectPts(-160 + 10, -130 + 12, 320, 300, 14), { fill: 'rgba(58,36,23,0.3)', line: false, key: 'v_calsh', tex: [{ k: 'hatch', a: 0.8, gap: 4, al: 0.5 }] });
-    page(2015 + (k < n ? k + 1 : n), 'n');                     // the page underneath (next year)
+    page(2015 + (k < n ? k + 1 : n), 'n', cover < 40);                     // the page underneath (next year)
     if (k < n) {                                                // the current page tears off upward from the binding
       ctx.save(); ctx.translate(0, -66); ctx.scale(1, 1 - EZ.i2(u)); ctx.translate(0, 66);
-      page(2015 + k, 'c');
+      page(2015 + k, 'c', cover > 165);
       ctx.restore();
     }
     if (TT > fl1) handText('10 năm', -84, 150, 58, C.red, { key: 'v_10y', frac: ev(fl1, 0.5) });
@@ -71,7 +72,7 @@ SCENES.hook = function () {
     for (let i = 0; i < 3; i++) {
       if (TT - tWho < i * 0.3) continue;
       const u = mod(TT - tWho - i * 0.3, 1.1) / 1.1;
-      handText('?', 660 + i * 90, 1060 - u * 170, 100, C.ink, { key: 'v_q' + i, al: (1 - u) * (1 - seg(TT, t1 - 0.8, t1 - 0.4)) });
+      handText('?', 730 + i * 80, 1060 - u * 170, 100, C.ink, { key: 'v_q' + i, al: (1 - u) * (1 - seg(TT, t1 - 0.8, t1 - 0.4)) });
     }
   }
 
@@ -114,10 +115,8 @@ function v_gauge(gx, gy, sc, o) {
   // the swept wedge (0 -> needle): a red danger fill that breathes
   const na = Math.PI + o.val / 10 * Math.PI;
   if (o.val > 0.4) {
-    const P = [[0, 0], ...arcPts(0, 0, R - 36, Math.PI, na, 40)];
-    ctx.save(); ctx.globalAlpha = o.wedgeA;
-    paint(P, { fill: C.red, key: 'v_wedge', line: false, tex: [{ k: 'hatch', gap: 6, al: 0.35, c: '#000' }] });
-    ctx.restore();
+    const P = [...arcPts(0, 0, R - 30, Math.PI, na, 40), ...arcPts(0, 0, R - 100, na, Math.PI, 40)];
+    paint(P, { fill: C.red, fillAl: o.wedgeA, key: 'v_wedge', line: false, tex: [{ k: 'hatch', gap: 6, al: 0.35, c: '#000' }] });
   }
   ink(arcPts(0, 0, R, Math.PI, Math.PI + Math.PI * gp, 40), { w: 6, color: C.peri, key: 'v_garc' });
   for (let v = 0; v <= 10; v++) {
@@ -133,12 +132,12 @@ function v_gauge(gx, gy, sc, o) {
   ink([[0, 0], [Math.cos(na) * (R - 50), Math.sin(na) * (R - 50)]], { w: 9, color: C.red, key: 'v_needle', amt: 0.8 });
   ctx.fillStyle = C.peri; ctx.beginPath(); ctx.arc(0, 0, 18, 0, TAU); ctx.fill();
   if (o.sp > 0) {
-    ctx.save(); ctx.translate(0, -96); ctx.scale(o.sp, o.sp);
-    monoText('9,2', -118, 0, 128, C.red, { key: 'v_score' });
+    ctx.save(); ctx.translate(-40, 130); ctx.scale(o.sp, o.sp);
+    monoText('9,2', -105, 0, 120, C.red, { key: 'v_score' });
     ctx.restore();
   }
-  if (o.s10 > 0 && sc > 0.6) { ctx.save(); ctx.translate(112, -96); ctx.scale(o.s10, o.s10); monoText('/10', 0, 0, 60, C.peri, { key: 'v_score10' }); ctx.restore(); }
-  if (o.cvss > 0 && sc > 0.6) monoText('CVSS 4.0', -106, 74, 48, C.peri, { key: 'v_cvss', count: Math.floor(o.cvss * 8) });
+  if (o.s10 > 0) { ctx.save(); ctx.translate(76, 130); ctx.scale(o.s10, o.s10); monoText('/10', 0, 0, 64, C.peri, { key: 'v_score10' }); ctx.restore(); }
+  if (o.cvss > 0 && sc > 0.6) monoText('CVSS 4.0', -106, -80, 48, C.peri, { key: 'v_cvss', count: Math.floor(o.cvss * 8) });
   ctx.restore();
 }
 SCENES.cve = function () {
@@ -146,7 +145,7 @@ SCENES.cve = function () {
   const tScore = VW('cve', 'chín'), tHai = VW('cve', 'hai'), tTren = VW('cve', 'trên'), tMuoi = VW('cve', 'mười'), tNam = VW('cve', 'nằm');
   const tChain = VW('cve', 'chuỗi'), tName = VW('cve', 'các'), tRoot = VW('cve', 'nginx'), tRoot2 = VW('cve', 'root'), t1 = EE('cve');
   // the server steps aside (top right) to make room, and is back at SRV before the bridge
-  const [sx, sy, ss] = v_track([[E0 + 0.5, SRV[0], SRV[1], 1], [E0 + 1.3, 840, 470, 0.5], [t1 - 1.45, 840, 470, 0.5], [t1 - 0.55, SRV[0], SRV[1], 1]]);
+  const [sx, sy, ss] = v_track([[E0 + 0.5, SRV[0], SRV[1], 1], [E0 + 1.3, 846, 480, 0.66], [t1 - 1.45, 846, 480, 0.66], [t1 - 0.55, SRV[0], SRV[1], 1]]);
 
   // the big CVE chip
   chip('CVE-2026-123007', 80, 482, C.red, { size: 54, s: popS(E0 + 0.35), dark: true, key: 'v_cvechip' });
@@ -158,14 +157,14 @@ SCENES.cve = function () {
     let val = 0.3 + 0.15 * Math.sin(TT * 6);
     if (TT >= tScore) val = lerp(val, 9.2, EZ.back(seg(TT, tScore, tScore + 0.8))) + (TT > tScore + 0.8 ? 0.06 * Math.sin(TT * 9) : 0);
     val = Math.min(val, 9.9);
-    const wedgeA = TT < tScore ? 0.3 : 0.3 + 0.32 * (0.5 + 0.5 * Math.sin((TT - tScore) * 3.2));
-    v_gauge(lerp(540, 820, sw), lerp(950, 560, sw), gg * lerp(1, 0.38, sw), {
+    const wedgeA = TT < tScore ? 0.5 : 0.35 + 0.6 * (0.5 + 0.5 * Math.sin((TT - tScore) * 3.2));
+    v_gauge(lerp(540, 820, sw), lerp(930, 560, sw), gg * lerp(1, 0.38, sw), {
       grow: seg(TT, E0 + 0.9, tScore - 0.1), val, wedgeA, sp: popS(tHai), s10: popS(tTren), cvss: ev(tMuoi + 0.1, 0.5),
     });
   }
 
   // the chain: 5 links pop on "nằm trong", light on "chuỗi"; a red pulse runs nginx -> root
-  const LY = 1160;
+  const LY = 1215;
   for (let i = 0; i < 5; i++) {
     const t = tNam + i * 0.12; if (TT < t) continue;
     const lx = 540 + (i - 2) * 112, p = popS(t), lit = TT > tChain + 0.1 + i * 0.1;
@@ -175,10 +174,10 @@ SCENES.cve = function () {
   if (TT >= tRoot) monoText('nginx', 70, LY + 14, 42, C.peri, { key: 'v_lkn', count: Math.floor(ev(tRoot, 0.3) * 5) });
   if (TT >= tRoot2) monoText('root', 846, LY + 14, 42, C.red, { key: 'v_lkr', count: Math.floor(ev(tRoot2, 0.25) * 4) });
   const n1 = 'chuỗi 5 lỗi';
-  handText(n1, v_cx(n1, 64), 1300, 64, C.white, { key: 'v_note', frac: ev(tChain, 0.6) });
+  handText(n1, v_cx(n1, 64), 1345, 64, C.white, { key: 'v_note', frac: ev(tChain, 0.6) });
   if (TT >= tName) {
     const nm = '"nginx2root"', fs = 62;
-    monoText(nm, 540 - monoW(fs) * nm.length / 2, 1410, fs, C.yellow, { key: 'v_name', count: Math.floor(seg(TT, tName, tRoot) * nm.length + 1) });
+    monoText(nm, 540 - monoW(fs) * nm.length / 2, 1440, fs, C.yellow, { key: 'v_name', count: Math.floor(seg(TT, tName, tRoot) * nm.length + 1) });
   }
 
   serverProp(sx, sy, { state: 'vuln', dark: true, s: ss });
@@ -194,7 +193,7 @@ SCENES.since = function () {
 
   // dates above the line
   handText('22/9/2015', 70, 470, 60, C.ink, { key: 'v_d0', frac: ev(tFrom, 0.5) });
-  if (TT >= tDate) { const s = '18/11/2026'; handText(s, 935 - handW(s, 60), 470, 60, C.green, { key: 'v_d1', frac: ev(tDate, 0.6) }); }
+  if (TT >= tDate) { const s = '18/11/2026'; handText(s, 915 - handW(s, 60), 470, 60, C.green, { key: 'v_d1', frac: ev(tDate, 0.6) }); }
   ink([[X0 - 20, YT], [X1 + 20, YT]], { w: 5, key: 'v_tl' });
   for (let i = 1; i <= 11; i++) { const x = X0 + (i - 0.72) / 11.16 * (X1 - X0); ink([[x, YT - 14], [x, YT + 14]], { w: 3, key: 'v_tk' + i, amt: 0.6 }); }
   // a red pin drops on the start: 22/9/2015
@@ -210,7 +209,7 @@ SCENES.since = function () {
     paint(rrectPts(X0, YT - 16, Math.max(10, fx - X0), 32, 12), { fill: C.red, key: 'v_bar', w: 2.5, tex: [{ k: 'hatch', gap: 5, al: 0.35 }] });
     if (TT < tFix + 0.2) paint([[fx - 22, YT - 62], [fx + 22, YT - 62], [fx, YT - 26]], { fill: C.red, key: 'v_mk', w: 3, closed: true });
     const yr = String(Math.min(2026, Math.floor(2015.72 + bf * 11.16))), yw = monoW(46) * 4;
-    monoText(yr, clamp(fx - yw / 2, 64, 936 - yw), YT + 72, 46, yr === '2026' ? C.red : C.ink, { key: 'v_myr' + yr });
+    monoText(yr, clamp(fx - yw / 2, 64, 915 - yw), YT + 72, 46, yr === '2026' ? C.red : C.ink, { key: 'v_myr' + yr });
   }
   if (TT >= tFix) { const s = popS(tFix); paint(ellipsePts(X1, YT, 30 * s, 30 * s, 0, 24), { fill: C.green, key: 'v_fixdot', w: 3, tex: [{ k: 'hatch', gap: 4, al: 0.35 }] }); }
 
@@ -224,8 +223,8 @@ SCENES.since = function () {
   chip('1.31.8', 70, 1030, C.red, { size: 54, s: popS(tAll + 0.45), key: 'v_c1' });
   // right column: "mọi bản / đều dính"
   { const s1 = 'mọi bản', s2 = 'đều dính';
-    handText(s1, 935 - handW(s1, 66), 830, 66, C.red, { key: 'v_moi', frac: ev(tAll, 0.5) });
-    handText(s2, 935 - handW(s2, 66), 930, 66, C.red, { key: 'v_dinh', frac: ev(tDinh, 0.5) }); }
+    handText(s1, 915 - handW(s1, 58), 840, 58, C.red, { key: 'v_moi', frac: ev(tAll, 0.5) });
+    handText(s2, 915 - handW(s2, 58), 930, 58, C.red, { key: 'v_dinh', frac: ev(tDinh, 0.5) }); }
 
   // the fix (bottom): green chips, mainline / stable, 18/11
   handText('bản vá 18/11', 70, 1180, 70, C.green, { key: 'v_fixl', frac: ev(tFix, 0.6) });
