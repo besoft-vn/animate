@@ -24,8 +24,8 @@ function wa_heat(top, o = {}) {
 // the temperature readout at its standard place, with an optional pulse (kick) on a cue
 function wa_card(T, o = {}) {
   const s = 1 + 0.06 * (o.kick ?? 0);
-  ctx.save(); ctx.translate(290, 392); ctx.scale(s, s); ctx.translate(-290, -392);
-  tempCard(290, 392, T, { fill: wa_fill(T) + 0.006 * Math.sin(TT * 5.3), hot: o.hot ?? 0 });
+  ctx.save(); ctx.translate(290, 404); ctx.scale(s, s); ctx.translate(-290, -404);
+  tempCard(290, 404, T, { fill: wa_fill(T) + 0.006 * Math.sin(TT * 5.3), hot: o.hot ?? 0 });
   ctx.restore();
 }
 // the trend mark beside the readout (x 430–500): 'flat' (holds), 'up' grey crossed (not hotter), 'hot' orange up
@@ -33,7 +33,7 @@ function wa_trend(kind, k, o = {}) {
   if (k <= 0.01) return;
   const x = 462;
   if (kind === 'flat') {
-    simpleArrow(428, 392, 500, 392, { part: k, w: 5, al: o.al ?? 1 });
+    simpleArrow(428, 404, 500, 404, { part: k, w: 5, al: o.al ?? 1 });
     return;
   }
   const col = kind === 'hot' ? COL.heat : PAL.edge;

@@ -246,7 +246,7 @@ function cutaway(o = {}) {
   // the front knob on the left end (sticks out of the body)
   polyPath(rrectPts(138, lyy - 22, 70, 44, 14, 4), true); ctx.fillStyle = PAL.face; ctx.fill(); hair(PAL.edge, 4); ctx.stroke();
   // contacts: the moving leaf is pushed up by the lever's right side; touches the fixed one when cook
-  const cy = lerp(1128, 1110, cook);
+  const cy = lerp(1128, 1092, cook);
   polyPath([[650, 1096], [724, 1096]], false); hair(PAL.edge, 5); ctx.stroke();            // fixed
   polyPath([[600, cy + 4], [724, cy + 4]], false); hair(PAL.edge, 5); ctx.stroke();        // moving
   // wires: contact -> plate (current dashes in heat colour when flowing)
