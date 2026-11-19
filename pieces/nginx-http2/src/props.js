@@ -27,6 +27,8 @@ function serverProp(x, y, o = {}) {
 // a terminal card: lines typed one after another from t0 (cps chars/s). lines: [{ s: 'text', c: colour?, out: true? }]
 // o: { size (34), t0, cps (28), title, key, dark }  — returns the card height. Keep text ≥ 30px; ≤ 30 chars per line at 34px in w 880.
 function termCard(x, y, w, lines, o = {}) {
+  const b0 = B; B = 0;   // UI cards stay still (no boil): only drawings wobble
+  try {
   const size = o.size ?? 34, lh = size * 1.45, h = 70 + lines.length * lh, k = o.key || 'term', t0 = o.t0 ?? E0, cps = o.cps ?? 28;
   paint(rrectPts(x + 8, y + 10, w, h, 16), { fill: 'rgba(0,0,0,0.35)', line: false, key: k + 'sh' });
   paint(rrectPts(x, y, w, h, 16), { fill: '#11132a', key: k + 'b', line: C.peri, w: 3 });
@@ -39,12 +41,15 @@ function termCard(x, y, w, lines, o = {}) {
     t += dur + (L.gap ?? 0.25);
   });
   return h;
+  } finally { B = b0; }
 }
 // a CVE / version chip (red = vulnerable, green = fixed)
 function chip(str, x, y, col, o = {}) {
+  const b0 = B; B = 0; try {   // still UI chip
   const size = o.size ?? 40, w = monoW(size) * str.length + 40, s = o.s ?? 1; if (s <= 0.01) return w;
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
   paint(rrectPts(0, -size, w, size * 1.6, size * 0.8), { fill: col, key: (o.key || 'chip') + str, line: o.dark ? C.peri : C.ink, w: 3 });
   monoText(str, 20, size * 0.35, size, o.tc || C.white, { key: (o.key || 'chip') + 't' + str });
   ctx.restore(); return w;
+  } finally { B = b0; }
 }

@@ -39,6 +39,8 @@ Gói Starter tạo song song được: gọi `creative_generate_speech` cho TẤ
 - Đo trong lúc vẽ (không cần export): `node channel/motioncheck.mjs pieces/<slug> <t0> <t1> [--ignore a-b]` — cùng thước đo với stillcheck. Mỗi agent hoạt hình PHẢI chạy nó cho khoảng thời gian của mình và đạt PASS trước khi báo xong (tập NGINX 19/11: 16 đoạn đơ lọt qua vì agent không tự đo).
 - Chữ quan trọng (lệnh, kết quả, ghi chú) phải nằm trên màn hình ≥ 2 s sau khi gõ xong và ≥ 0,5 s trước cầu nối.
 
+- Chữ KHÔNG rung (góp ý 19/11/2026: "nét chữ cứ rung rung"): kit giờ mặc định `TEXT_BOIL = false` — chữ giữ nét tay lệch nhẹ nhưng đứng yên; chỉ hình vẽ còn boil. Thẻ giao diện (terminal, chip) nên vẽ với `B = 0` để không boil. Đừng bật lại TEXT_BOIL.
+
 ## 5d. Âm thanh mềm (góp ý 16/11/2026: "âm thanh to đột ngột")
 - Nhịp lặng trước payoff KHÔNG im bặt: giữ một lớp nền mỏng (~−30 dB trong bản mix) + một âm dâng nhỏ báo trước.
 - Payoff là hợp âm nở mềm (attack ~0,3 s), không dùng tiếng "tách"/noise hit sắc, sub nhẹ. Đo RMS bản mix quanh cú cắt: không bước nhảy > ~12 dB trong 0,2 s.
