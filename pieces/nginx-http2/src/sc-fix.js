@@ -1,7 +1,366 @@
-// stub
-SCENES.disable = function () { paperSheet('disable'); serverProp(SRV[0], SRV[1], { state: 'vuln' }); inkTag('disable'); };
-SCENES.trade = function () { paperSheet('trade'); serverProp(SRV[0], SRV[1], { state: 'vuln' }); inkTag('trade'); };
-SCENES.upgrade = function () { paperSheet('upgrade'); serverProp(SRV[0], SRV[1], { state: 'vuln' }); inkTag('upgrade'); };
-SCENES.four = function () { paperSheet('four'); serverProp(SRV[0], SRV[1], { state: 'vuln' }); inkTag('four'); };
-SCENES.defend = function () { paperSheet('defend'); serverProp(SRV[0], SRV[1], { state: 'vuln' }); inkTag('defend'); };
-SCENES.today = function () { paperSheet('today'); serverProp(SRV[0], SRV[1], { state: 'vuln' }); inkTag('today'); };
+// =====================================================================
+//  disable · trade · upgrade · four · defend · today — the fix half (paper, except defend = navy).
+//  The server leaves SRV after each bridge (shrinks to the bottom), cards take the frame, then it comes back.
+//  Lamp: red until "upgrade" turns it green (t0 + 2.5, on the score's chime); green to the end.
+// =====================================================================
+
+// ---- server path: starts at SRV (s 1); keys [t, x, y, s, d] eased in turn; a finished key lands exactly
+function f_srvPath(keys, tt = TT) {
+  let x = SRV[0], y = SRV[1], s = 1;
+  for (const [t, X, Y, S, d] of keys) {
+    const k = EZ.io(clamp((tt - t) / (d ?? 0.6)));
+    if (k >= 1) { x = X; y = Y; s = S; } else if (k > 0) { x = lerp(x, X, k); y = lerp(y, Y, k); s = lerp(s, S, k); }
+  }
+  return { x, y, s };
+}
+// scale a group about (cx, cy): in with a pop at tin, out at tout
+const f_inout = (tin, tout) => popS(tin) * (1 - EZ.i2(seg(TT, tout, tout + 0.25)));
+function f_sc(cx, cy, s, fn) {
+  if (s <= 0.01) return;
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(s, s); ctx.translate(-cx, -cy); fn(); ctx.restore();
+}
+// a paper card with a hatched shadow
+function f_card(x, y, w, h, key, o = {}) {
+  if (!o.dark) paint(rrectPts(x + 8, y + 10, w, h, 16), { fill: 'rgba(58,36,23,0.28)', line: false, key: key + 'sh', tex: [{ k: 'hatch', a: 0.8, gap: 4, al: 0.5 }] });
+  paint(rrectPts(x, y, w, h, 16), o.dark
+    ? { fill: C.navy2, key, line: o.line || C.peri, w: o.w ?? 3, tex: [{ k: 'hatch', c: C.periD, al: 0.16, gap: 7, dens: (px, py) => clamp((px - x + py - y) / (w + h)) }] }
+    : { fill: o.fill || C.cream, key, line: o.line || C.ink, w: o.w ?? 3, tex: [{ k: 'pencil', c: '#e8d6b0', al: 0.5, per: 90 }, { k: 'hatch', gap: 6, al: 0.12, dens: (px, py) => clamp((px - x + py - y) / (w + h) * 1.4 - 0.4) }] });
+}
+function f_tick(x, y, sz, frac, col = C.green, key = 'tk') {
+  if (frac <= 0) return;
+  ink([[x - sz * 0.45, y - sz * 0.02], [x - sz * 0.12, y + sz * 0.32], [x + sz * 0.5, y - sz * 0.42]], { w: sz * 0.14, color: col, key, frac, amt: 1.2 });
+}
+function f_arrow(x1, y1, x2, y2, col, frac = 1, key = 'ar', w = 4) {
+  if (frac <= 0) return;
+  ink([[x1, y1], [x2, y2]], { w, color: col, key, frac, amt: 1 });
+  if (frac >= 1) { const a = Math.atan2(y2 - y1, x2 - x1), L = 16; ink([[x2 - L * Math.cos(a - 0.5), y2 - L * Math.sin(a - 0.5)], [x2, y2], [x2 - L * Math.cos(a + 0.5), y2 - L * Math.sin(a + 0.5)]], { w, color: col, key: key + 'h', amt: 0.6 }); }
+}
+function f_strike(x, y, w, frac, key) { if (frac > 0) ink([[x - 6, y - 12], [x + w + 6, y - 10]], { w: 5, color: C.red, key, frac, amt: 1 }); }
+function f_brace(x, y0, y1, col, key, frac = 1) {
+  const m = (y0 + y1) / 2;
+  ink([[x, y0], [x + 16, y0 + 12], [x + 16, m - 14], [x + 32, m], [x + 16, m + 14], [x + 16, y1 - 12], [x, y1]], { w: 3.5, color: col, key, frac });
+}
+// the yellow HTTP/2 chip exactly as serverProp draws it, anchored at its top-left corner (ax, ay)
+function f_h2chip(ax, ay, s, rot) {
+  ctx.save(); ctx.translate(ax, ay); ctx.rotate(rot);
+  paint(rrectPts(0, -28 * s, 150 * s, 56 * s, 28 * s), { fill: C.yellow, key: 'fh2', line: C.ink, w: 3 });
+  monoText('HTTP/2', 18 * s, 12 * s, 34 * s, C.ink, { key: 'fh2t' });
+  ctx.restore();
+}
+function f_lampAt(P) { return [P.x + SW * P.s / 2 - 40 * P.s, P.y + SH * P.s / 2 - 48 * P.s]; }
+// a small worker box (upgrade's reload / restart panels): state 'old' (red lamp), 'new' (green), ghost = dashed, floating
+function f_worker(x, y, state, key, o = {}) {
+  const w = 70, h = 62;
+  if (o.ghost) {
+    const bob = Math.sin(TT * 5 + 1) * 6;
+    ctx.save(); ctx.setLineDash([9, 7]);
+    paint(rrectPts(x, y + bob, w, h, 10), { fill: 'rgba(160,150,140,0.22)', key, line: 'rgba(58,36,23,0.6)', w: 3, tex: [{ k: 'hatch', gap: 6, al: 0.25, c: '#8a8070' }] });
+    ctx.restore();
+    ctx.globalAlpha = 0.55 + 0.45 * Math.sin(TT * 8); ctx.fillStyle = C.red; ctx.beginPath(); ctx.arc(x + w - 16, y + bob + 18, 8, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+    for (let i = 0; i < 3; i++) ink([[x + 8 + i * 22, y + h + bob + 4], [x + 16 + i * 22, y + h + bob + 14 + Math.sin(TT * 6 + i) * 4]], { w: 2.5, color: 'rgba(58,36,23,0.45)', key: key + 'gt' + i, amt: 0.8 });
+    return;
+  }
+  paint(rrectPts(x, y, w, h, 10), { fill: '#e9e2d2', key, line: C.ink, w: 3, tex: [{ k: 'hatch', gap: 6, al: 0.22, dens: (px, py) => clamp((px - x + py - y) / (w + h)) }] });
+  ink([[x + 10, y + 40], [x + 46, y + 40]], { w: 3, color: 'rgba(58,36,23,0.6)', key: key + 'l', amt: 0.6 });
+  ctx.fillStyle = state === 'new' ? C.green : C.red; ctx.beginPath(); ctx.arc(x + w - 16, y + 18, 8, 0, TAU); ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = C.ink; ctx.stroke();
+}
+
+// =====================================================================
+//  disable — Ubuntu / Debian: no fixed package yet → turn HTTP/2 off, nginx -t, restart; the HTTP/2 chip falls off
+// =====================================================================
+SCENES.disable = function () {
+  const id = 'disable', t0 = ET(id), t1 = EE(id), vw = (w, n) => VW(id, w, n);
+  paperSheet(id);
+  const tFall = vw('khởi');                         // "khởi động lại": the restart, the chip falls
+  const keys = [[t0 + 0.5, 540, 1265, 0.6], [t1 - 1.1, SRV[0], SRV[1], 1]];
+  const P = f_srvPath(keys);
+
+  // ---- A: the two badges + the stamp "chưa có gói vá"
+  const tOutA = vw('trong') - 0.3, tStamp = vw('chưa');
+  f_sc(510, 620, 1 - EZ.i2(seg(TT, tOutA, tOutA + 0.25)), () => {
+    f_sc(330, 525, popS(vw('ubuntu')), () => {
+      f_card(80, 450, 500, 150, 'fdU');
+      handText('Ubuntu', 110, 518, 58, C.ink, { key: 'fdUt', weight: 700 });
+      monoText('16.04 → 26.10', 112, 578, 34, C.woodD, { key: 'fdUs' });
+    });
+    f_sc(330, 715, popS(vw('debian')), () => {
+      f_card(80, 640, 500, 150, 'fdD');
+      handText('Debian', 110, 708, 58, C.ink, { key: 'fdDt', weight: 700 });
+      handText('bản chính thức', 112, 770, 46, C.woodD, { key: 'fdDs' });
+    });
+    if (TT >= tStamp - 0.3) f_brace(598, 465, 775, C.ink, 'fdbr', ev(tStamp - 0.3, 0.3));
+    if (TT >= tStamp) {
+      const k = EZ.o3(seg(TT, tStamp, tStamp + 0.2)), s = 1 + 0.6 * (1 - k);
+      ctx.save(); ctx.translate(790, 620); ctx.rotate(-0.07); ctx.scale(s, s);
+      paint(rrectPts(-140, -88, 280, 176, 18), { fill: 'rgba(244,236,217,0.9)', key: 'fdst', line: C.red, w: 6, tex: [{ k: 'hatch', c: C.red, al: 0.14, gap: 7 }] });
+      ink(rrectPts(-128, -76, 256, 152, 12), { closed: true, w: 2.5, color: C.red, key: 'fdst2' });
+      handText('chưa có', -98, -10, 62, C.red, { key: 'fdst3', weight: 700 });
+      handText('gói vá', -82, 58, 62, C.red, { key: 'fdst4', weight: 700 });
+      ctx.restore();
+      const b = seg(TT, tStamp + 0.1, tStamp + 0.5);
+      if (b > 0 && b < 1) burst(790, 620, 170 + 40 * b, 210 + 60 * b, { c: C.red, n: 14, w: 4, al: 1 - b, key: 'fdbu' });   // the scene's one particle effect
+    }
+  });
+
+  // ---- B: the config card (≥ 1.25.1 and the older listen form), then nginx -t && restart
+  const tCfg = tOutA + 0.35, tOutB = t1 - 1.25, tOff = vw('tắt'), tOld = tOff + 0.6;
+  f_sc(520, 670, f_inout(tCfg, tOutB), () => {
+    f_card(70, 440, 900, 460, 'fdC');
+    monoText('nginx.conf', 100, 490, 30, C.woodD, { key: 'fdCn' });
+    ink([[96, 508], [944, 510]], { w: 2, color: 'rgba(58,36,23,0.4)', key: 'fdCl' });
+    handText('NGINX ≥ 1.25.1', 100, 566, 46, C.ink, { key: 'fdCa', frac: ev(tCfg + 0.2, 0.4), weight: 700 });
+    const s1 = 'listen 443 ssl;';
+    monoText(s1, 100, 636, 40, C.ink, { key: 'fdC1', count: Math.floor(clamp((TT - tCfg - 0.5) * 30 / s1.length) * s1.length) });
+    if (TT >= tCfg + 0.7) {
+      monoText('http2 on;', 100, 706, 40, C.ink, { key: 'fdC2', al: TT >= tOff + 0.2 ? 0.55 : 1 });
+      f_strike(100, 706, monoW(40) * 9, ev(tOff, 0.2), 'fdC2s');
+      f_arrow(345, 694, 398, 694, C.ink, ev(tOff + 0.15, 0.15), 'fdC2a');
+      const s2 = 'http2 off;';
+      monoText(s2, 412, 706, 40, C.green, { key: 'fdC2n', count: Math.floor(clamp((TT - tOff - 0.3) * 24 / s2.length) * s2.length) });
+    }
+    ctx.save(); ctx.setLineDash([10, 9]); ink([[96, 748], [944, 750]], { w: 2, color: 'rgba(58,36,23,0.35)', key: 'fdCd' }); ctx.restore();
+    handText('1.9.5 – 1.25.0', 100, 810, 46, C.ink, { key: 'fdCb', frac: ev(tOld, 0.4), weight: 700 });
+    if (TT >= tOld + 0.2) {
+      const s3 = 'listen 443 ssl http2;', s4 = 'listen 443 ssl;', cw = monoW(32);
+      monoText(s3, 100, 870, 32, C.ink, { key: 'fdC3', al: TT >= tOld + 0.6 ? 0.55 : 1 });
+      f_strike(100, 870, cw * s3.length, ev(tOld + 0.4, 0.2), 'fdC3s');
+      f_arrow(100 + cw * s3.length + 12, 860, 100 + cw * s3.length + 58, 860, C.ink, ev(tOld + 0.55, 0.15), 'fdC3a');
+      monoText(s4, 100 + cw * s3.length + 72, 870, 32, C.green, { key: 'fdC4', count: Math.floor(clamp((TT - tOld - 0.7) * 30 / s4.length) * s4.length) });
+    }
+  });
+  const tTerm = vw('kiểm');
+  f_sc(520, 990, f_inout(tTerm - 0.3, tOutB), () => {
+    termCard(70, 935, 920, [{ s: '$ sudo nginx -t && sudo systemctl restart nginx' }], { size: 30, t0: tTerm, cps: 45, key: 'fdT' });
+  });
+
+  // ---- the server; at the restart its yellow HTTP/2 chip drops off
+  serverProp(P.x, P.y, { state: 'vuln', s: P.s, h2: TT < tFall ? 1 : 0 });
+  if (TT >= tFall) {
+    const Q = f_srvPath(keys, tFall), dt = TT - tFall;
+    const ax = Q.x - SW * Q.s / 2 - 10 * Q.s, ay = Q.y - SH * Q.s / 2 - 20 * Q.s;
+    if (dt < 1.4) f_h2chip(ax - 70 * dt, ay + 60 * dt + 900 * dt * dt, Q.s, -2.4 * dt);
+  }
+  inkTag('tạm tắt HTTP/2');
+};
+
+// =====================================================================
+//  trade — blocks 2 of the 5 (123007, 123633), not the other three; HTTP/1.1 is a little slower
+// =====================================================================
+SCENES.trade = function () {
+  const id = 'trade', t0 = ET(id), t1 = EE(id), vw = (w, n) => VW(id, w, n);
+  paperSheet(id);
+  const P = f_srvPath([[t0 + 0.5, 850, 1190, 0.5], [t1 - 1.1, SRV[0], SRV[1], 1]]);
+  const IDS5 = ['CVE-2026-123007', 'CVE-2026-123633', 'CVE-2026-121810', 'CVE-2026-113425', 'CVE-2026-123634'];
+  const tChk = [vw('được'), vw('hai')], tOut = t1 - 1.2;
+  IDS5.forEach((s, i) => {
+    const y = 480 + i * 95, ok = i < 2 && TT >= tChk[i];
+    chip(s, 70, y, ok ? C.green : C.red, { size: 34, s: popS(t0 + 0.35 + i * 0.08), key: 'ftc' });
+    if (i < 2) f_tick(420, y - 8, 56, ev(tChk[i], 0.25), C.green, 'ftt' + i);
+  });
+  f_sc(560, 620, 1 - EZ.i2(seg(TT, tOut, tOut + 0.25)), () => {
+    if (TT >= tChk[1] + 0.15) f_brace(462, 440, 590, C.green, 'ftb1', ev(tChk[1] + 0.15, 0.25));
+    handText('chặn được', 508, 532, 50, C.green, { key: 'ftl1', frac: ev(tChk[1] + 0.3, 0.4), weight: 700 });
+    const tU = vw('đổi') - 0.5;
+    if (TT >= tU) f_brace(462, 630, 875, C.ink, 'ftb2', ev(tU, 0.25));
+    handText('chưa chặn', 508, 770, 50, C.ink, { key: 'ftl2', frac: ev(tU + 0.15, 0.4), weight: 700 });
+  });
+  // the speed gauge: HTTP/2 → HTTP/1.1, the needle dips a little
+  const gx = 280, gy = 1330, gr = 160, tD = vw('tải');
+  f_sc(gx, gy - 60, popS(vw('đổi')), () => {
+    const band = [...arcPts(gx, gy, gr, Math.PI, TAU, 30), ...arcPts(gx, gy, gr - 46, TAU, Math.PI, 30)];
+    paint(band, { fill: C.cream, key: 'ftg', w: 3.5, tex: [{ k: 'hatch', gap: 6, al: 0.3, dens: (px) => clamp((gx + gr - px) / (2 * gr)) }] });
+    const fast = [...arcPts(gx, gy, gr, TAU - 0.75, TAU, 10), ...arcPts(gx, gy, gr - 46, TAU, TAU - 0.75, 10)];
+    paint(fast, { fill: C.greenL, key: 'ftgf', w: 3, tex: [{ k: 'pencil', c: C.green, al: 0.5, per: 50 }] });
+    for (let i = 0; i <= 6; i++) { const a = Math.PI + i / 6 * Math.PI; ink([[gx + Math.cos(a) * (gr + 6), gy + Math.sin(a) * (gr + 6)], [gx + Math.cos(a) * (gr + 22), gy + Math.sin(a) * (gr + 22)]], { w: 3, key: 'ftgk' + i, amt: 0.5 }); }
+    const ang = lerp(TAU - 0.38, TAU - 0.8, EZ.io(seg(TT, tD, tD + 0.6))) + 0.025 * Math.sin(TT * 11);
+    ink([[gx, gy], [gx + Math.cos(ang) * (gr - 20), gy + Math.sin(ang) * (gr - 20)]], { w: 7, color: C.red, key: 'ftgn', amt: 0.6 });
+    ctx.fillStyle = C.ink; ctx.beginPath(); ctx.arc(gx, gy, 12, 0, TAU); ctx.fill();
+    const lab = TT < tD ? 'HTTP/2' : 'HTTP/1.1';
+    monoText(lab, gx - monoW(34) * lab.length / 2, gy + 62, 34, C.ink, { key: 'ftgl' + lab });
+  });
+  handText('chậm hơn chút', 480, 1320, 46, C.ink, { key: 'ftsl', frac: ev(vw('chậm'), 0.45) });
+  serverProp(P.x, P.y, { state: 'vuln', s: P.s });
+  inkTag('đánh đổi');
+};
+
+// =====================================================================
+//  upgrade — docker pull / compose recreate → 1.31.9 / 1.30.7, lamp GREEN; restart = all new, reload = old worker lingers
+// =====================================================================
+SCENES.upgrade = function () {
+  const id = 'upgrade', t0 = ET(id), t1 = EE(id), vw = (w, n) => VW(id, w, n);
+  paperSheet(id);
+  const P = f_srvPath([[t0 + 0.5, 540, 1265, 0.6], [t1 - 1.1, SRV[0], SRV[1], 1]]);
+  const tGreen = t0 + 2.5, tR = vw('khởi'), tL = vw('reload'), tOutA = tR - 0.5, tOutB = t1 - 0.55;
+  // ---- A: the commands + the two fixed versions
+  f_sc(520, 530, f_inout(t0 + 0.4, tOutA), () => {
+    termCard(70, 450, 900, [{ s: '$ docker pull nginx:1.30.7' }, { s: '$ docker compose up -d --force-recreate' }], { size: 34, t0: t0 + 0.6, cps: 40, key: 'fuT' });
+  });
+  f_sc(400, 790, 1 - EZ.i2(seg(TT, tOutA, tOutA + 0.25)), () => {
+    const t1v = vw('một', 1), t2v = vw('một', 2);
+    chip('1.31.9', 110, 768, C.green, { size: 46, s: popS(t1v), key: 'fuc' });
+    if (TT >= t1v + 0.2) handText('mainline', 116, 862, 46, C.ink, { key: 'fucl1', frac: ev(t1v + 0.2, 0.35) });
+    if (TT >= vw('hoặc')) handText('hoặc', 352, 782, 46, C.woodD, { key: 'fuho', frac: ev(vw('hoặc'), 0.3) });
+    chip('1.30.7', 480, 768, C.green, { size: 46, s: popS(t2v), key: 'fuc' });
+    if (TT >= t2v + 0.2) handText('stable', 486, 862, 46, C.ink, { key: 'fucl2', frac: ev(t2v + 0.2, 0.35) });
+  });
+  // ---- B: restart (right) vs reload (left)
+  const wx = (x0) => [x0 + 20, x0 + 104, x0 + 188];
+  f_sc(835, 650, f_inout(tR, tOutB), () => {      // restart → all new
+    const x0 = 685;
+    f_card(x0, 440, 290, 470, 'fuPR');
+    paint(rrectPts(x0 + 30, 465, 200, 62, 31), { fill: C.greenL, key: 'fuPRp', w: 3, tex: [{ k: 'pencil', c: C.green, al: 0.45, per: 50 }] });
+    monoText('restart', x0 + 50, 508, 38, C.ink, { key: 'fuPRt' });
+    f_arrow(x0 + 130, 540, x0 + 130, 610, C.ink, ev(tR + 0.2, 0.2), 'fuPRa');
+    const tSwap = tR + 0.6;
+    wx(x0).forEach((x, i) => {
+      const so = (1 - EZ.i2(seg(TT, tSwap + i * 0.08, tSwap + 0.2 + i * 0.08))) * popS(tR + 0.15);
+      f_sc(x + 35, 660, so, () => f_worker(x, 630, 'old', 'fuwo' + i));
+      f_sc(x + 35, 660, popS(tSwap + 0.25 + i * 0.1), () => f_worker(x, 630, 'new', 'fuwn' + i));
+    });
+    handText('tất cả mới', x0 + 22, 800, 46, C.green, { key: 'fuPRl', frac: ev(tSwap + 0.6, 0.4), weight: 700 });
+  });
+  f_sc(235, 650, f_inout(tL, tOutB), () => {      // reload → an old worker keeps running
+    const x0 = 85;
+    f_card(x0, 440, 300, 470, 'fuPL');
+    paint(rrectPts(x0 + 30, 465, 190, 62, 31), { fill: C.yellowL, key: 'fuPLp', w: 3, tex: [{ k: 'pencil', c: C.yellow, al: 0.5, per: 50 }] });
+    monoText('reload', x0 + 52, 508, 38, C.ink, { key: 'fuPLt' });
+    f_arrow(x0 + 125, 540, x0 + 125, 610, C.ink, ev(tL + 0.2, 0.2), 'fuPLa');
+    const tSwap = tL + 0.5;
+    wx(x0).forEach((x, i) => {
+      if (i < 2) {
+        const so = (1 - EZ.i2(seg(TT, tSwap + i * 0.08, tSwap + 0.2 + i * 0.08))) * popS(tL + 0.1);
+        f_sc(x + 35, 660, so, () => f_worker(x, 630, 'old', 'fulo' + i));
+        f_sc(x + 35, 660, popS(tSwap + 0.25 + i * 0.1), () => f_worker(x, 630, 'new', 'fuln' + i));
+      } else if (TT < tSwap + 0.2) f_sc(x + 35, 660, popS(tL + 0.1), () => f_worker(x, 630, 'old', 'fulo2'));
+      else f_worker(x, 630, 'old', 'fulg', { ghost: true });
+    });
+    const tW = vw('worker');
+    handText('worker cũ', x0 + 22, 790, 46, C.red, { key: 'fuPLl1', frac: ev(tW, 0.35), weight: 700 });
+    handText('vẫn chạy', x0 + 22, 852, 46, C.red, { key: 'fuPLl2', frac: ev(vw('vẫn'), 0.35), weight: 700 });
+  });
+  // ---- the server: lamp turns green on the chime, a ring of green ticks
+  serverProp(P.x, P.y, { state: TT >= tGreen ? 'patched' : 'vuln', s: P.s });
+  const b = seg(TT, tGreen, tGreen + 0.45);
+  if (b > 0 && b < 1) { const [lx, ly] = f_lampAt(P); burst(lx, ly, 26 + 20 * b, 50 + 40 * b, { c: C.green, n: 12, w: 4, al: 1 - b, key: 'fubu' }); }
+  inkTag('nâng cấp');
+};
+
+// =====================================================================
+//  four — the two releases also fix 4 more bugs, each behind its own config; ticked with the voice
+// =====================================================================
+SCENES.four = function () {
+  const id = 'four', t0 = ET(id), t1 = EE(id), vw = (w, n) => VW(id, w, n);
+  paperSheet(id);
+  const P = f_srvPath([[t0 + 0.5, 830, 1385, 0.42], [t1 - 1.1, SRV[0], SRV[1], 1]]);
+  const ROWS = [['HTTP/3', 'CVE-2026-121810', vw('http')], ['mail proxy', 'CVE-2026-113425', vw('mail')], ['resolver (biến + SSI/mirror)', 'CVE-2026-123634', vw('resolver')], ['HTTP/2 + worker_connections', 'CVE-2026-123633', vw('worker')]];
+  const tC = vw('bốn'), tOut = t1 - 1.05;
+  let act = -1; ROWS.forEach((r, i) => { if (TT >= r[2]) act = i; });
+  f_sc(520, 830, 1 - EZ.i2(seg(TT, tOut, tOut + 0.25)), () => {
+    ROWS.forEach(([title, cve, tk], i) => {
+      const top = 445 + i * 200;
+      f_sc(520, top + 90, popS(tC + i * 0.12), () => {
+        f_card(70, top, 880, 180, 'ffc' + i);
+        if (i === act) ink(rrectPts(64, top - 6, 892, 192, 20), { closed: true, w: 7, color: `rgba(95,156,92,${(0.45 + 0.3 * Math.sin(TT * 6)).toFixed(3)})`, key: 'ffhl' });
+        handText(title, 100, top + 64, 46, C.ink, { key: 'fft' + i, weight: 700 });
+        chip(cve, 100, top + 136, TT >= tk ? C.green : C.red, { size: 32, key: 'ffch' });
+        paint(rrectPts(852, top + 52, 66, 66, 10), { fill: '#fbf6ea', key: 'ffb' + i, w: 3.5, tex: [{ k: 'hatch', gap: 6, al: 0.15 }] });
+        f_tick(886, top + 84, 70, ev(tk, 0.25), C.green, 'ffk' + i);
+      });
+    });
+    chip('1.31.9 / 1.30.7', 80, 1340, C.green, { size: 34, s: popS(vw('vá')), key: 'ffv' });
+  });
+  serverProp(P.x, P.y, { state: 'patched', s: P.s });
+  inkTag('4 lỗi khác');
+};
+
+// =====================================================================
+//  defend (navy) — block the SCTP module; watch for 4 signs; a clean access log is not proof
+// =====================================================================
+SCENES.defend = function () {
+  const id = 'defend', t0 = ET(id), t1 = EE(id), vw = (w, n) => VW(id, w, n);
+  darkWorld('defend', { dust: 40 });
+  const P = f_srvPath([[t0 + 0.5, 800, 830, 0.55], [t1 - 1.1, SRV[0], SRV[1], 1]]);
+  f_sc(530, 520, popS(t0 + 0.45), () => {
+    termCard(70, 440, 920, [{ s: "$ echo 'install sctp /bin/false' |" }, { s: '  sudo tee /etc/modprobe.d/disable-sctp.conf' }], { size: 30, t0: t0 + 0.7, cps: 40, key: 'fdfT' });
+  });
+  // the SCTP module, crossed out
+  const tB = vw('chặn'), tX = vw('sctp') + 0.3, tOutA = vw('và') - 0.25;
+  f_sc(270, 860, f_inout(tB, tOutA), () => {
+    f_card(120, 745, 300, 120, 'fdfS', { dark: true });
+    monoText('SCTP', 270 - monoW(48) * 2, 822, 48, C.white, { key: 'fdfSt' });
+    handText('nhân Linux', 150, 925, 46, C.peri, { key: 'fdfSl' });
+    const k = ev(tX, 0.18), k2 = ev(tX + 0.15, 0.18);
+    if (k > 0) ink([[110, 735], [430, 875]], { w: 9, color: C.red, key: 'fdfx1', frac: k, amt: 1 });
+    if (k2 > 0) ink([[430, 735], [110, 875]], { w: 9, color: C.red, key: 'fdfx2', frac: k2, amt: 1 });
+    const b = seg(TT, tX + 0.2, tX + 0.65);
+    if (b > 0 && b < 1) sparkBurst(270, 805, 80 + 90 * b, { c: C.redL, glow: 'rgba(212,56,44,0.25)', core: false, key: 'fdfsp' });   // the scene's one particle effect
+    handText('nếu không dùng', 150, 1005, 46, C.yellow, { key: 'fdfSn', frac: ev(vw('nếu'), 0.45) });
+  });
+  // the four signs
+  const SIGNS = ['worker chạy chương trình lạ', 'worker sập / core dump', 'kết nối HTTP/2 lâu, ít log', 'kết nối ra ngoài / DNS lạ'];
+  const tLit = [vw('worker'), vw('sập'), vw('hay'), vw('kết')], tS = vw('và') + 0.05;
+  if (TT >= tS) handText('dấu hiệu:', 80, 1080, 46, C.cyan, { key: 'fdfh', frac: ev(tS, 0.35), weight: 700 });
+  SIGNS.forEach((s, i) => {
+    const y = 1165 + i * 80, lit = TT >= tLit[i];
+    f_sc(110, y - 14, popS(tS + 0.15 + i * 0.1), () => {
+      if (lit) { const g = 0.5 + 0.5 * Math.sin(TT * 7 + i); ctx.fillStyle = `rgba(212,56,44,${(0.18 + 0.2 * g).toFixed(3)})`; ctx.beginPath(); ctx.arc(102, y - 15, 22, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = lit ? C.red : 'rgba(124,134,196,0.5)'; ctx.beginPath(); ctx.arc(102, y - 15, 11, 0, TAU); ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = C.peri; ctx.stroke();
+      handText(s, 136, y, 46, lit ? C.white : 'rgba(200,208,240,0.45)', { key: 'fdfs' + i });
+    });
+  });
+  const tN = vw('ngoài') - 0.1;
+  if (TT >= tN) {
+    handText('access log sạch ≠ an toàn', 80, 668, 50, C.yellow, { key: 'fdfn', frac: ev(tN, 0.45), weight: 700 });
+    ink([[80, 684], [80 + handW('access log sạch ≠ an toàn', 50, 700), 686]], { w: 4, color: C.red, key: 'fdfnu', frac: ev(tN + 0.35, 0.3) });
+  }
+  serverProp(P.x, P.y, { state: 'patched', s: P.s, dark: true });
+  inkTag('phòng thủ thêm');
+};
+
+// =====================================================================
+//  today — the 5-item checklist ticking with the voice; randomize_va_space → 2; the end card
+// =====================================================================
+SCENES.today = function () {
+  const id = 'today', t0 = ET(id), vw = (w, n) => VW(id, w, n);
+  paperSheet(id);
+  const tEnd = 138.0;
+  const P = f_srvPath([[t0 + 0.5, 830, 1370, 0.42], [tEnd, SRV[0], SRV[1], 1]]);
+  const ITEMS = ['liệt kê máy chạy NGINX', 'tìm máy bật HTTP/2, HTTP/3', 'Ubuntu: tắt tạm, chờ USN', 'Docker: kéo 1.30.7 / 1.31.9', 'kiểm tra SCTP, ASLR'];
+  const tW = [vw('liệt') - 0.2, vw('tìm') - 0.2, vw('tắt') - 0.3, vw('nâng') - 0.2, vw('kiểm') - 0.2];
+  const tTerm = vw('kiểm') + 0.1, tOutp = tTerm + ('$ cat /proc/sys/kernel/randomize_va_space'.length / 40) + 0.25;
+  const tK = [vw('nginx') + 0.1, vw('ba') + 0.1, vw('hoặc', 2), vw('và'), tOutp + 0.1];
+  const tOut = tEnd - 0.1;
+  f_sc(520, 760, 1 - EZ.i2(seg(TT, tOut, tOut + 0.25)), () => {
+    let cur = -1;
+    ITEMS.forEach((s, i) => {
+      const y = 500 + i * 105;
+      f_sc(106, y - 16, popS(t0 + 0.55 + i * 0.08), () => {
+        paint(rrectPts(80, y - 44, 54, 54, 9), { fill: '#fbf6ea', key: 'fyb' + i, w: 3.5, tex: [{ k: 'hatch', gap: 6, al: 0.15 }] });
+      });
+      if (TT >= tW[i]) { handText(s, 160, y, 46, C.ink, { key: 'fyt' + i, frac: ev(tW[i], 0.5) }); cur = i; }
+      f_tick(108, y - 18, 60, ev(tK[i], 0.25), C.green, 'fyk' + i);
+    });
+    // the pencil follows the line being written, then idles beside it
+    if (cur >= 0 && TT < tK[4] + 0.4) {
+      const y = 500 + cur * 105, wv = handW(ITEMS[cur], 46), f = ev(tW[cur], 0.5);
+      drawPencil(170 + wv * f + 6 * Math.sin(TT * 9), y - 6 + 4 * Math.cos(TT * 7), -0.7, 220, 0.8, 'fyp');
+    }
+    f_sc(520, 1090, popS(tTerm - 0.3), () => {
+      termCard(70, 1010, 900, [{ s: '$ cat /proc/sys/kernel/randomize_va_space' }, { s: '2', out: true, c: '#5de37a' }], { size: 32, t0: tTerm, cps: 40, key: 'fyT' });
+    });
+    if (TT >= tOutp) {
+      handText('ASLR đang bật', 90, 1262, 46, C.green, { key: 'fyas', frac: ev(tOutp, 0.4), weight: 700 });
+      f_tick(90 + handW('ASLR đang bật', 46, 700) + 40, 1246, 50, ev(tOutp + 0.35, 0.2), C.green, 'fyask');
+    }
+  });
+  serverProp(P.x, P.y, { state: 'patched', s: P.s });
+  const tB = tEnd + 0.25;
+  if (TT >= tB) {
+    const s = 'besoft.vn', w = handW(s, 52, 700);
+    handText(s, 540 - w / 2, 1400, 52, C.ink, { key: 'fyend', frac: ev(tB, 0.5), weight: 700 });
+    ink([[540 - w / 2, 1416], [540 + w / 2, 1418]], { w: 3, color: C.terra, key: 'fyendu', frac: ev(tB + 0.4, 0.35) });
+  }
+  inkTag('việc hôm nay');
+};
