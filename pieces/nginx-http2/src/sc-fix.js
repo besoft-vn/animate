@@ -73,7 +73,7 @@ SCENES.disable = function () {
   const id = 'disable', t0 = ET(id), t1 = EE(id), vw = (w, n) => VW(id, w, n);
   paperSheet(id);
   const tFall = vw('khởi');                         // "khởi động lại": the restart, the chip falls
-  const keys = [[t0 + 0.5, 540, 1265, 0.6], [t1 - 1.1, SRV[0], SRV[1], 1]];
+  const keys = [[t0 + 0.5, 540, 1270, 0.85], [t1 - 1.1, SRV[0], SRV[1], 1]];
   const P = f_srvPath(keys);
 
   // ---- A: the two badges + the stamp "chưa có gói vá"
@@ -131,7 +131,7 @@ SCENES.disable = function () {
   });
   const tTerm = vw('kiểm');
   f_sc(520, 990, f_inout(tTerm - 0.3, tOutB), () => {
-    termCard(70, 935, 920, [{ s: '$ sudo nginx -t && sudo systemctl restart nginx' }], { size: 30, t0: tTerm, cps: 45, key: 'fdT' });
+    termCard(58, 935, 940, [{ s: '$ sudo nginx -t && sudo systemctl restart nginx' }], { size: 30, t0: tTerm, cps: 45, key: 'fdT' });
   });
 
   // ---- the server; at the restart its yellow HTTP/2 chip drops off
@@ -150,7 +150,7 @@ SCENES.disable = function () {
 SCENES.trade = function () {
   const id = 'trade', t0 = ET(id), t1 = EE(id), vw = (w, n) => VW(id, w, n);
   paperSheet(id);
-  const P = f_srvPath([[t0 + 0.5, 850, 1190, 0.5], [t1 - 1.1, SRV[0], SRV[1], 1]]);
+  const P = f_srvPath([[t0 + 0.5, 830, 1150, 0.65], [t1 - 1.1, SRV[0], SRV[1], 1]]);
   const IDS5 = ['CVE-2026-123007', 'CVE-2026-123633', 'CVE-2026-121810', 'CVE-2026-113425', 'CVE-2026-123634'];
   const tChk = [vw('được'), vw('hai')], tOut = t1 - 1.2;
   IDS5.forEach((s, i) => {
@@ -190,7 +190,7 @@ SCENES.trade = function () {
 SCENES.upgrade = function () {
   const id = 'upgrade', t0 = ET(id), t1 = EE(id), vw = (w, n) => VW(id, w, n);
   paperSheet(id);
-  const P = f_srvPath([[t0 + 0.5, 540, 1265, 0.6], [t1 - 1.1, SRV[0], SRV[1], 1]]);
+  const P = f_srvPath([[t0 + 0.5, 540, 1270, 0.85], [t1 - 1.1, SRV[0], SRV[1], 1]]);
   const tGreen = t0 + 2.5, tR = vw('khởi'), tL = vw('reload'), tOutA = tR - 0.5, tOutB = t1 - 0.55;
   // ---- A: the commands + the two fixed versions
   f_sc(520, 530, f_inout(t0 + 0.4, tOutA), () => {
@@ -252,7 +252,7 @@ SCENES.upgrade = function () {
 SCENES.four = function () {
   const id = 'four', t0 = ET(id), t1 = EE(id), vw = (w, n) => VW(id, w, n);
   paperSheet(id);
-  const P = f_srvPath([[t0 + 0.5, 830, 1385, 0.42], [t1 - 1.1, SRV[0], SRV[1], 1]]);
+  const P = f_srvPath([[t0 + 0.5, 830, 1370, 0.5], [t1 - 1.1, SRV[0], SRV[1], 1]]);
   const ROWS = [['HTTP/3', 'CVE-2026-121810', vw('http')], ['mail proxy', 'CVE-2026-113425', vw('mail')], ['resolver (biến + SSI/mirror)', 'CVE-2026-123634', vw('resolver')], ['HTTP/2 + worker_connections', 'CVE-2026-123633', vw('worker')]];
   const tC = vw('bốn'), tOut = t1 - 1.05;
   let act = -1; ROWS.forEach((r, i) => { if (TT >= r[2]) act = i; });
@@ -326,7 +326,7 @@ SCENES.today = function () {
   const id = 'today', t0 = ET(id), vw = (w, n) => VW(id, w, n);
   paperSheet(id);
   const tEnd = 138.0;
-  const P = f_srvPath([[t0 + 0.5, 830, 1370, 0.42], [tEnd, SRV[0], SRV[1], 1]]);
+  const P = f_srvPath([[t0 + 0.5, 830, 1360, 0.55], [tEnd, SRV[0], SRV[1], 1]]);
   const ITEMS = ['liệt kê máy chạy NGINX', 'tìm máy bật HTTP/2, HTTP/3', 'Ubuntu: tắt tạm, chờ USN', 'Docker: kéo 1.30.7 / 1.31.9', 'kiểm tra SCTP, ASLR'];
   const tW = [vw('liệt') - 0.2, vw('tìm') - 0.2, vw('tắt') - 0.3, vw('nâng') - 0.2, vw('kiểm') - 0.2];
   const tTerm = vw('kiểm') + 0.1, tOutp = tTerm + ('$ cat /proc/sys/kernel/randomize_va_space'.length / 40) + 0.25;
@@ -343,9 +343,9 @@ SCENES.today = function () {
       f_tick(108, y - 18, 60, ev(tK[i], 0.25), C.green, 'fyk' + i);
     });
     // the pencil follows the line being written, then idles beside it
-    if (cur >= 0 && TT < tK[4] + 0.4) {
+    if (cur >= 0 && TT < tW[4] + 0.6) {
       const y = 500 + cur * 105, wv = handW(ITEMS[cur], 46), f = ev(tW[cur], 0.5);
-      drawPencil(170 + wv * f + 6 * Math.sin(TT * 9), y - 6 + 4 * Math.cos(TT * 7), -0.7, 220, 0.8, 'fyp');
+      drawPencil(170 + wv * f + 6 * Math.sin(TT * 9), y - 6 + 4 * Math.cos(TT * 7), 0.55, 220, 0.8, 'fyp');
     }
     f_sc(520, 1090, popS(tTerm - 0.3), () => {
       termCard(70, 1010, 900, [{ s: '$ cat /proc/sys/kernel/randomize_va_space' }, { s: '2', out: true, c: '#5de37a' }], { size: 32, t0: tTerm, cps: 40, key: 'fyT' });
