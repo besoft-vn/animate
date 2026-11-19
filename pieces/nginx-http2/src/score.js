@@ -40,6 +40,6 @@
   // typing under the terminal scenes
   for (const id of ['check', 'version', 'disable', 'upgrade', 'defend']) for (let i = 0; i < 10; i++) blip(ET(id) + 0.6 + i * E16, 1300 + (i % 3) * 250, 1100, 0.03, 0.022);
   // the fix confirm chimes (lamp turns green)
-  chime(ET('upgrade') + 2.5, [nz('D6'), nz('A5')], 0.025, 0);
+  chime(106.0, [nz('D6'), nz('A5')], 0.025, 0);   // with the lamp turning green after the restart (sc-fix)
   // the slam into root: a soft bloom
   sub(SLAM, 0.08);   // a soft low bloom under the chord (no click)
