@@ -16,7 +16,7 @@ const sw_env = (id, pad = 0.5, ramp = 0.6) => EZ.io(seg(TT, ET(id) + pad, ET(id)
 // screen point of a cutaway point inside the lens (k = lens grow 0..1)
 const sw_lp = (x, y, k = 1) => [SW_LENS.cx + (x - LENS_C[0]) * SW_LENS.z * k, SW_LENS.cy + (y - LENS_C[1]) * SW_LENS.z * k];
 // the readout card, kept at a fixed SCREEN spot (290, 404) under any camera zoom about (540, 1000), clear of the tag
-function sw_card(v, o = {}) { const z = ctx.getTransform().a || 1; tempCard(540 + (290 - 540) / z, 1000 - (1000 - 404) / z, v, o); }
+function sw_card(v, o = {}) { if (DEFER) DEFER.push(() => tempCard(290, 404, v, o)); else tempCard(290, 404, v, o); }   // screen space, below the tag
 const sw_lens = (o) => thermoLens(SW_LENS.cx, SW_LENS.cy, SW_LENS.R, SW_LENS.z, o);
 
 // a label (Pangolin) on a soft white pill, springing in at t0 (now: no spring); optional hairline leader to `to`
@@ -155,7 +155,7 @@ SCENES.curie = function () {
   heroDrop(hx - 10 * Math.sin((TT - t0) * 1.2) * e, hy + 6 * Math.sin((TT - t0) * 1.7) * e, HR,
     { key: 'hero', steam: 1, mood: TT >= tMat ? 'wow' : 'calm', look: -0.5 * clamp(seg(TT, t0 + 0.5, t0 + 1.0)) });
   viTag('07', 'ferit nóng');
-  viCaption(['≈103°C: ferit', 'mất từ tính'], [1, 'mất từ tính'], { at: tMot - t0 });
+  viCaption(['≈103°C: ferit', 'mất từ tính'], [1, 'mất từ tính'], { at: 0.35 });
 };
 
 // ---------------------------------------------------------------------

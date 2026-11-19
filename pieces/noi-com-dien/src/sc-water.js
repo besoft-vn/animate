@@ -23,6 +23,7 @@ function wa_heat(top, o = {}) {
 }
 // the temperature readout at its standard place, with an optional pulse (kick) on a cue
 function wa_card(T, o = {}) {
+  if (DEFER && !o._now) { const tt = TT; DEFER.push(() => wa_card(T, { ...o, _now: true })); return; }
   const s = 1 + 0.06 * (o.kick ?? 0);
   ctx.save(); ctx.translate(290, 404); ctx.scale(s, s); ctx.translate(-290, -404);
   tempCard(290, 404, T, { fill: wa_fill(T) + 0.006 * Math.sin(TT * 5.3), hot: o.hot ?? 0 });
@@ -31,6 +32,7 @@ function wa_card(T, o = {}) {
 // the trend mark beside the readout (x 430–500): 'flat' (holds), 'up' grey crossed (not hotter), 'hot' orange up
 function wa_trend(kind, k, o = {}) {
   if (k <= 0.01) return;
+  if (DEFER && !o._now) { DEFER.push(() => wa_trend(kind, k, { ...o, _now: true })); return; }
   const x = 462;
   if (kind === 'flat') {
     simpleArrow(428, 404, 500, 404, { part: k, w: 5, al: o.al ?? 1 });
@@ -117,7 +119,6 @@ SCENES.steam = function () {
   wa_wisps(wTop, EZ.o2(ev(th - 0.15, 0.6)));
   wa_card(100, { kick: kick(TT, VW('steam', 'biến'), { k: 200, damp: 0.4 }) * 0.6 });
   vlabel('vẫn 100°C', 272, 628, VW('steam', 'chỉ'), 58, { align: 'left' });
-  wa_trend('up', EZ.o2(ev(tk, 0.4)), { cross: EZ.o2(ev(tn - 0.1, 0.45)) });
   const e = wa_env('steam'), [hx, hy] = BR.steamDry.a;
   const look = TT > th + 0.2 && TT < tk ? 0.8 : 0;
   heroDrop(hx + 4 * Math.sin((TT - t0) * 1.9) * e, hy + 7 * Math.sin((TT - t0) * 3.1) * e, HR,
@@ -162,11 +163,9 @@ SCENES.dry = function () {
   // the last wisps fade as the water goes
   wa_wisps(wTop, 1 - EZ.io(seg(TT, tg, tDry + 0.2)), 3);
   // readout: holds 100 until "vọt", then jumps to 102 and turns hot
-  const kv = spring(TT, tv - 0.05, { k: 160, damp: 0.55 });
-  wa_card(lerp(100, 102, clamp(kv, 0, 1.2)), { hot: EZ.o2(ev(tv - 0.05, 0.35)), kick: kick(TT, tv, { k: 220, damp: 0.35 }) });
+  const kv = EZ.o2(seg(TT, tDry + 0.1, tv + 0.15)), Tc = lerp(100, 102, kv);
+  wa_card(Tc, { hot: clamp((Tc - 100.4) / 0.8), kick: kick(TT, tv, { k: 220, damp: 0.35 }) });
   // the "not hotter" mark from steam leaves; on "vọt" an orange up arrow
-  const kOld = 1 - ev(t0 + 0.4, 0.4);
-  wa_trend('up', kOld, { cross: 1, al: kOld });
   wa_trend('hot', EZ.o2(ev(tv, 0.35)));
   // "vẫn 100°C" stays while the water drains, then leaves (the pot is drying)
   const kl = 1 - ev(tDry, 0.4);
