@@ -13,3 +13,6 @@ STYLE.post = () => grain({ n: 700 });
 // KHÔNG ĐƠ: every scene breathes with a slow linear push-in (≤ 4%) centred on the server, so held cards never read as
 // frozen. Not on "risk" (its end is the deliberate silence) — and "root" (after the hard cut) starts at 1.0 like risk.
 for (const id of IDS) if (id !== 'risk') CAMS[id] = (t) => camOf({ z: 1 + 0.03 * seg(t, ET(id), EE(id)), p: [540, 860], to: [540, 860] });
+// text no longer boils (TEXT_BOIL = false) → two card-heavy scenes read as still: a slightly stronger, still slow push
+// (a slow upward glide, not a stronger zoom: zooming pushed the 'mainline/stable' labels into the right-hand UI zone)
+for (const id of ['upgrade', 'four']) CAMS[id] = (t) => camOf({ z: 1.02, p: [540, 860], to: [540, 860 - 50 * (seg(t, ET(id), EE(id)) - 0.5)] });

@@ -298,7 +298,7 @@ function rim(cx, cy, r, key, o = {}) { rimLine(ringPts(cx, cy, r), key, o); }
 function typeW(str, size, weight = 900) { ctx.save(); ctx.font = `${weight} ${size}px ${PRINT}`; const w = ctx.measureText(str).width; ctx.restore(); return w; }
 function type(str, x, y, size, tones, o = {}) {
   const frac = clamp(o.frac ?? 1); if (frac <= 0) return;
-  const R = RNG('type', o.key ?? str, B % 3), font = `${o.weight ?? 900} ${size}px ${PRINT}`;
+  const R = RNG('type', o.key ?? str, TB() % 3), font = `${o.weight ?? 900} ${size}px ${PRINT}`;
   const w = typeW(str, size, o.weight ?? 900), x0 = o.align === 'center' ? x - w / 2 : x;
   const knock = o.knock !== false, jx = R.n(0.7), jy = R.n(0.7), rot = R.n(0.004);
   const each = (g, paint) => {

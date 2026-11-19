@@ -407,7 +407,7 @@ function fillAll(color) { ctx.save(); screen(); ctx.fillStyle = color; ctx.fillR
 function monoText(str, x, y, size, color, o = {}) {
   ctx.save();
   ctx.font = `${o.weight ?? 700} ${size}px ${MONO}`; ctx.fillStyle = color; ctx.textBaseline = 'alphabetic';
-  const cw = ctx.measureText('M').width, R = RNG('txt', o.key ?? str, B), jit = o.jit ?? 0.9;
+  const cw = ctx.measureText('M').width, R = RNG('txt', o.key ?? str, TB()), jit = o.jit ?? 0.9;
   const n = Math.min(o.count ?? str.length, str.length);
   ctx.globalAlpha = o.al ?? 1;
   for (let i = 0; i < n; i++) {
@@ -478,6 +478,10 @@ function asterisk(x, y, r0, r1, n, rot, color, w) {
 //  ev(t, d) = 0..1 progress of an event at t over d seconds; popS(t) = back-eased pop-in scale
 // ---------------------------------------------------------------------
 let TT = 0, E0 = 0, DEFER = null, SPARK_AT = null;
+// Text does NOT boil by default (owner feedback: "nét chữ cứ rung rung"): letters keep a fixed hand-made irregularity
+// but stay still, so labels and terminal commands are easy to read. A piece may set TEXT_BOIL = true to bring it back.
+let TEXT_BOIL = false;
+const TB = () => (TEXT_BOIL ? B : 0);
 const ev = (t, d = 0.25) => clamp((TT - t) / d);
 const popS = (t) => (TT < t ? 0 : EZ.back(clamp((TT - t) / 0.25)));
 
