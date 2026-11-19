@@ -1,0 +1,24 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2.0,
+ "tts": { "provider": "elevenlabs-api", "voice": "GaEEAHHYlbueVlFfyrPr", "voice_name": "Tuan Khang - Emotional Narrator", "model": "eleven_v3" },
+ "lines": [
+  { "id": "hook",    "text": "Một lỗ hổng nằm trong NGINX suốt mười năm, và máy chủ của bạn có thể đang bật HTTP hai mà không ai nhớ.", "after": 0.6 },
+  { "id": "cve",     "text": "Nó có biệt danh nginx to root, điểm nguy hiểm chín phẩy hai trên mười.", "after": 0.5 },
+  { "id": "since",   "text": "Lỗi có từ năm hai nghìn không trăm mười lăm, và mọi phiên bản đều dính, cho tới bản vá ngày mười tám tháng mười một.", "after": 0.5 },
+  { "id": "how",     "text": "Khi xử lý một luồng HTTP hai đặc biệt, cửa sổ điều khiển luồng vượt ngưỡng, làm tràn bộ nhớ heap.", "after": 0.5 },
+  { "id": "impact",  "text": "Thường thì worker chỉ bị sập. Nhưng nếu vượt được ASLR, kẻ tấn công có thể chạy mã trên máy chủ, mà không cần đăng nhập.", "after": 0.5 },
+  { "id": "risk",    "text": "Chưa ghi nhận vụ tấn công nào, nhưng mã khai thác thử đã công khai trên GitHub.", "after": 1.6 },
+  { "id": "root",    "text": "Và nhờ một lỗi khác trong nhân Linux, người ta đã leo lên được quyền root, kể cả khi NGINX chạy trong Docker.", "after": 0.5 },
+  { "id": "barrier", "text": "Bản thử cần khoảng một trăm hai mươi tám gigabyte lưu lượng. Đó là rào cản, không phải lý do để chờ.", "after": 0.6 },
+  { "id": "check",   "text": "Kiểm tra trước: tìm chữ http hai trong cấu hình, và hỏi máy chủ từ bên ngoài xem nó có nhận HTTP hai không. Có CDN phía trước thì kiểm tra thẳng máy chủ gốc.", "after": 0.5 },
+  { "id": "version", "text": "Xem phiên bản. Với gói của Ubuntu, hãy so cả chuỗi phiên bản gói, vì con số chính có thể không đổi.", "after": 0.6 },
+  { "id": "disable", "text": "Ubuntu và Debian chưa có gói vá. Trong lúc chờ, hãy tạm tắt HTTP hai, kiểm tra cấu hình, rồi khởi động lại.", "after": 0.5 },
+  { "id": "trade",   "text": "Cách này chặn được hai lỗi, đổi lại trang có thể tải chậm hơn một chút.", "after": 0.6 },
+  { "id": "upgrade", "text": "Tốt nhất là nâng lên bản một chấm ba mươi mốt chấm chín, hoặc một chấm ba mươi chấm bảy, và khởi động lại hẳn. Chỉ reload thì worker cũ vẫn chạy.", "after": 0.5 },
+  { "id": "four",    "text": "Hai bản này còn vá thêm bốn lỗi cùng mức chín phẩy hai: HTTP ba, mail proxy, SSI, và worker connections.", "after": 0.6 },
+  { "id": "defend",  "text": "Thêm một lớp nữa: chặn module SCTP nếu không dùng, và để ý worker chạy chương trình lạ, sập bất thường, hay giữ kết nối HTTP hai quá lâu.", "after": 0.6 },
+  { "id": "today",   "text": "Hôm nay: liệt kê mọi máy chạy NGINX, tìm máy bật HTTP hai hoặc ba, tắt tạm hoặc nâng cấp, và kiểm tra ASLR đang bật.", "after": 0.3 }
+ ]
+}
