@@ -10,3 +10,6 @@ function pieceCam(era, t) { const f = CAMS[IDS[era]]; return f ? f(t) : null; }
 const SRVP = () => ({ P: rrectPts(SRV[0] - SW / 2, SRV[1] - SH / 2, SW, SH, 18, 8), c: '#e9e2d2' });
 const BRIDGES = IDS.slice(1).filter((id) => id !== SLAM_ID).map((id) => ({ tc: ET(id), d: 0.5, A: SRVP, B: SRVP }));
 STYLE.post = () => grain({ n: 700 });
+// KHÔNG ĐƠ: every scene breathes with a slow linear push-in (≤ 4%) centred on the server, so held cards never read as
+// frozen. Not on "risk" (its end is the deliberate silence) — and "root" (after the hard cut) starts at 1.0 like risk.
+for (const id of IDS) if (id !== 'risk') CAMS[id] = (t) => camOf({ z: 1 + 0.03 * seg(t, ET(id), EE(id)), p: [540, 860], to: [540, 860] });
