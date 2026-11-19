@@ -1,0 +1,13 @@
+{
+  "name": "nginx-http2",
+  "title": "Lỗ hổng NGINX HTTP/2 tồn tại 10 năm: cách kiểm tra và vá",
+  "series": "Besoft — Tin bảo mật",
+  "date": "2026-11-19",
+  "source": "https://besoft.vn/blog/lo-hong-nginx-http2-ton-tai-10-nam-cach-kiem-tra-va-va",
+  "format": { "width": 1080, "height": 1920, "fps": 24, "bpm": 120 },
+  "storyFormat": "F5 fixed-hero journey (the server), morph-joined, one slam into 'root'",
+  "style": "crosshatch",
+  "scenes": ["src/props.js", "src/sc-vuln.js", "src/sc-risk.js", "src/sc-fix.js"],
+  "voice": { "file": "voice/voice.wav", "music": -14 },
+  "review": { "safe": { "top": 240, "bottom": 420, "right": 140 }, "refs": {}, "wpsMax": 5.0 }
+}

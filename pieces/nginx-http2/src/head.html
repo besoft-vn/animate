@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lỗ hổng NGINX HTTP/2 tồn tại 10 năm</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  BESOFT — "Lỗ hổng NGINX HTTP/2 tồn tại 10 năm: cách kiểm tra và vá" — 9:16, crosshatch, voiced (vi), ~1:50.
+//  The constant is THE SERVER (serverProp, lamp red = vulnerable, green = fixed). Commands appear as terminal cards
+//  (termCard) — the article's commands must be shown exactly (see brief.md). Paper = the ops team / advice;
+//  navy = inside the server / the attack. Rules: KHUNG HÌNH GỌN, KHÔNG ĐƠ, âm thanh mềm, cú cắt liền mạch.
+//  Colour: RED = vulnerable / attack; GREEN = fixed / safe; YELLOW chip = HTTP/2; everything else ink / periwinkle.
+//  Payoff: a hard cut (SLAM) into "root" in the pause after "risk". Shared file: director's; agents never edit it.
+// =====================================================================
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+// Vietnamese-capable handwriting: Pangolin (installed by channel/setup.sh), then system fallbacks with Vietnamese glyphs
+const HAND = '"Pangolin", "Segoe Print", "Comic Sans MS", "DejaVu Sans", sans-serif';
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'cve', 'since', 'how', 'impact', 'risk', 'root', 'barrier', 'check', 'version', 'disable', 'trade', 'upgrade', 'four', 'defend', 'today'];
+const SLAM_ID = 'root';
+const SLAM = snap8(VL('risk').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);
+// ---- the bridges' contract: at every boundary (except the SLAM into "root") the SERVER (serverProp, s = 1, unrotated,
+// no shake) sits exactly at SRV during [tc - 0.5, tc + 0.5]. Between those windows scenes may move/scale it freely.
+const SRV = [540, 860];
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'lỗ hổng 10 năm trong NGINX', cve: 'CVE-2026-123007 · 9,2', since: 'từ 1.9.5 (2015) tới 1.31.8', how: 'cửa sổ luồng tính sai → tràn heap',
+  impact: 'sập worker, hoặc chạy mã', risk: 'chưa thấy tấn công, PoC đã công khai', root: 'leo root qua SCTP, cả trong Docker', barrier: '~128 GB lưu lượng',
+  check: 'grep http2 · openssl -alpn h2', version: 'nginx -v · dpkg -l', disable: 'tạm tắt HTTP/2', trade: 'chặn 2 lỗi, chậm hơn chút',
+  upgrade: '1.31.9 / 1.30.7 · restart', four: '4 lỗi khác được vá', defend: 'chặn SCTP · dấu hiệu', today: 'việc cần làm hôm nay',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1, -1),
+  cues: { slam: SLAM, click: SLAM },
+  acts: [
+    { name: '1 Lỗ hổng',  role: 'build',   t0: 0,          t1: ET('impact') },
+    { name: '2 Rủi ro',   role: 'journey', t0: ET('impact'), t1: ET('risk') },
+    { name: '3 PoC',      role: 'peak',    t0: ET('risk'),   t1: snap8(VL('risk').t1) },
+    { name: '4 Lặng',     role: 'silence', t0: snap8(VL('risk').t1), t1: SLAM - 0.125 },
+    { name: '5 Root',     role: 'gift',    t0: SLAM,         t1: SLAM + 2.25 },
+    { name: '6 Kiểm tra & vá', role: 'goodbye', t0: SLAM + 2.25, t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;
