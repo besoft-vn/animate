@@ -12,7 +12,7 @@ const BRIDGES = [
   { tc: ET('boil'),   d: 0.5, A: () => HSP(BR.heatBoil.a),    B: () => HSP(BR.heatBoil.b) },
   { tc: ET('steam'),  d: 0.5, A: () => HSP(BR.boilSteam.a),   B: () => HSP(BR.boilSteam.b) },
   { tc: ET('dry'),    d: 0.5, A: () => HSP(BR.steamDry.a),    B: () => HSP(BR.steamDry.b) },
-  { tc: ET('curie'),  d: 0.5, A: () => HSP(BR.dryCurie.a),    B: () => HSP(BR.dryCurie.b) },
+  { tc: ET('curie'),  d: 0.3, m: 0.04, A: () => HSP(BR.dryCurie.a),    B: () => HSP(BR.dryCurie.b) },
   { tc: ET('warm'),   d: 0.5, A: () => HSP(BR.clickWarm.a),   B: () => HSP(BR.clickWarm.b) },
   { tc: ET('end'),    d: 0.5, A: () => HSP(BR.warmEnd.a),     B: () => HSP(BR.warmEnd.b) },
 ];
