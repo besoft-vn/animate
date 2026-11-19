@@ -26,132 +26,213 @@ SCENES.hook = function () {
   paperSheet('hook');
   woodSurface(-40, 1022, W + 40, H + 40, 'v_desk');
   ink([[-20, 1022], [W + 20, 1024]], { w: 4, key: 'v_deskedge' });
-  const tFlaw = VW('hook', 'lỗ'), tH2 = VW('hook', 'HTTP'), tWho = VW('hook', 'không'), tMay = VW('hook', 'máy');
+  const tFlaw = VW('hook', 'lỗ'), tNg = VW('hook', 'NGINX'), tSu = VW('hook', 'suốt'), tH2 = VW('hook', 'HTTP'), tBat = VW('hook', 'bật');
+  const tWho = VW('hook', 'không'), tMay = VW('hook', 'máy'), t1 = EE('hook');
+  const lampX = SRV[0] + SW / 2 - 40, lampY = SRV[1] + SH / 2 - 48;
 
-  // calendar: the years tick 2015 -> 2026 on "suốt mười năm"
-  const cs = popS(VW('hook', 'NGINX'));
+  // the calendar (top left): pages flip 2015 -> 2026 on "suốt mười năm"
+  const cs = popS(tNg);
   if (cs > 0) {
-    ctx.save(); ctx.translate(780, 540); ctx.rotate(0.05); ctx.scale(cs, cs);
-    paint(rrectPts(-130 + 8, -110 + 10, 260, 250, 14), { fill: 'rgba(58,36,23,0.3)', line: false, key: 'v_calsh', tex: [{ k: 'hatch', a: 0.8, gap: 4, al: 0.5 }] });
-    paint(rrectPts(-130, -110, 260, 250, 14), { fill: C.cream, key: 'v_cal', w: 3, tex: [{ k: 'pencil', c: '#e8d6b0', al: 0.6, per: 80 }] });
-    paint(rrectPts(-130, -110, 260, 56, 12), { fill: C.red, key: 'v_calh', w: 3, tex: [{ k: 'hatch', gap: 5, al: 0.3 }] });
-    for (const sx of [-70, 70]) ink([[sx, -126], [sx, -92]], { w: 6, key: 'v_calr' + sx });
-    const yr = 2015 + Math.floor(11 * seg(TT, VW('hook', 'suốt'), VE('hook', 'năm') + 0.3));
-    monoText(String(yr), -82, 22, 60, yr === 2026 ? C.red : C.ink, { key: 'v_yr' + yr });
-    if (TT > VE('hook', 'năm') + 0.3) handText('10 năm', -78, 110, 50, C.red, { key: 'v_10y', frac: ev(VE('hook', 'năm') + 0.3, 0.5) });
+    const fl0 = tSu, fl1 = tSu + 1.65, n = 11;
+    const k = TT < fl0 ? 0 : Math.min(n, Math.floor(n * seg(TT, fl0, fl1) + 1e-6)), u = TT < fl0 || k >= n ? 1 : mod(n * seg(TT, fl0, fl1), 1);
+    const page = (yr, key) => {
+      paint(rrectPts(-160, -66, 320, 236, 10), { fill: C.cream, key: 'v_pg' + key, w: 3, tex: [{ k: 'pencil', c: '#e8d6b0', al: 0.6, per: 80 }] });
+      monoText(String(yr), -96, 50, 80, yr === 2026 ? C.red : C.ink, { key: 'v_yr' + yr });
+    };
+    ctx.save(); ctx.translate(250, 600); ctx.rotate(-0.04); ctx.scale(cs, cs);
+    paint(rrectPts(-160 + 10, -130 + 12, 320, 300, 14), { fill: 'rgba(58,36,23,0.3)', line: false, key: 'v_calsh', tex: [{ k: 'hatch', a: 0.8, gap: 4, al: 0.5 }] });
+    page(2015 + (k < n ? k + 1 : n), 'n');                     // the page underneath (next year)
+    if (k < n) {                                                // the current page tears off upward from the binding
+      ctx.save(); ctx.translate(0, -66); ctx.scale(1, 1 - EZ.i2(u)); ctx.translate(0, 66);
+      page(2015 + k, 'c');
+      ctx.restore();
+    }
+    if (TT > fl1) handText('10 năm', -84, 150, 58, C.red, { key: 'v_10y', frac: ev(fl1, 0.5) });
+    paint(rrectPts(-160, -130, 320, 66, 12), { fill: C.red, key: 'v_calh', w: 3, tex: [{ k: 'hatch', gap: 5, al: 0.3 }] });
+    for (const sx of [-80, 80]) ink([[sx, -148], [sx, -110]], { w: 6, key: 'v_calr' + sx });
     ctx.restore();
   }
 
-  // the dusty sticky note nobody reads
-  ctx.save(); ctx.translate(706, 770); ctx.rotate(0.07);
-  paint(box(0, 0, 220, 190), { fill: C.yellowL, key: 'v_sticky', w: 2.6, tex: [{ k: 'pencil', c: C.yellow, al: 0.5, per: 70 }, { k: 'stipple', c: 'rgba(90,70,50,0.55)', n: 260, s: 2 }] });
-  handText('bật từ', 22, 78, 46, C.ink, { key: 'v_stk1' });
-  handText('bao giờ?', 22, 140, 46, C.ink, { key: 'v_stk2' });
-  ink([[160, 0], [220, 0], [220, 60]], { w: 1.4, color: 'rgba(58,36,23,0.5)', key: 'v_web1' });
-  ink([[175, 0], [220, 45]], { w: 1.2, color: 'rgba(58,36,23,0.5)', key: 'v_web2' });
-  ink(arcPts(220, 0, 30, Math.PI * 0.5, Math.PI, 8), { w: 1.2, color: 'rgba(58,36,23,0.5)', key: 'v_web3' });
+  // "lỗ hổng" (top right) with an arrow down to the red lamp
+  const lw = handW('lỗ hổng', 76);
+  handText('lỗ hổng', 900 - lw, 560, 76, C.red, { key: 'v_flaw', frac: ev(tFlaw, 0.5) });
+  v_arrow(790, 600, lampX + 70, lampY - 40, { frac: ev(tFlaw + 0.45, 0.4), c: C.red, key: 'v_flarr', w: 6, head: 30 });
+
+  // the dusty sticky note nobody reads (on the desk)
+  ctx.save(); ctx.translate(610, 1080); ctx.rotate(0.06 + (TT > tWho ? 0.05 * Math.sin((TT - tWho) * 5) * Math.exp(-(TT - tWho) * 1.5) : 0));
+  paint(box(0, 0, 300, 250), { fill: C.yellowL, key: 'v_sticky', w: 2.6, tex: [{ k: 'pencil', c: C.yellow, al: 0.5, per: 70 }, { k: 'stipple', c: 'rgba(90,70,50,0.55)', n: 320, s: 2 }] });
+  handText('bật từ', 30, 100, 58, C.ink, { key: 'v_stk1' });
+  handText('bao giờ?', 30, 180, 58, C.ink, { key: 'v_stk2' });
+  ink([[220, 0], [300, 0], [300, 80]], { w: 1.4, color: 'rgba(58,36,23,0.5)', key: 'v_web1' });
+  ink([[240, 0], [300, 60]], { w: 1.2, color: 'rgba(58,36,23,0.5)', key: 'v_web2' });
+  ink(arcPts(300, 0, 40, Math.PI * 0.5, Math.PI, 8), { w: 1.2, color: 'rgba(58,36,23,0.5)', key: 'v_web3' });
   ctx.restore();
-  if (TT >= tWho) {   // question marks drift up on "không ai nhớ"
+  if (TT >= tWho && TT < t1 - 0.4) {   // big question marks rise from the note on "không ai nhớ"
     for (let i = 0; i < 3; i++) {
-      const u = mod(TT - tWho - i * 0.35, 1.2) / 1.2; if (TT - tWho < i * 0.35) continue;
-      handText('?', 760 + i * 52, 740 - u * 90, 60, C.ink, { key: 'v_q' + i, al: 1 - u });
+      if (TT - tWho < i * 0.3) continue;
+      const u = mod(TT - tWho - i * 0.3, 1.1) / 1.1;
+      handText('?', 660 + i * 90, 1060 - u * 170, 100, C.ink, { key: 'v_q' + i, al: (1 - u) * (1 - seg(TT, t1 - 0.8, t1 - 0.4)) });
     }
   }
 
-  const h2s = 1 + 0.12 * Math.sin(seg(TT, tH2, tH2 + 0.6) * Math.PI);
+  // the server; the HTTP/2 chip swells and glints on "đang bật HTTP hai"
+  const hp = seg(TT, tBat, t1 - 0.6);
+  const h2s = 1 + (hp > 0 && hp < 1 ? 0.32 * Math.abs(Math.sin((TT - tBat) * 3.4)) * (1 - EZ.i2(seg(TT, t1 - 1.0, t1 - 0.6))) : 0);
   serverProp(SRV[0], SRV[1], { state: TT >= tFlaw ? 'vuln' : 'ok', h2: h2s });
-  if (TT >= tFlaw && TT < tFlaw + 0.5) burst(SRV[0] + SW / 2 - 40, SRV[1] + SH / 2 - 48, 26, 26 + 50 * ev(tFlaw, 0.3), { c: C.red, w: 4, key: 'v_lampb' });
-  planInk(ellipsePts(SRV[0] - SW / 2 + 62, SRV[1] - SH / 2 - 20, 118, 52, -0.04, 40), { closed: true, key: 'v_h2ring', frac: ev(tH2, 0.5) });
+  if (hp > 0 && hp < 1) {
+    const cx0 = SRV[0] - SW / 2 - 10, cy0 = SRV[1] - SH / 2 - 20;
+    ctx.save(); ctx.translate(cx0, cy0); ctx.scale(h2s, h2s);
+    ctx.beginPath(); ctx.roundRect(0, -28, 150, 56, 28); ctx.clip();
+    const gx = -80 + mod((TT - tBat) * 300, 330);
+    ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.moveTo(gx, -30); ctx.lineTo(gx + 34, -30); ctx.lineTo(gx + 10, 30); ctx.lineTo(gx - 24, 30); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  planInk(ellipsePts(SRV[0] - SW / 2 + 70, SRV[1] - SH / 2 - 20, 140 * (h2s * 0.5 + 0.5), 62, -0.04, 40), { closed: true, key: 'v_h2ring', frac: ev(tH2, 0.5) });
+  // the lamp: a red halo that keeps pulsing outward once the flaw is named
+  if (TT >= tFlaw && TT < t1 - 0.5) {
+    const fade = 1 - seg(TT, t1 - 0.9, t1 - 0.5);
+    for (let j = 0; j < 2; j++) {
+      const u = mod(TT - tFlaw - j * 0.6, 1.2) / 1.2; if (TT - tFlaw < j * 0.6) continue;
+      ctx.save(); ctx.globalAlpha = 0.42 * (1 - u) * fade; ctx.fillStyle = C.red;
+      ctx.beginPath(); ctx.arc(lampX, lampY, 22 + 120 * EZ.o2(u), 0, TAU); ctx.fill(); ctx.restore();
+    }
+  }
 
   // on the desk: "máy chủ của bạn" with an arrow up to the server
-  handText('máy chủ của bạn', v_cx('máy chủ của bạn', 58), 1230, 58, C.ink, { key: 'v_yours', frac: ev(tMay, 0.6) });
-  v_arrow(540, 1170, 540, 1060, { frac: ev(tMay + 0.4, 0.3), key: 'v_yarr' });
+  handText('máy chủ', 70, 1190, 72, C.ink, { key: 'v_yours1', frac: ev(tMay, 0.4) });
+  handText('của bạn', 70, 1280, 72, C.ink, { key: 'v_yours2', frac: ev(tMay + 0.35, 0.4) });
+  v_arrow(250, 1110, 390, 990, { frac: ev(tMay + 0.6, 0.3), key: 'v_yarr', w: 6 });
   inkTag('lỗ hổng 10 năm');
 };
 
-// ---------------------------------------------------------------- cve (navy): CVE chip, 0–10 gauge to 9,2
-SCENES.cve = function () {
-  darkWorld('cve', { dust: 40 });
-  const tScore = VW('cve', 'chín'), tChain = VW('cve', 'chuỗi'), tRoot = VW('cve', 'nginx');
-
-  // the big CVE chip
-  const cw = monoW(50) * 15 + 40;
-  chip('CVE-2026-123007', 540 - cw / 2, 480, C.red, { size: 50, s: popS(E0 + 0.35), dark: true, key: 'v_cvechip' });
-
-  // the note: nginx2root = chain of 5 bugs, and a 5-link chain
-  const note = 'nginx2root = chuỗi 5 lỗi';
-  handText(note, v_cx(note, 50), 600, 50, C.white, { key: 'v_note', frac: ev(tChain, 0.7) });
-  for (let i = 0; i < 5; i++) {
-    const t = tChain + 0.25 + i * 0.12; if (TT < t) continue;
-    const lx = 540 + (i - 2) * 58, hot = Math.floor((TT - tRoot) * 5) % 6 === i && TT > tRoot;
-    ink(ellipsePts(lx, 650, 34 * popS(t), 16 * popS(t), 0, 24), { closed: true, w: hot ? 6 : 4.5, color: i === 0 || hot ? C.red : C.peri, key: 'v_link' + i });
-  }
-
-  // gauge: 0..10 (CVSS 4.0), needle sweeps to 9,2 on "chín phẩy hai"
-  const gx = 540, gy = 1380, gr = 220;
-  const band = [...arcPts(gx, gy, gr, Math.PI * 1.9, Math.PI * 2, 8), ...arcPts(gx, gy, gr - 34, Math.PI * 2, Math.PI * 1.9, 8)];
-  paint(band, { fill: C.red, key: 'v_gband', line: C.peri, w: 2, tex: [{ k: 'hatch', gap: 5, al: 0.35, c: '#000' }] });
-  ink(arcPts(gx, gy, gr, Math.PI, Math.PI * 2, 40), { w: 5, color: C.peri, key: 'v_garc' });
-  for (let v = 0; v <= 10; v++) {
-    const a = Math.PI + v / 10 * Math.PI, r0 = v % 5 ? gr - 18 : gr - 30;
-    ink([[gx + Math.cos(a) * r0, gy + Math.sin(a) * r0], [gx + Math.cos(a) * gr, gy + Math.sin(a) * gr]], { w: v % 5 ? 2.5 : 4, color: C.peri, key: 'v_gt' + v, amt: 0.6 });
-  }
-  monoText('0', gx - gr - 40, gy + 12, 34, C.peri, { key: 'v_g0' });
-  monoText('10', gx + gr + 8, gy + 12, 34, C.peri, { key: 'v_g10' });
-  monoText('5', gx - 9, gy - gr - 14, 34, C.peri, { key: 'v_g5' });
-  let val = 0.3 + 0.15 * Math.sin(TT * 6);
-  if (TT >= tScore) val = lerp(val, 9.2, EZ.back(seg(TT, tScore, tScore + 0.8))) + (TT > tScore + 0.8 ? 0.07 * Math.sin(TT * 9) : 0);
-  val = Math.min(val, 9.9);
-  const na = Math.PI + val / 10 * Math.PI;
-  ink([[gx, gy], [gx + Math.cos(na) * (gr - 40), gy + Math.sin(na) * (gr - 40)]], { w: 7, color: C.red, key: 'v_needle', amt: 0.8 });
-  ctx.fillStyle = C.peri; ctx.beginPath(); ctx.arc(gx, gy, 14, 0, TAU); ctx.fill();
-  const sp = popS(VW('cve', 'hai'));
-  if (sp > 0) {
-    ctx.save(); ctx.translate(gx, gy - 70); ctx.scale(sp, sp);
-    monoText('9,2', -84, 0, 84, C.red, { key: 'v_score' });
-    monoText('/10', 66, 0, 40, C.peri, { key: 'v_score10' });
+// ---------------------------------------------------------------- cve (navy): CVE chip, 0–10 gauge to 9,2, chain of 5
+// the gauge drawn around (0,0) at radius 300; sc < 0.6 hides the small labels
+function v_gauge(gx, gy, sc, o) {
+  const R = 300;
+  ctx.save(); ctx.translate(gx, gy); ctx.scale(sc, sc);
+  const gp = o.grow;
+  // the swept wedge (0 -> needle): a red danger fill that breathes
+  const na = Math.PI + o.val / 10 * Math.PI;
+  if (o.val > 0.4) {
+    const P = [[0, 0], ...arcPts(0, 0, R - 36, Math.PI, na, 40)];
+    ctx.save(); ctx.globalAlpha = o.wedgeA;
+    paint(P, { fill: C.red, key: 'v_wedge', line: false, tex: [{ k: 'hatch', gap: 6, al: 0.35, c: '#000' }] });
     ctx.restore();
   }
-  monoText('CVSS 4.0', gx - 66, gy + 54, 30, C.peri, { key: 'v_cvss' });
+  ink(arcPts(0, 0, R, Math.PI, Math.PI + Math.PI * gp, 40), { w: 6, color: C.peri, key: 'v_garc' });
+  for (let v = 0; v <= 10; v++) {
+    if (gp < v / 10) break;
+    const a = Math.PI + v / 10 * Math.PI, r0 = v % 5 ? R - 24 : R - 42;
+    ink([[Math.cos(a) * r0, Math.sin(a) * r0], [Math.cos(a) * R, Math.sin(a) * R]], { w: v % 5 ? 3 : 5, color: C.peri, key: 'v_gt' + v, amt: 0.6 });
+  }
+  if (sc > 0.6) {
+    if (gp > 0.02) monoText('0', -R - 46, 14, 44, C.peri, { key: 'v_g0' });
+    if (gp > 0.5) monoText('5', -12, -R - 18, 44, C.peri, { key: 'v_g5' });
+    if (gp >= 1) monoText('10', R + 10, 14, 44, C.peri, { key: 'v_g10' });
+  }
+  ink([[0, 0], [Math.cos(na) * (R - 50), Math.sin(na) * (R - 50)]], { w: 9, color: C.red, key: 'v_needle', amt: 0.8 });
+  ctx.fillStyle = C.peri; ctx.beginPath(); ctx.arc(0, 0, 18, 0, TAU); ctx.fill();
+  if (o.sp > 0) {
+    ctx.save(); ctx.translate(0, -96); ctx.scale(o.sp, o.sp);
+    monoText('9,2', -118, 0, 128, C.red, { key: 'v_score' });
+    ctx.restore();
+  }
+  if (o.s10 > 0 && sc > 0.6) { ctx.save(); ctx.translate(112, -96); ctx.scale(o.s10, o.s10); monoText('/10', 0, 0, 60, C.peri, { key: 'v_score10' }); ctx.restore(); }
+  if (o.cvss > 0 && sc > 0.6) monoText('CVSS 4.0', -106, 74, 48, C.peri, { key: 'v_cvss', count: Math.floor(o.cvss * 8) });
+  ctx.restore();
+}
+SCENES.cve = function () {
+  darkWorld('cve', { dust: 40 });
+  const tScore = VW('cve', 'chín'), tHai = VW('cve', 'hai'), tTren = VW('cve', 'trên'), tMuoi = VW('cve', 'mười'), tNam = VW('cve', 'nằm');
+  const tChain = VW('cve', 'chuỗi'), tName = VW('cve', 'các'), tRoot = VW('cve', 'nginx'), tRoot2 = VW('cve', 'root'), t1 = EE('cve');
+  // the server steps aside (top right) to make room, and is back at SRV before the bridge
+  const [sx, sy, ss] = v_track([[E0 + 0.5, SRV[0], SRV[1], 1], [E0 + 1.3, 840, 470, 0.5], [t1 - 1.45, 840, 470, 0.5], [t1 - 0.55, SRV[0], SRV[1], 1]]);
 
-  serverProp(SRV[0], SRV[1], { state: 'vuln', dark: true });
+  // the big CVE chip
+  chip('CVE-2026-123007', 80, 482, C.red, { size: 54, s: popS(E0 + 0.35), dark: true, key: 'v_cvechip' });
+
+  // gauge: grows in the middle, needle sweeps to 9,2; at the end it swaps places with the server
+  const sw = EZ.io(seg(TT, t1 - 1.45, t1 - 0.55));
+  const gg = EZ.o3(seg(TT, E0 + 0.8, E0 + 1.4));
+  if (gg > 0) {
+    let val = 0.3 + 0.15 * Math.sin(TT * 6);
+    if (TT >= tScore) val = lerp(val, 9.2, EZ.back(seg(TT, tScore, tScore + 0.8))) + (TT > tScore + 0.8 ? 0.06 * Math.sin(TT * 9) : 0);
+    val = Math.min(val, 9.9);
+    const wedgeA = TT < tScore ? 0.3 : 0.3 + 0.32 * (0.5 + 0.5 * Math.sin((TT - tScore) * 3.2));
+    v_gauge(lerp(540, 820, sw), lerp(950, 560, sw), gg * lerp(1, 0.38, sw), {
+      grow: seg(TT, E0 + 0.9, tScore - 0.1), val, wedgeA, sp: popS(tHai), s10: popS(tTren), cvss: ev(tMuoi + 0.1, 0.5),
+    });
+  }
+
+  // the chain: 5 links pop on "nằm trong", light on "chuỗi"; a red pulse runs nginx -> root
+  const LY = 1160;
+  for (let i = 0; i < 5; i++) {
+    const t = tNam + i * 0.12; if (TT < t) continue;
+    const lx = 540 + (i - 2) * 112, p = popS(t), lit = TT > tChain + 0.1 + i * 0.1;
+    const hot = TT > tRoot && Math.floor((TT - tRoot) * 6) % 7 === i;
+    ink(ellipsePts(lx, LY, 66 * p, (i % 2 ? 24 : 38) * p, 0, 28), { closed: true, w: hot ? 9 : 6, color: lit ? (hot ? C.yellow : C.red) : C.peri, key: 'v_link' + i });
+  }
+  if (TT >= tRoot) monoText('nginx', 70, LY + 14, 42, C.peri, { key: 'v_lkn', count: Math.floor(ev(tRoot, 0.3) * 5) });
+  if (TT >= tRoot2) monoText('root', 846, LY + 14, 42, C.red, { key: 'v_lkr', count: Math.floor(ev(tRoot2, 0.25) * 4) });
+  const n1 = 'chuỗi 5 lỗi';
+  handText(n1, v_cx(n1, 64), 1300, 64, C.white, { key: 'v_note', frac: ev(tChain, 0.6) });
+  if (TT >= tName) {
+    const nm = '"nginx2root"', fs = 62;
+    monoText(nm, 540 - monoW(fs) * nm.length / 2, 1410, fs, C.yellow, { key: 'v_name', count: Math.floor(seg(TT, tName, tRoot) * nm.length + 1) });
+  }
+
+  serverProp(sx, sy, { state: 'vuln', dark: true, s: ss });
   inkTag('mức nguy hiểm');
 };
 
 // ---------------------------------------------------------------- since (paper): timeline 2015 -> 2026
 SCENES.since = function () {
   paperSheet('since');
-  const tFrom = VW('since', 'từ'), tAll = VW('since', 'mọi'), tFix = VW('since', 'vá'), tDate = VW('since', 'ngày');
-  const X0 = 110, X1 = 905, YT = 545;
-  const xAt = (y) => X0 + (y - 2015.72) / (2026.88 - 2015.72) * (X1 - X0);
+  const tFrom = VW('since', 'từ'), tNam = VW('since', 'năm'), tHai = VW('since', 'hai'), tVa = VW('since', 'và'), tAll = VW('since', 'mọi');
+  const tDinh = VW('since', 'dính'), tFix = VW('since', 'vá'), tDate = VW('since', 'ngày'), tM2 = VW('since', 'mười', 2);
+  const X0 = 120, X1 = 900, YT = 560;
 
-  handText('22/9/2015', 90, 480, 52, C.ink, { key: 'v_d0', frac: ev(tFrom, 0.5) });
-  if (TT >= tDate) { const s = '18/11/2026'; handText(s, 930 - handW(s, 52), 480, 52, C.green, { key: 'v_d1', frac: ev(tDate, 0.6) }); }
-  ink([[X0 - 20, YT], [X1 + 20, YT]], { w: 4, key: 'v_tl' });
-  for (let y = 2016; y <= 2026; y++) ink([[xAt(y), YT - 12], [xAt(y), YT + 12]], { w: 2.5, key: 'v_tk' + y, amt: 0.6 });
-  // the red bar: every version is affected, until the fix
-  const bf = EZ.o2(seg(TT, tAll - 0.1, tFix - 0.1));
-  if (bf > 0) paint(rrectPts(X0, YT - 13, Math.max(8, (X1 - X0) * bf), 26, 10), { fill: C.red, key: 'v_bar', w: 2.5, tex: [{ k: 'hatch', gap: 5, al: 0.35 }] });
-  const fx = X0 + (X1 - X0) * bf;
-  if (bf > 0 && bf < 1) burst(fx, YT, 18, 34, { c: C.red, w: 3, n: 8, key: 'v_barb' });
-  if (TT >= tFix) {   // the fix lands at the end of the line
-    const s = popS(tFix);
-    paint(ellipsePts(X1, YT, 26 * s, 26 * s, 0, 24), { fill: C.green, key: 'v_fixdot', w: 3, tex: [{ k: 'hatch', gap: 4, al: 0.35 }] });
+  // dates above the line
+  handText('22/9/2015', 70, 470, 60, C.ink, { key: 'v_d0', frac: ev(tFrom, 0.5) });
+  if (TT >= tDate) { const s = '18/11/2026'; handText(s, 935 - handW(s, 60), 470, 60, C.green, { key: 'v_d1', frac: ev(tDate, 0.6) }); }
+  ink([[X0 - 20, YT], [X1 + 20, YT]], { w: 5, key: 'v_tl' });
+  for (let i = 1; i <= 11; i++) { const x = X0 + (i - 0.72) / 11.16 * (X1 - X0); ink([[x, YT - 14], [x, YT + 14]], { w: 3, key: 'v_tk' + i, amt: 0.6 }); }
+  // a red pin drops on the start: 22/9/2015
+  if (TT >= tFrom) {
+    const py = lerp(380, YT - 34, EZ.back(seg(TT, tFrom, tFrom + 0.45)));
+    ink([[X0, py], [X0, py + 34]], { w: 4, key: 'v_pinl' });
+    paint(ellipsePts(X0, py, 20, 20, 0, 20), { fill: C.red, key: 'v_pin', w: 3, tex: [{ k: 'hatch', gap: 4, al: 0.35 }] });
   }
+  // the red bar: every version is affected, until the fix; a marker shows the year travelling with it
+  const bf = EZ.io(seg(TT, tVa, tFix - 0.1));
+  if (bf > 0) {
+    const fx = X0 + (X1 - X0) * bf;
+    paint(rrectPts(X0, YT - 16, Math.max(10, fx - X0), 32, 12), { fill: C.red, key: 'v_bar', w: 2.5, tex: [{ k: 'hatch', gap: 5, al: 0.35 }] });
+    if (TT < tFix + 0.2) paint([[fx - 22, YT - 62], [fx + 22, YT - 62], [fx, YT - 26]], { fill: C.red, key: 'v_mk', w: 3, closed: true });
+    const yr = String(Math.min(2026, Math.floor(2015.72 + bf * 11.16))), yw = monoW(46) * 4;
+    monoText(yr, clamp(fx - yw / 2, 64, 936 - yw), YT + 72, 46, yr === '2026' ? C.red : C.ink, { key: 'v_myr' + yr });
+  }
+  if (TT >= tFix) { const s = popS(tFix); paint(ellipsePts(X1, YT, 30 * s, 30 * s, 0, 24), { fill: C.green, key: 'v_fixdot', w: 3, tex: [{ k: 'hatch', gap: 4, al: 0.35 }] }); }
 
-  // affected range: red chips
-  chip('1.9.5', 90, 670, C.red, { s: popS(VW('since', 'hai')), key: 'v_c0' });
-  const aw = ev(tAll + 0.3, 0.3);
-  if (aw > 0) v_arrow(255, 660, 335, 660, { frac: aw, key: 'v_carr', w: 4, head: 18 });
-  chip('1.31.8', 350, 670, C.red, { s: popS(VW('since', 'dính')), key: 'v_c1' });
-  if (TT >= VW('since', 'dính')) handText('đều dính', 560, 680, 52, C.red, { key: 'v_dinh', frac: ev(VW('since', 'dính'), 0.5) });
+  // affected range (left column): 1.9.5 ... 1.31.8 in red
+  if (TT >= tHai) v_arrow(X0, YT + 110, 140, 728, { frac: ev(tHai, 0.3), key: 'v_parr', w: 4, head: 18 });
+  chip('1.9.5', 70, 800, C.red, { size: 54, s: popS(tHai + 0.2), key: 'v_c0' });
+  if (TT >= tAll) {
+    v_arrow(150, 860, 150, 950, { frac: ev(tAll, 0.4), key: 'v_carr', w: 5, head: 20 });
+    handText('…', 200, 920, 64, C.red, { key: 'v_dots', frac: ev(tAll + 0.2, 0.3) });
+  }
+  chip('1.31.8', 70, 1030, C.red, { size: 54, s: popS(tAll + 0.45), key: 'v_c1' });
+  // right column: "mọi bản / đều dính"
+  { const s1 = 'mọi bản', s2 = 'đều dính';
+    handText(s1, 935 - handW(s1, 66), 830, 66, C.red, { key: 'v_moi', frac: ev(tAll, 0.5) });
+    handText(s2, 935 - handW(s2, 66), 930, 66, C.red, { key: 'v_dinh', frac: ev(tDinh, 0.5) }); }
 
-  // the fix: green chips (mainline / stable), 18/11
-  handText('bản vá 18/11', 90, 1130, 56, C.green, { key: 'v_fixl', frac: ev(tFix, 0.6) });
-  chip('1.31.9', 90, 1240, C.green, { s: popS(tDate), key: 'v_g0' });
-  chip('1.30.7', 420, 1240, C.green, { s: popS(VW('since', 'mười', 2)), key: 'v_g1' });
-  if (TT >= tDate + 0.3) monoText('mainline', 100, 1320, 30, C.ink, { key: 'v_ml', count: Math.floor(ev(tDate + 0.3, 0.3) * 8) });
-  if (TT >= VW('since', 'mười', 2) + 0.3) monoText('stable', 430, 1320, 30, C.ink, { key: 'v_st', count: Math.floor(ev(VW('since', 'mười', 2) + 0.3, 0.3) * 6) });
+  // the fix (bottom): green chips, mainline / stable, 18/11
+  handText('bản vá 18/11', 70, 1180, 70, C.green, { key: 'v_fixl', frac: ev(tFix, 0.6) });
+  chip('1.31.9', 70, 1300, C.green, { size: 56, s: popS(tDate), key: 'v_g0' });
+  chip('1.30.7', 540, 1300, C.green, { size: 56, s: popS(tM2), key: 'v_g1' });
+  if (TT >= tDate + 0.3) monoText('mainline', 80, 1400, 44, C.ink, { key: 'v_ml', count: Math.floor(ev(tDate + 0.3, 0.35) * 8) });
+  if (TT >= tM2 + 0.3) monoText('stable', 550, 1400, 44, C.ink, { key: 'v_st', count: Math.floor(ev(tM2 + 0.3, 0.3) * 6) });
 
   serverProp(SRV[0], SRV[1], { state: 'vuln' });
   inkTag('từ 2015');

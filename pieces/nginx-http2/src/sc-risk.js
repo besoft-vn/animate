@@ -69,7 +69,7 @@ SCENES.risk = function () {
   const zs = popS(40.25);
   if (zs > 0) {
     ctx.save(); ctx.translate(150, 545); ctx.scale(zs, zs);
-    handText('0', -55, 55, 160, C.glow, { key: 'r0', weight: 700 });
+    handText('0', -55, 55, 160, C.white, { key: 'r0', weight: 700 });
     ctx.restore();
   }
   handText('vụ tấn công', 230, 505, 54, C.white, { key: 'rv1', frac: ev(40.6, 0.45) });
@@ -100,9 +100,7 @@ SCENES.risk = function () {
     handText('của Rapid7', 640, 1150, 46, C.peri, { key: 'rr7' });
     handText('mã khai thác thử', 160, 1230, 56, C.white, { key: 'rgh1', frac: ev(42.5, 0.5) });
     handText('đã công khai trên GitHub', 160, 1305, 56, C.redL, { key: 'rgh2', frac: ev(43.3, 1.2) });
-    const cmd = '$ git clone .../nginx-poc';
-    monoText(cmd, 160, 1385, 32, C.cyan, { key: 'rghc', count: Math.floor(seg(TT, 43.0, 44.9) * cmd.length) });
-    if (TT < tFreeze && Math.floor(TT * 4) % 2 === 0) { const n = Math.floor(seg(TT, 43.0, 44.9) * cmd.length); ctx.fillStyle = C.cyan; ctx.fillRect(160 + n * monoW(32), 1360, 16, 30); }
+    handText('ai cũng tải về được', 160, 1385, 48, C.peri, { key: 'rghc', frac: ev(43.6, 1.2) });
     ctx.restore();
     // it is aimed at servers like this one
     r_arrow(r_curve([[850, 1080], [880, 990], [700, 930]]), { c: C.red, w: 6, frac: ev(44.5, 0.4), key: 'rarr' });
@@ -168,41 +166,51 @@ SCENES.root = function () {
 SCENES.barrier = function () {
   darkWorld('barrier', { dust: 40 });
   const t0 = VW('barrier', 'cần'), t1 = VE('barrier', 'lượng'), tH = VW('barrier', 'rào'), tN = VW('barrier', 'không');
-  const fill = EZ.o2(seg(TT, t0, t1)), x0 = 100, x1 = 940, bw = x1 - x0;
+  const fill = EZ.o2(seg(TT, t0, t1)), x0 = 100, x1 = 940, bw = x1 - x0, HX = 250, GY = 1022;
   handText('bản thử cần', x0, 458, 52, C.peri, { key: 'rb1', frac: ev(ET('barrier') + 0.1, 0.4) });
   const v = Math.round(128 * fill), lab = '~' + v + ' GB', cw = monoW(64);
   monoText(lab, x1 - 16 - cw * lab.length, 462, 64, fill >= 1 ? C.yellow : C.white, { key: 'rbn' });
   // the meter
-  paint(rrectPts(x0, 495, bw, 86, 18), { fill: C.navy2, key: 'rbm', line: C.peri, w: 3.5 });
-  if (fill > 0.01) paint(rrectPts(x0 + 8, 503, (bw - 16) * fill, 70, 12), { fill: C.red, key: 'rbf', line: false, tex: [{ k: 'hatch', gap: 7, al: 0.35, c: '#7a1a12' }, { k: 'pencil', c: C.redL, al: 0.3, per: 80 }] });
-  // packets streaming into the meter (the scene's one particle effect)
+  paint(rrectPts(x0, 495, bw, 96, 18), { fill: C.navy2, key: 'rbm', line: C.peri, w: 3.5 });
+  if (fill > 0.01) paint(rrectPts(x0 + 8, 503, (bw - 16) * fill, 80, 12), { fill: C.red, key: 'rbf', line: false, tex: [{ k: 'hatch', gap: 7, al: 0.35, c: '#7a1a12' }, { k: 'pencil', c: C.redL, al: 0.3, per: 80 }] });
+  // packets streaming through the meter (the scene's one particle effect) — they keep flowing once it is full
   const fx = x0 + 8 + (bw - 16) * fill;
   if (TT > t0 - 0.2) {
     ctx.fillStyle = C.yellow;
-    for (let i = 0; i < 9; i++) { const u = mod(TT * 1.4 + i / 9, 1), px = x0 + 14 + u * Math.max(20, fx - x0 - 40); if (px < fx - 18) ctx.fillRect(px, 530 + ((i * 7) % 3) * 6, 14, 10); }
-    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(TT * 9); ctx.fillStyle = C.yellowL; ctx.fillRect(fx - 6, 508, 6, 60); ctx.globalAlpha = 1;
+    for (let i = 0; i < 9; i++) { const u = mod(TT * 0.9 + i / 9, 1), px = x0 + 14 + u * Math.max(20, fx - x0 - 40); if (px < fx - 26) ctx.fillRect(px, 522 + ((i * 7) % 3) * 10, 24, 14); }
+    if (fill < 1) { ctx.globalAlpha = 0.5 + 0.5 * Math.sin(TT * 9); ctx.fillStyle = C.yellowL; ctx.fillRect(fx - 6, 508, 6, 70); ctx.globalAlpha = 1; }
   }
-  // the ground
-  ink([[80, 1022], [1000, 1022]], { w: 3.5, color: C.periD, key: 'rbg' });
-  // the hurdle rises on "rào cản"
-  const hs = EZ.back(seg(TT, tH, tH + 0.35));
-  if (hs > 0) {
-    ctx.save(); ctx.translate(250, 1022); ctx.scale(1, hs);
-    paint(rrectPts(-72, -126, 14, 126, 4), { fill: C.peri, key: 'rhp0', line: C.white, w: 2.5 });
-    paint(rrectPts(58, -126, 14, 126, 4), { fill: C.peri, key: 'rhp1', line: C.white, w: 2.5 });
-    paint(rrectPts(-100, -150, 200, 40, 8), { fill: C.yellow, key: 'rhb', line: C.white, w: 3, tex: [{ k: 'hatch', a: 0.9, gap: 18, w: 8, c: C.navy, al: 0.85 }] });
+  // the full meter becomes the hurdle: a marching dashed line drops from the meter to where the hurdle rises
+  const dropF = ev(t1, 0.5), dropA = 1 - ev(tH + 0.4, 0.4);
+  if (dropF > 0 && dropA > 0) {
+    ctx.save(); ctx.globalAlpha = dropA; ctx.strokeStyle = C.yellow; ctx.lineWidth = 6; ctx.setLineDash([18, 14]); ctx.lineDashOffset = -TT * 60; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(HX, 600); ctx.lineTo(HX, 600 + (800 - 600) * dropF); ctx.stroke();
+    if (dropF >= 1) ink([[HX - 18, 782], [HX, 806], [HX + 18, 782]], { w: 6, color: C.yellow, key: 'rbdh' });
     ctx.restore();
   }
-  handText('rào cản,', 110, 1150, 64, C.yellow, { key: 'rbt1', frac: ev(tH, 0.5) });
-  handText('không phải lý do để chờ', 110, 1240, 64, C.white, { key: 'rbt2', frac: ev(tN, 0.9) });
-  if (TT > tN + 0.8) ink([[110, 1268], [800, 1264]], { w: 6, color: C.red, key: 'rbul', frac: ev(tN + 0.8, 0.5) });
+  // the ground
+  ink([[80, GY], [1000, GY]], { w: 3.5, color: C.periD, key: 'rbg' });
+  // the hurdle grows slowly out of the ground while "Đó là…" (built from the 128 GB), settles on "rào cản"
+  const hs = EZ.io(seg(TT, t1 + 0.15, tH + 0.1));
+  if (hs > 0) {
+    ctx.save(); ctx.translate(HX, GY); ctx.scale(1, hs);
+    paint(rrectPts(-96, -156, 16, 156, 4), { fill: C.peri, key: 'rhp0', line: C.white, w: 2.5 });
+    paint(rrectPts(80, -156, 16, 156, 4), { fill: C.peri, key: 'rhp1', line: C.white, w: 2.5 });
+    paint(rrectPts(-125, -190, 250, 52, 10), { fill: C.yellow, key: 'rhb', line: C.white, w: 3, tex: [{ k: 'hatch', a: 0.9, gap: 22, w: 6, c: C.navy, al: 0.35 }] });
+    ctx.restore();
+    if (hs > 0.98) { const tw = monoW(32) * 6; ctx.fillStyle = C.yellow; ctx.fillRect(HX - tw / 2 - 8, GY - 186, tw + 16, 44); monoText('128 GB', HX - tw / 2, GY - 152, 32, C.navy, { key: 'rhbt' }); }
+  }
+  handText('rào cản,', 110, 1170, 64, C.yellow, { key: 'rbt1', frac: ev(tH, 0.5) });
+  handText('không phải lý do để chờ', 110, 1270, 64, C.white, { key: 'rbt2', frac: ev(tN, 0.9) });
+  if (TT > tN + 0.8) ink([[110, 1298], [800, 1294]], { w: 6, color: C.red, key: 'rbul', frac: ev(tN + 0.8, 0.5) });
+  handText('(thử nghiệm của Rapid7)', 110, 1390, 46, C.periD, { key: 'rb7', frac: ev(t1 + 0.3, 0.8) });
   // THE SERVER at SRV
   serverProp(SRV[0], SRV[1], { state: 'vuln', dark: true });
   // a red arc still clears the hurdle into the server
-  const arc = r_curve([[95, 990], [250, 790], [400, 900]]);
+  const arc = r_curve([[75, 1010], [110, 860], [HX, 700], [395, 905]]);
   if (TT > tN) {
     r_arrow(arc, { c: C.red, w: 6, frac: ev(tN, 0.5), key: 'rbarc', dash: [16, 12] });
-    if (TT > tN + 0.5) { const p = pointAt(resample(arc, false, 8), mod(TT - tN - 0.5, 1.1) / 1.1); ctx.fillStyle = C.red; ctx.beginPath(); ctx.arc(p[0], p[1], 11, 0, TAU); ctx.fill(); ctx.strokeStyle = C.white; ctx.lineWidth = 2.5; ctx.stroke(); }
+    if (TT > tN + 0.5) { const p = pointAt(resample(arc, false, 8), mod(TT - tN - 0.5, 1.1) / 1.1); ctx.fillStyle = C.red; ctx.beginPath(); ctx.arc(p[0], p[1], 13, 0, TAU); ctx.fill(); ctx.strokeStyle = C.white; ctx.lineWidth = 2.5; ctx.stroke(); }
   }
   inkTag('~128 GB');
 };
@@ -224,10 +232,12 @@ SCENES.check = function () {
     ctx.save(); ctx.translate(slide, 0);
     const a0 = E + 0.6;
     if (TT > E + 0.45) {
-      termCard(70, 410, 920, [{ s: '$ grep -rnE "http2" /etc/nginx/' }, { s: '  listen 443 ssl http2;', out: true, c: C.yellow }], { t0: a0, cps: 22, key: 'rt1', size: 38 });
+      termCard(70, 390, 920, [{ s: '$ grep -rnE "http2" /etc/nginx/' }, { s: '/etc/nginx/sites-enabled/default:12:', out: true, c: C.periD }, { s: '  listen 443 ssl http2;', out: true, c: C.yellow }], { t0: a0, cps: 22, key: 'rt1', size: 38 });
+      // an illustrative result (path:line: prefix as grep -rn prints it)
+      if (slide === 0) handText('ví dụ', 925 - handW('ví dụ', 46), 372, 46, C.ink, { key: 'rvd1', frac: ev(a0 + 31 / 22 + 0.25, 0.3) });
       // reading: this line, or "http2 on;" = HTTP/2 on
-      const nt = a0 + 31 / 22 + 0.5;
-      let x = 80; const y = 650;
+      const nt = a0 + 31 / 22 + 1.0;
+      let x = 80; const y = 705;
       if (slide === 0) {
       x += handText('dòng này, hoặc', x, y, 48, C.ink, { key: 'rn1', frac: ev(nt, 0.4) }) + 16;
       if (TT > nt + 0.4) monoText('http2 on;', x, y, 36, C.ink, { key: 'rn2', count: Math.floor(seg(TT, nt + 0.4, nt + 0.8) * 9) });
@@ -241,12 +251,12 @@ SCENES.check = function () {
     }
     const b0 = VW('check', 'hỏi') - 0.3;
     if (TT > b0 - 0.2) {
-      termCard(70, 730, 920, [
+      termCard(70, 775, 920, [
         { s: '$ openssl s_client -alpn h2 -connect' }, { s: '  example.com:443 </dev/null', gap: 0.05 }, { s: '  2>/dev/null | grep "ALPN"', gap: 0.05 },
         { s: 'ALPN protocol: h2', out: true, c: C.yellow }], { t0: b0, cps: 30, key: 'rt2', size: 38 });
       // asked from outside: a dashed arrow from the card to the (small) server
-      if (slide === 0) handText('hỏi từ bên ngoài', 90, 1110, 48, C.ink, { key: 'rn4', frac: ev(b0 + 0.4, 0.5) });
-      r_arrow(r_curve([[480, 1090], [620, 1160], [740, 1260]]), { c: C.ink, w: 4, dash: [12, 10], frac: ev(b0 + 0.7, 0.5), key: 'rn5' });
+      if (slide === 0) handText('hỏi từ bên ngoài', 90, 1150, 48, C.ink, { key: 'rn4', frac: ev(b0 + 0.4, 0.5) });
+      r_arrow(r_curve([[490, 1135], [630, 1190], [735, 1265]]), { c: C.ink, w: 4, dash: [12, 10], frac: ev(b0 + 0.7, 0.5), key: 'rn5' });
     }
     ctx.restore();
   }
@@ -274,11 +284,17 @@ SCENES.check = function () {
     handText('CDN', 540 - handW('CDN', 62, 700) / 2, 1182 + bob, 62, C.skyD, { key: 'rcdn', weight: 700 });
     ctx.restore();
     r_arrow([[540, 1080], [540, 1030]], { c: C.ink, w: 4, frac: ev(tCDN + 0.5, 0.25), key: 'rcp2' });
+    // a request goes the usual way: laptop -> CDN (and the CDN answers it; the origin never sees it)
+    if (TT > tCDN + 0.6) {
+      const u = mod(TT - tCDN - 0.6, 1.0), p = u < 0.5 ? pointAt(resample(cdnPath, false, 8), u / 0.5) : pointAt(resample([[385, 1185], [540, 1160]], false, 8), (u - 0.5) / 0.5);
+      ctx.fillStyle = C.skyD; ctx.beginPath(); ctx.arc(p[0], p[1], 13, 0, TAU); ctx.fill(); ctx.strokeStyle = C.ink; ctx.lineWidth = 2.5; ctx.stroke();
+    }
   }
-  if (TT > tBy - 0.4) {
-    r_arrow(byPath, { c: C.green, w: 8, frac: ev(tBy - 0.4, 0.7), key: 'rby', head: 32 });
-    handText('kiểm tra thẳng origin', 560 - handW('kiểm tra thẳng origin', 52) / 2, 1430, 52, C.green, { key: 'rbyt', frac: ev(tBy - 0.1, 0.6), weight: 700 });
-    if (TT > tBy + 0.3) { const p = pointAt(resample(byPath, false, 8), mod(TT - tBy - 0.3, 0.9) / 0.9); ctx.fillStyle = C.green; ctx.beginPath(); ctx.arc(p[0], p[1], 12, 0, TAU); ctx.fill(); ctx.strokeStyle = C.ink; ctx.lineWidth = 2.5; ctx.stroke(); }
+  const tB0 = tCDN + 0.95;
+  if (TT > tB0) {
+    r_arrow(byPath, { c: C.green, w: 8, frac: ev(tB0, 0.9), key: 'rby', head: 32 });
+    handText('kiểm tra thẳng origin', 560 - handW('kiểm tra thẳng origin', 52) / 2, 1430, 52, C.green, { key: 'rbyt', frac: ev(tB0 + 0.4, 0.7), weight: 700 });
+    if (TT > tB0 + 0.9) { const p = pointAt(resample(byPath, false, 8), mod(TT - tB0 - 0.9, 0.9) / 0.9); ctx.fillStyle = C.green; ctx.beginPath(); ctx.arc(p[0], p[1], 12, 0, TAU); ctx.fill(); ctx.strokeStyle = C.ink; ctx.lineWidth = 2.5; ctx.stroke(); }
   }
   // THE SERVER (paper): SRV at the bridges, the corner while the cards are up
   serverProp(sx, sy, { state: 'vuln', s: ss, key: 'srv' });
@@ -292,15 +308,16 @@ SCENES.check = function () {
 // =====================================================================
 SCENES.version = function () {
   paperSheet('version');
-  const E = ET('version'), size = 34, lh = size * 1.45, cw = monoW(size);
+  const E = ET('version'), size = 38, lh = size * 1.45, cw = monoW(size);
   const tU = VW('version', 'ubuntu'), tS = VW('version', 'so'), tN = VW('version', 'con');
   const L4 = 'ii  nginx  1.24.0-2ubuntu7.5  amd64', vStr = '1.24.0-2ubuntu7.5';
   const t0 = E + 0.6;
-  termCard(70, 410, 920, [{ s: '$ nginx -v' }, { s: 'nginx version: nginx/1.24.0', out: true }, { s: '$ dpkg -l nginx | tail -n 1', gap: 0.1 }, { s: L4, out: true }],
-    { t0, cps: 20, key: 'rv' });
-  if (TT > tU) chip('Ubuntu', 790, 446, C.orange, { size: 30, s: popS(tU), key: 'rub' });
+  const CY = 380;
+  termCard(70, CY, 920, [{ s: '$ nginx -v' }, { s: 'nginx version: nginx/1.24.0', out: true }, { s: '$ dpkg -l nginx | tail -n 1', gap: 0.1 }, { s: L4, out: true }],
+    { t0, cps: 20, key: 'rv', size });
+  if (TT > tU) chip('Ubuntu', 790, CY + 36, C.orange, { size: 30, s: popS(tU), key: 'rub' });
   // highlight of the package version on the card
-  const vx = 70 + 28 + 11 * cw, vy = 410 + 70 + 3 * lh + size * 0.4;
+  const vx = 70 + 28 + 11 * cw, vy = CY + 70 + 3 * lh + size * 0.4;
   if (TT > tS - 0.2) {
     ctx.save(); ctx.strokeStyle = C.yellow; ctx.lineWidth = 4; ctx.globalAlpha = 0.9;
     const k = ev(tS - 0.2, 0.4); ctx.strokeRect(vx - 8, vy - size - 2, (vStr.length * cw + 16) * k, size + 16); ctx.restore();
@@ -310,18 +327,18 @@ SCENES.version = function () {
   // the magnifier: the full package version string, big
   const ms = popS(tS);
   if (ms > 0) {
-    const big = 60, bcw = monoW(big), bw = bcw * vStr.length, bx = 540 - bw / 2, by = 1172;
-    ctx.save(); ctx.translate(540, 1150); ctx.scale(ms, ms); ctx.translate(-540, -1150);
-    handText('ví dụ', 120, 1066, 46, C.ink, { key: 'rvd' });
-    ink([[bx + bw + 30, 1100], [bx + bw + 100, 1040]], { w: 16, color: C.woodD, key: 'rmh' });
-    paint(rrectPts(bx - 36, 1090, bw + 72, 120, 60), { fill: '#fbf6ea', key: 'rmg', line: C.ink, w: 7, tex: [{ k: 'pencil', c: C.skyL, al: 0.5, per: 60 }, { k: 'hatch', gap: 6, al: 0.15, dens: (x, y) => clamp((x - bx) / bw - 0.3) }] });
+    const big = 60, bcw = monoW(big), bw = bcw * vStr.length, bx = 540 - bw / 2, by = 1212;
+    ctx.save(); ctx.translate(540, 1190); ctx.scale(ms, ms); ctx.translate(-540, -1190);
+    handText('ví dụ', 120, 1106, 46, C.ink, { key: 'rvd' });
+    ink([[bx + bw + 30, 1140], [bx + bw + 100, 1080]], { w: 16, color: C.woodD, key: 'rmh' });
+    paint(rrectPts(bx - 36, 1130, bw + 72, 120, 60), { fill: '#fbf6ea', key: 'rmg', line: C.ink, w: 7, tex: [{ k: 'pencil', c: C.skyL, al: 0.5, per: 60 }, { k: 'hatch', gap: 6, al: 0.15, dens: (x, y) => clamp((x - bx) / bw - 0.3) }] });
     monoText(vStr, bx, by, big, C.ink, { key: 'rvbig' });
-    ink([[bx - 4, by + 18], [bx + bw + 4, by + 18]], { w: 5, color: C.green, key: 'rvul', frac: ev(tS + 0.2, 0.8) });
+    ink([[bx - 4, by + 18], [bx + bw + 4, by + 18]], { w: 5, color: '#2f6db5', key: 'rvul', frac: ev(tS + 0.2, 0.8) });
     // the upstream number (can stay the same with Ubuntu backports)
-    if (TT > tN) { ink([[bx - 4, 1102], [bx + 6 * bcw, 1102]], { w: 5, color: C.skyD, key: 'rvmaj', frac: ev(tN, 0.4) }); }
+    if (TT > tN) { ink([[bx - 4, by - 52], [bx + 6 * bcw, by - 52]], { w: 5, color: C.skyD, key: 'rvmaj', frac: ev(tN, 0.4) }); }
     ctx.restore();
   }
-  handText('so cả chuỗi phiên bản gói', 540 - handW('so cả chuỗi phiên bản gói', 54, 700) / 2, 1300, 54, C.green, { key: 'rvs', frac: ev(tS + 0.3, 0.8), weight: 700 });
-  handText('số chính có thể không đổi', 540 - handW('số chính có thể không đổi', 48) / 2, 1390, 48, C.skyD, { key: 'rvn', frac: ev(tN + 0.2, 0.7) });
+  handText('so cả chuỗi phiên bản gói', 540 - handW('so cả chuỗi phiên bản gói', 54, 700) / 2, 1330, 54, '#2f6db5', { key: 'rvs', frac: ev(tS + 0.3, 0.8), weight: 700 });
+  handText('số chính có thể không đổi', 540 - handW('số chính có thể không đổi', 48) / 2, 1420, 48, C.skyD, { key: 'rvn', frac: ev(tN + 0.2, 0.7) });
   inkTag('xem phiên bản');
 };
