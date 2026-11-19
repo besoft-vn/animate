@@ -108,6 +108,7 @@ SCENES.disable = function () {
   f_sc(520, 930, f_inout(tCfg, tOutB), () => {
     f_card(70, T0, 900, 380, 'fdC');
     handText('NGINX ≥ 1.25.1', 100, T0 + 60, 46, C.ink, { key: 'fdCa', frac: ev(tCfg + 0.2, 0.4), weight: 700 });
+    inkCard('bước 1', 820, T0 + 40, 46, { rot: -0.03, s: popS(tCfg + 0.1) });
     const s1 = 'listen 443 ssl;';
     monoText(s1, 100, T0 + 124, 40, C.ink, { key: 'fdC1', count: Math.floor(clamp((TT - tCfg - 0.5) * 30 / s1.length) * s1.length) });
     if (TT >= tCfg + 0.7) {
@@ -129,12 +130,13 @@ SCENES.disable = function () {
   });
 
   // ---- the command: on screen from ~89 s (slides down from the top) and held until the bridge
-  const tTerm = tCfg + 1.2, tEndT = t1 - 0.5;
+  const tTerm = tCfg + 1.2, tEndT = t1 - 0.5;   // on screen ≥ 2 s (review MUST-FIX); order shown by the 'bước 1 / bước 2' tags
   const slide = EZ.o3(seg(TT, tTerm - 0.35, tTerm)), fadeT = 1 - EZ.i2(seg(TT, tEndT - 0.05, tEndT + 0.2));
   if (TT >= tTerm - 0.35 && fadeT > 0.01) {
     ctx.save(); ctx.globalAlpha = fadeT; ctx.translate(0, -260 * (1 - slide));
     const L1 = '$ sudo nginx -t &&', L2 = '  sudo systemctl restart nginx', cw = monoW(36), ty = 432;
     termCard(60, ty, 900, [{ s: L1 }, { s: L2 }], { size: 36, t0: tTerm + 0.1, cps: 34, key: 'fdT' });
+    inkCard('bước 2', 820, ty + 26, 46, { rot: 0.03, s: popS(tTerm) });
     // markers under the words as the voice says them: "kiểm tra cấu hình" → nginx -t, "khởi động lại" → restart
     const lh = 36 * 1.45, by1 = ty + 70 + 36 * 0.4 + 10, by2 = by1 + lh;
     ink([[88 + cw * 7, by1], [88 + cw * 15, by1 + 1]], { w: 5, color: '#5de37a', key: 'fdTu1', frac: ev(vw('kiểm'), 0.35), amt: 0.8 });
@@ -384,9 +386,9 @@ SCENES.today = function () {
   const P = f_srvPath([[t0 + 0.5, 830, 1360, 0.55], [vw('đang'), 720, 1335, 0.62, 0.8]]);   // the finale: the green server steps forward
   const ITEMS = ['liệt kê máy chạy NGINX', 'tìm máy bật HTTP/2, HTTP/3', 'Ubuntu: tắt tạm, chờ USN', 'Docker: kéo 1.30.7 / 1.31.9', 'kiểm tra SCTP, ASLR'];
   const tW = [vw('liệt') - 0.2, vw('tìm') - 0.2, vw('tắt') - 0.3, vw('nâng') - 0.2, vw('kiểm') - 0.2];
-  const C1 = '$ cat /proc/sys/kernel/', C2 = 'randomize_va_space', CPS = 30, TY = 960;
+  const C1 = '$ cat /proc/sys/kernel/randomize_va_space', CPS = 30, TY = 960;   // ONE line (32 px): a wrapped path invites a typo
   const tTerm = vw('tắt') + 0.55;                   // ≈134.5: typed early so the answer stays up to the end
-  const tOutp = tTerm + C1.length / CPS + 0.25 + C2.length / CPS + 0.25;
+  const tOutp = tTerm + C1.length / CPS + 0.25;
   const tK = [vw('nginx') + 0.1, vw('ba') + 0.1, vw('hoặc', 2), vw('và'), tOutp + 0.1];
   const RY = (i) => 470 + i * 96;
   let cur = -1;
@@ -435,9 +437,9 @@ SCENES.today = function () {
 
   // ---- item 5: the ASLR check, typed from ≈134.5 and held to the end (the end card shares the last seconds)
   f_sc(510, TY + 110, popS(tTerm - 0.3), () => {
-    termCard(60, TY, 900, [{ s: C1 }, { s: C2 }, { s: '2', out: true, c: '#5de37a' }], { size: 36, t0: tTerm, cps: CPS, key: 'fyT' });
+    termCard(60, TY, 900, [{ s: C1 }, { s: '2', out: true, c: '#5de37a' }], { size: 32, t0: tTerm, cps: CPS, key: 'fyT' });
     if (TT >= tOutp) {   // ring the answer
-      const by = TY + 70 + 2 * 36 * 1.45 + 36 * 0.4;
+      const by = TY + 70 + 1 * 32 * 1.45 + 32 * 0.4;
       ink(ellipsePts(99, by - 13, 32, 34, 0, 30), { closed: true, w: 5, color: '#5de37a', key: 'fy2r', frac: ev(tOutp + 0.1, 0.35) });
     }
   });
