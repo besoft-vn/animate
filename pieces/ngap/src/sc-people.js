@@ -21,15 +21,15 @@ function PE_deskBack(hh, mm) {
   cut(capsulePts(990, PE_DESK_Y - 10, 1010, 760, 26, 6), PAL.charcoal, { key: 'pelarm1', sb: 6 });
   cut(capsulePts(1010, 760, 950, 700, 24, 6), PAL.charcoal, { key: 'pelarm2', sb: 6 });
   cut([[890, 730], [925, 650], [985, 650], [1030, 730]], PAL.lamp, { key: 'pelshade', sb: 8 });
-  ctx.save(); ctx.globalAlpha = 0.18 + 0.03 * Math.sin(TT * 3);
-  ctx.fillStyle = PAL.yellow; ctx.beginPath(); ctx.moveTo(898, 732); ctx.lineTo(1022, 732); ctx.lineTo(1080, PE_DESK_Y); ctx.lineTo(820, PE_DESK_Y); ctx.closePath(); ctx.fill();
-  ctx.restore();
+  cut(ellipsePts(960, 736, 26, 14, 0, 14), PAL.yellow, { key: 'pelbulb', sb: 4, grain: false });
   cut(ellipsePts(990, PE_DESK_Y - 8, 60, 16, 0, 22), PAL.charcoal, { key: 'pelbase', sb: 5 });
 }
 function PE_deskFront() {
   cut(rect(-40, PE_DESK_Y, W + 80, 900, 6), PAL.wood, { key: 'pedesk', tear: 0.6, sy: -6, pat: pat.grainWood('rgba(120,70,30,0.18)') });
   cut(rect(-40, PE_DESK_Y - 6, W + 80, 26, 6), PAL.woodL, { key: 'pedeskedge', tear: 0.5, sb: 6, sy: 4 });
-  mug(770, PE_DESK_Y - 100, 1.05, PAL.yellow, 'pemug');
+  cut(rect(150, 1215, 780, 230, 14), PAL.woodL, { key: 'pedrawer', sb: 6, sy: 3, grain: 0.3 });
+  cut(capsulePts(490, 1250, 590, 1250, 22, 6), PAL.woodD, { key: 'peknob', sb: 4 });
+  mug(885, PE_DESK_Y - 92, 0.95, PAL.yellow, 'pemug');
 }
 
 // ---- an oxygen tank (green, neutral prop) rising from behind the desk; returns the valve point
@@ -41,6 +41,18 @@ function PE_tank(x, k) {
   cut(ellipsePts(x + 28, top + 2, 16, 16, 0, 16), PAL.paper, { key: 'petankg', sb: 3 });
   ink([[x + 28, top + 2], [x + 28 + 9 * Math.cos(-0.6 + Math.sin(TT * 7) * 0.05), top + 2 + 9 * Math.sin(-0.6)]], { w: 3, color: PAL.ink, amt: 0.1, key: 'petankn' });
   return [x, top - 6];
+}
+// the tank label "O₂ 100%" (subscript drawn by hand: the font has no ₂)
+function PE_o2tag(x, y, k) {
+  if (k <= 0.01) return;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(-0.05); ctx.scale(k, k);
+  const w1 = handW('O', 56), w2 = handW('2', 36), w3 = handW(' 100%', 56), w = w1 + w2 + w3 + 50;
+  cut(rect(-w / 2, -42, w, 84, 3), PAL.paper, { key: 'peo2', tear: 1.6 });
+  let xx = -w / 2 + 25;
+  handText('O', xx, 20, 56, PAL.ink, { key: 'peo2a' }); xx += w1;
+  handText('2', xx, 32, 36, PAL.ink, { key: 'peo2b' }); xx += w2;
+  handText(' 100%', xx, 20, 56, PAL.ink, { key: 'peo2c' });
+  ctx.restore();
 }
 // the clear mask (over nose + mouth) at (mx, my), rotated a; tube from the valve
 function PE_mask(mx, my, a, valve, strap) {
@@ -87,11 +99,11 @@ SCENES.hook = function () {
     const fx = PE_MINH.x, fy = PE_MINH.y - 130 + breath;               // over nose + mouth, below the eyes
     const slide = EZ.io(seg(TT, yT0 + 0.1, yT0 + 0.7));
     const mx = lerp(valve[0] + 40, fx, mk) + slide * 30, my = lerp(valve[1] + 30, fy, mk) + slide * 110;
-    PE_mask(mx, my, lerp(-0.4, 0, mk) + slide * 0.35, valve, clamp((mk - 0.85) / 0.15));
+    PE_mask(mx, my, lerp(-0.4, 0, mk) + slide * 0.35, valve, clamp((mk - 0.85) / 0.15) * (1 - slide));
   }
   PE_deskFront();
   // tank label (≥ 50 px) — in front of the desk edge
-  ptag('O₂ 100%', 200, 1010, tO2, 54, { rot: -0.05, fill: PAL.paper });
+  PE_o2tag(200, 1010, pop(tO2));
   // the question tag, then the strike on "vẫn"
   ptag('thiếu ô xi?', 260, 520, tO, 60, { rot: -0.04 });
   if (TT > tVan) {
@@ -150,7 +162,7 @@ const PE_LLAN_SKIN = PAL.skin2;
 // an icon card (eye / ear) with its word, popping at t0
 function PE_iconCard(kind, word, x, y, t0) {
   const s = pop(t0); if (s <= 0.01) return;
-  ctx.save(); ctx.translate(x, y); ctx.rotate(kind === 'eye' ? -0.05 : 0.05); ctx.scale(s, s);
+  ctx.save(); ctx.translate(x, y); ctx.rotate(kind === 'eye' ? -0.05 : 0.05); ctx.scale(s * 0.86, s * 0.86);
   cut(rect(-92, -84, 184, 168, 6), PAL.paper, { key: 'pec' + kind, tear: 1.4, sb: 8 });
   cut(rect(-30, -98, 60, 26, 2), 'rgba(240,230,190,0.8)', { key: 'pect' + kind, shadow: false, grain: 0.3, shade: false });
   const I = PAL.ink;
@@ -166,7 +178,7 @@ function PE_iconCard(kind, word, x, y, t0) {
     ink(arcPts(2, -28, 16, Math.PI * 0.6, Math.PI * 1.9, 10), { w: 5, color: '#a96f4f', amt: 0.2, key: 'peeari' });
     for (let i = 0; i < 2; i++) { const r = 50 + i * 16 + mod(TT * 30, 16); ctx.save(); ctx.globalAlpha = 0.8 - i * 0.3; ink(arcPts(-20, -26, r, Math.PI * 0.75, Math.PI * 1.25, 8), { w: 5, color: COL.textD, amt: 0.2, key: 'peeaw' + i }); ctx.restore(); }
   }
-  vtext(word, 0, 62, 52, { col: COL.text });
+  vtext(word, 0, 64, 60, { col: COL.text });
   ctx.restore();
 }
 
@@ -189,8 +201,8 @@ SCENES.lay = function () {
   PE_livingFront();
   PE_phone(pop(tDoc - 0.15, SPRING.smooth), TT > tSil ? Math.sin(TT * 27) * 0.012 : 0);
   // the senses: eye on "thấy", ear on "nghe"
-  PE_iconCard('eye', 'thấy', 522, 565, tThay);
-  PE_iconCard('ear', 'nghe', 522, 770, tNghe);
+  PE_iconCard('eye', 'thấy', 520, 530, tThay);
+  PE_iconCard('ear', 'nghe', 520, 712, tNghe);
   // the hero above Lan: exact at [740,560,70] at the start; looks at Minh; anxious (wow + shiver) at the end
   const anx = TT > tDoc + 0.4;
   const shiver = TT > tSil ? Math.sin(TT * 40) * 2.5 : 0;
@@ -208,12 +220,12 @@ SCENES.payoff = function () {
   // Minh laughs (bouncing, little open mouth)
   const laugh = 1 - seg(TT, 45.6, 46.6);
   const bnc = Math.abs(Math.sin(TT * TAU * 2.4)) * 7 * laugh;
-  bust(PE_LMINH.x, PE_LMINH.y - bnc, PE_LMINH.s, { who: 'minh', yawn: 0.05 + 0.16 * laugh * Math.abs(Math.sin(TT * TAU * 2.4)), look: 1, tilt: 0.04 * Math.sin(TT * TAU * 1.2) * laugh, key: 'pelminh' });
+  bust(PE_LMINH.x, PE_LMINH.y - bnc, PE_LMINH.s, { who: 'minh', yawn: 0, look: 1, tilt: 0.04 * Math.sin(TT * TAU * 1.2) * laugh, key: 'pelminh' });
   // Lan: a huge yawn already near full at the SLAM
   const yl = yawnCurve(TT, SLAM - 1.0, 3.2);
   bust(PE_LLAN.x, PE_LLAN.y + Math.sin(TT * TAU * 0.33 + 1) * 4, PE_LLAN.s, { who: 'lan', yawn: yl, look: TT > SLAM + 2.3 ? -1 : 0, key: 'pellan' });
-  PE_livingFront();
   PE_phone(1 - EZ.io(seg(TT, SLAM + 0.6, SLAM + 1.6)));
+  PE_livingFront();
   // the brain above Lan yawns with her; exactly at [740,560,70] all along
   const yb = yawnCurve(TT, SLAM - 0.8, 3.0);
   heroBrain(PE_HERO_LAY[0], PE_HERO_LAY[1], PE_HERO_LAY[2], { warm: heroWarmAt(TT), yawn: yb, mood: TT > SLAM + 2.4 ? 'happy' : 'calm', look: TT > SLAM + 3.2 ? -0.8 * Math.sin(TT * 1.5) : 0, key: 'hero' });
