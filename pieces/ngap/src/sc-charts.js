@@ -40,7 +40,7 @@ function CH_num(str, x, y, t0, size, col) {
   vtext(str, x, y, size, { col, al: clamp(s * 1.6) });
   ctx.restore();
 }
-// a horizontal paper bar: pale track (0..50%) + filled part growing from t0
+// a horizontal paper bar: pale track (0..100%) + filled part growing from t0
 function CH_pctBar(x, y, w, frac, t0, col, key) {
   cut(rect(x, y, w, 34, 6), 'rgba(255,255,255,0.55)', { key: key + 'tr', shadow: false, tear: 0.5, grain: false, shade: false });
   const g = clamp(springEase(TT - t0, 120, 18), 0, 1.05);
@@ -90,11 +90,11 @@ SCENES.season = function () {
     CH_face(Lc + fx, fy, 34, i, wi >= 0 ? CH_held(tN + 0.1 * wi, i) : 0, { key: 'chfw' });
     CH_face(Rc + fx, fy, 34, i + 3, si >= 0 ? CH_held(tS + 0.15 + 0.1 * si, i) : 0, { key: 'chfs' });
   }
-  // the numbers + bars (bar length ∝ %, track = 50%)
+  // the numbers + bars (bar length ∝ %, track = 100%)
   CH_num('45%', L.x + 92, 1180, tN + 0.25, 72, COL.coolD);
-  CH_pctBar(L.x + 175, 1145, 255, 0.45 / 0.5, tN + 0.3, COL.cool, 'chbw');
+  CH_pctBar(L.x + 175, 1145, 255, 0.45, tN + 0.3, COL.cool, 'chbw');
   CH_num('24%', R.x + 92, 1180, tS + 0.4, 72, COL.heatD);
-  CH_pctBar(R.x + 175, 1145, 255, 0.24 / 0.5, tS + 0.45, COL.heat, 'chbs');
+  CH_pctBar(R.x + 175, 1145, 255, 0.24, tS + 0.45, COL.heat, 'chbs');
   // tag Arizona (top right, below the scene tag line)
   ptag('Arizona', 800, 430, tA, 54, { rot: 0.04 });
   // the hero: exact spot all era, looks at winter then at summer
