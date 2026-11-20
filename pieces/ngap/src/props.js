@@ -147,7 +147,7 @@ function heroBrain(x, y, r = 80, o = {}) {
 function heroWarmAt(t) {
   if (t < ET('warm') + 0.6) return 0.25;
   if (t < VW('cool', 'lên')) return 1;
-  if (t < ET('season')) return 1 - seg(t, VW('cool', 'lên'), ET('season') - 0.6);
+  if (t < ET('season')) return 1 - seg(t, VW('cool', 'lên'), VW('cool', 'lên') + 1.2);
   return 0;
 }
 STYLE.hero = (x, y, r, o = {}) => heroBrain(x, y, r, { warm: heroWarmAt(TT), mood: 'calm', key: 'hero' + (o.key ?? '') });

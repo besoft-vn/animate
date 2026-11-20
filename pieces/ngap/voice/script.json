@@ -1,7 +1,7 @@
 {
  "lang": "vi",
  "lead": 0.9,
- "tail": 1.2,
+ "tail": 1.0,
  "level": -16,
  "tts": {
   "provider": "elevenlabs-api",
@@ -66,7 +66,7 @@
   },
   {
    "id": "end",
-   "text": "Vậy đấy: một cái ngáp là não đang tự hạ nhiệt, và có khi chính bạn vừa ngáp xong.",
+   "text": "Vậy đấy: có lẽ ngáp là não đang tự hạ nhiệt, và có khi chính bạn vừa ngáp xong.",
    "after": 0.3,
    "file": "end.mp3"
   }
