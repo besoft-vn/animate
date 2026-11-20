@@ -44,12 +44,8 @@ function scratch(text, out) {
 function decode(file) {
   const trim = 'silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.02';
   // every take levelled to the same loudness, so no line jumps out of the mix (S.level LUFS, default -16; false = off)
-  const lvl = S.level === false ? '' : `,loudnorm=I=${S.level ?? -16}:TP=-2:LRA=7`;
-  // two passes: ffmpeg 6.1 can hang forever on some takes when loudnorm is followed by a resample in the same graph
-  // (seen 19/11/2026); filter to float wav first, then resample to 48 kHz mono s16 in a second process
-  const f1 = spawnSync('ffmpeg', ['-v', 'error', '-i', file, '-af', `${trim},areverse,${trim},areverse${lvl}`, '-c:a', 'pcm_f32le', '-f', 'wav', '-'], { maxBuffer: 1 << 30, stdio: ['ignore', 'pipe', 'pipe'], timeout: 120000 });
-  if (f1.status !== 0) { console.error('could not decode', file, String(f1.stderr || f1.error)); process.exit(1); }
-  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', '-', '-ac', '1', '-ar', String(SR), '-f', 's16le', '-'], { input: f1.stdout, maxBuffer: 1 << 30, timeout: 120000 });
+  const lvl = S.level === false ? '' : `,aresample=${SR},loudnorm=I=${S.level ?? -16}:TP=-2:LRA=7,aresample=${SR}`   // resample BEFORE loudnorm: on some takes loudnorm at 44.1k hangs;
+  const r = spawnSync('ffmpeg', ['-nostdin', '-v', 'error', '-i', file, '-af', `${trim},areverse,${trim},areverse${lvl}`, '-ac', '1', '-ar', String(SR), '-f', 's16le', '-'], { maxBuffer: 1 << 30 });
   if (r.status !== 0) { console.error('could not decode', file, r.stderr.toString()); process.exit(1); }
   return r.stdout;
 }

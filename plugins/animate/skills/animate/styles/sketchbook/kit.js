@@ -167,7 +167,7 @@ function handLetter(str, x, y, size, o = {}) {
   ctx.translate(x, y); ctx.rotate(rot); ctx.translate(-x, -y);
   for (let i = 0; i < n && i < shown; i++) {
     if (str[i] === ' ') continue;
-    const k = clamp(shown - i), R = RNG('hl', key, i, B);
+    const k = clamp(shown - i), R = RNG('hl', key, i, TB());   // still text (TEXT_BOIL)
     const jx = R.n(1.2) * jit, jy = R.n(1.4) * jit, jr = R.n(0.025) * jit, gx = x0 + xs[i], gw = xs[i + 1] - xs[i];
     ctx.save(); ctx.globalAlpha = a * (0.25 + 0.75 * k);
     ctx.translate(gx + gw / 2 + jx, y + jy + (1 - k) * size * 0.12); ctx.rotate(jr); ctx.scale(0.8 + 0.2 * k, 0.8 + 0.2 * k);
