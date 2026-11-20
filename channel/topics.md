@@ -10,9 +10,9 @@ Tiêu chí: có một **quá trình thật** với các bước rõ ràng, có m
 - [x] 2026-11-17 — Lò vi sóng làm nóng thức ăn ra sao? → `pieces/lo-vi-song/` (crosshatch, 57s, giọng Tuan Khang / eleven_v3)
 - [x] 2026-11-19 — Vì sao nồi cơm điện tự nhảy nút "giữ ấm"? → `pieces/noi-com-dien/` (isometric, 56s, giọng Tuan Khang / eleven_v3)
 - [x] 2026-11-18 — Máy bay nặng hàng trăm tấn sao vẫn bay được? → `pieces/may-bay/` (sketchbook, 59s, giọng Tuan Khang / eleven_v3)
+- [x] 2026-11-20 — Vì sao ta ngáp — và vì sao ngáp lây? → `pieces/ngap/` (cut-paper, 61s, giọng Tuan Khang / eleven_v3)
 
 ## Hàng chờ (gợi ý style)
-- [ ] Vì sao ta ngáp — và vì sao ngáp lây? (cut-paper)
 - [ ] Màn hình cảm ứng biết ngón tay bạn ở đâu? (isometric)
 - [ ] Sét hình thành như thế nào? (riso)
 - [ ] Vết thương tự lành ra sao? (cut-paper)

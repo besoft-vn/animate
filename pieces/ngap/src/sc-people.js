@@ -160,7 +160,7 @@ function PE_phone(k, wob = 0) {
   ctx.save(); ctx.translate(660, 1105 + dy); ctx.rotate(-0.08 + wob);
   cut(rect(-110, -72, 220, 144, 18), PAL.navy, { key: 'peph', sb: 10 });
   cut(rect(-96, -58, 192, 116, 8), PAL.paper, { key: 'pephs', shadow: false, grain: false });
-  vtext('ngáp', 0, 18, 60, { col: COL.text });
+  if (k > 0.8) vtext('ngáp', 0, 18, 60, { col: COL.text });
   ctx.restore();
 }
 const PE_LLAN_SKIN = PAL.skin2;

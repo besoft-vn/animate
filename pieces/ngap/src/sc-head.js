@@ -165,7 +165,7 @@ function HD_engineCard(t0) {
     const u = mod(TT * 0.9, 1);
     dot(lerp(828, 866, u), 408, 5, COL.coolD); dot(lerp(866, 828, u), 452, 5, COL.coolD);
   }
-  vtext('làm mát', 840, 528, 50, { col: COL.coolD });
+  vtext('làm mát', 818, 528, 50, { col: COL.coolD });
   ctx.restore();
 }
 

@@ -80,8 +80,8 @@ SCENES.season = function () {
     ink([[sx + Math.cos(a) * 62, sy + Math.sin(a) * 62], [sx + Math.cos(a) * 84, sy + Math.sin(a) * 84]], { w: 8, color: '#e2ac2c', amt: 0.3, key: 'chsr' + k });
   }
   cut(ellipsePts(sx, sy, 50, 50, 0, 24), PAL.yellow, { key: 'chsun', sb: 6, sy: 4 });
-  thermo(R.x + 245, 880, 150, 0.86, { col: COL.heat, key: 'chts' });
-  vtext('37°C', R.x + 355, 845, 60, { col: COL.heatD });
+  thermo(R.x + 225, 880, 150, 0.86, { col: COL.heat, key: 'chts' });
+  vtext('37°C', R.x + 318, 845, 56, { col: COL.heatD });
   // faces: 2 rows × 4
   const winterY = [0, 2, 5, 7], summerY = [1, 6];
   for (let i = 0; i < 8; i++) {
