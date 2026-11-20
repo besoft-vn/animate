@@ -16,7 +16,7 @@ const HD_JAW_ANG = 0.42;                      // jaw = 1 -> 0.42 rad clockwise (
 const HD_JMAX = 1.08;                         // a bit wider on the deep breath ("hít")
 const HD_HERO = [470, 640, 130];
 // the vessel (neck -> brain underside)
-const HD_VES = [[452, 1215], [455, 1100], [461, 1005], [476, 935], [503, 880], [507, 818], [490, 770], [472, 738]];
+const HD_VES = [[440, 1215], [438, 1100], [430, 1000], [423, 920], [421, 860], [428, 800], [447, 760], [468, 738]];
 const HD_VES_R = resample(HD_VES, false, 6);
 
 // rotate points about the jaw hinge by the jaw opening
@@ -56,15 +56,21 @@ function HD_head(o) {
   cut([[340, 900], [530, 950], [548, 1170], [352, 1170]], HD_SKIN_D, { key: 'hdnk', sb: 6, sy: 3 });
   // mouth cavity (shows between the lips when the jaw drops)
   if (jaw > 0.02) {
-    const C = [[HD_HINGE[0] + 10, HD_HINGE[1]], [600, 872], [745, 878], ...HD_rotJ([[748, 886], [600, 880], [470, 872]], jaw)];
+    const C = [[HD_HINGE[0] + 10, HD_HINGE[1]], [600, 874], [745, 878], ...HD_rotJ([[744, 880], [600, 872], [470, 868]], jaw)];
     cut(C, COL.mouth, { key: 'hdcav', shadow: false, tear: 0.3, grain: false });
   }
-  // lower jaw (rotates about the hinge)
-  const J = [[HD_HINGE[0] - 5, HD_HINGE[1] + 2], [600, 879], [722, 883], [752, 892], [748, 918], [738, 960], [716, 1000], [650, 1018], [560, 1010], [480, 965], [448, 915]];
+  // upper head (cranium + face, profile facing right)
+  const U = [[300, 955], [252, 830], [232, 700], [248, 565], [305, 470], [400, 418], [510, 402], [620, 428], [700, 488], [746, 568],
+    [754, 648], [738, 690], [758, 740], [800, 800], [776, 826], [748, 834], [752, 860], [744, 878], [600, 876], [HD_HINGE[0] + 5, HD_HINGE[1] - 4], [400, 905]];
+  cut(U, HD_SKIN, { key: 'hdhead', sb: 14, sy: 8 });
+  // hair cap over the back/top
+  cut([[236, 700], [244, 572], [300, 474], [398, 420], [510, 404], [618, 430], [690, 482], [650, 500], [540, 480], [400, 500], [300, 590], [266, 700]], HD_HAIR, { key: 'hdhair', sb: 4, sy: 3, tear: 1.2 });
+  // lower jaw (rotates about the hinge; drawn over the upper face so a closed jaw is one continuous profile)
+  const J = [[HD_HINGE[0] - 5, HD_HINGE[1] - 2], [600, 868], [728, 872], [744, 886], [745, 908], [738, 948], [712, 980], [650, 994], [570, 990], [490, 958], [446, 912]];
   ctx.save(); ctx.translate(HD_HINGE[0], HD_HINGE[1]); ctx.rotate(HD_JAW_ANG * jaw); ctx.translate(-HD_HINGE[0], -HD_HINGE[1]);
   if (jaw > 0.05) { ctx.fillStyle = COL.tongue; ctx.beginPath(); ctx.ellipse(615, 872, 80, 13, 0.02, 0, TAU); ctx.fill(); }
-  cut(J, HD_SKIN, { key: 'hdjaw', sb: 8, sy: 5 });
-  ink([[722, 886], [750, 893], [746, 914]], { w: 5, color: '#c98466', amt: 0.3, key: 'hdll' });    // lower lip
+  cut(J, HD_SKIN, { key: 'hdjaw', sb: lerp(0, 8, clamp(jaw * 3)), sy: lerp(0, 5, clamp(jaw * 3)), sx: lerp(0, 3, clamp(jaw * 3)) });
+  ink([[728, 886], [744, 890], [743, 910]], { w: 5, color: '#c98466', amt: 0.3, key: 'hdll' });    // lower lip
   // stretch arcs on the cheek (the face muscles pull)
   const ar = clamp(o.arcs ?? 0);
   if (ar > 0.01) {
@@ -78,12 +84,6 @@ function HD_head(o) {
     }
   }
   ctx.restore();
-  // upper head (cranium + face, profile facing right)
-  const U = [[300, 955], [252, 830], [232, 700], [248, 565], [305, 470], [400, 418], [510, 402], [620, 428], [700, 488], [746, 568],
-    [754, 648], [738, 690], [758, 740], [800, 800], [776, 826], [748, 834], [752, 862], [735, 876], [600, 870], [HD_HINGE[0] + 5, HD_HINGE[1] - 8], [400, 905]];
-  cut(U, HD_SKIN, { key: 'hdhead', sb: 14, sy: 8 });
-  // hair cap over the back/top
-  cut([[236, 700], [244, 572], [300, 474], [398, 420], [510, 404], [618, 430], [690, 482], [650, 500], [540, 480], [400, 500], [300, 590], [266, 700]], HD_HAIR, { key: 'hdhair', sb: 4, sy: 3, tear: 1.2 });
   // the cut-away skull: bone ring + light window around the brain
   cut(ellipsePts(470, 636, 206, 168, 0, 48), '#eadcc0', { key: 'hdbone', sb: 6, sy: 3, tear: 1.4 });
   cut(ellipsePts(470, 636, 188, 152, 0, 48), '#fdf7ea', { key: 'hdwin', shadow: false, tear: 1.0, grain: 0.3 });
@@ -96,7 +96,8 @@ function HD_head(o) {
   else if (mod(TT, 3.4) < 0.1) ink([[692, 688], [716, 688]], { w: 5, color: I, amt: 0.2, key: 'hdeyb' });
   else { dot(706, 688, 8, I); dot(709, 685, 2.6, '#fff'); }
   ink(arcPts(704, 676 - 6 * clamp(jaw), 24, Math.PI * 1.15, Math.PI * 1.8, 8), { w: 5, color: HD_HAIR, amt: 0.2, key: 'hdbrow' });
-  ink([[748, 836], [752, 862], [732, 875]], { w: 5, color: '#c98466', amt: 0.3, key: 'hdul' });    // upper lip
+  ink([[748, 836], [752, 860], [742, 876]], { w: 5, color: '#c98466', amt: 0.3, key: 'hdul' });    // upper lip
+  if (jaw < 0.12) { ctx.save(); ctx.globalAlpha = 1 - jaw / 0.12; ink([[690, 877], [718, 879], [744, 878]], { w: 4, color: '#9a5a40', amt: 0.2, key: 'hdml' }); ctx.restore(); }   // closed mouth line
   ink([[770, 806], [784, 812]], { w: 4, color: '#b07050', amt: 0.2, key: 'hdnos' });               // nostril
   ctx.fillStyle = 'rgba(240,110,120,0.30)'; ctx.beginPath(); ctx.ellipse(670, 770, 26, 15, 0, 0, TAU); ctx.fill();
 
@@ -124,17 +125,15 @@ function HD_head(o) {
   if (air > 0.01 && aal > 0.01) {
     for (let i = 0; i < 3; i++) {
       const y0 = 868 + i * 46, y1 = 885 + i * 13;
-      waveArrow(930, y0, 568 + i * 6, y1 + (jaw - 1) * 6, { col: COL.cool, part: clamp(air * 1.25 - i * 0.12), w: 9, amp: 7, head: 22, ph: i * 1.3, al: aal, key: 'hdair' + i });
+      waveArrow(930, y0, 585 + i * 8, y1 + (jaw - 1) * 6, { col: COL.cool, part: clamp(air * 1.25 - i * 0.12), w: 9, amp: 7, head: 22, ph: i * 1.3, al: aal, key: 'hdair' + i });
     }
   }
-  // ---- heat leaving the blood into the air: 4 small orange wisps from the vessel drifting right into the stream
+  // ---- heat leaving the blood INTO the air: 3 small orange wave arrows from the vessel (x ≈ 445) to the air heads
   const hx = clamp(o.heatX ?? 0);
   if (hx > 0.01) {
-    for (let i = 0; i < 4; i++) {
-      const u = mod(TT * 0.55 + i / 4, 1), al = hx * Math.sin(Math.PI * u);
-      const bx = 512 + u * 120, by = 905 - i * 12 - u * 34, Pw = [];
-      for (let k = 0; k <= 7; k++) Pw.push([bx + k * 6, by - Math.sin(k * 1.1 + TT * 6 + i) * 7]);
-      ctx.save(); ctx.globalAlpha = al; ink(Pw, { w: 7, color: COL.heat, amt: 0.3, key: 'hdhx' + i }); ctx.restore();
+    for (let i = 0; i < 3; i++) {
+      const y0 = 852 + i * 34, y1 = 862 + i * 22;
+      waveArrow(450, y0, 548, y1, { col: COL.heat, part: clamp(hx * 1.3 - i * 0.15), w: 7, amp: 5, head: 15, ph: i * 1.7, al: hx, key: 'hdhx' + i });
     }
   }
 }
@@ -149,24 +148,24 @@ function HD_hero(o = {}) {
 // the engine + radiator inset card (cool, on "như nước làm mát")
 function HD_engineCard(t0) {
   const s = pop(t0); if (s <= 0.01) return;
-  const cx = 790, cy = 500;
+  const cx = 840, cy = 450;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(0.03); ctx.scale(s, s); ctx.translate(-cx, -cy);
-  cut(rect(660, 385, 270, 235, 6), '#fbf6ea', { key: 'hdcard', tear: 1.2 });
-  cut(rect(762, 350 + 25, 66, 26, 2), 'rgba(240,230,190,0.8)', { key: 'hdcardtape', shadow: false, grain: 0.3, shade: false });
-  // engine block (grey) with 3 cylinders
-  cut(rect(680, 430, 110, 90, 8), PAL.grey, { key: 'hdeng', sb: 4, sy: 3 });
-  for (let i = 0; i < 3; i++) cut(rect(690 + i * 32, 410, 24, 26, 4), PAL.charcoal, { key: 'hdcyl' + i, sb: 3, sy: 2 });
+  cut(rect(742, 350, 196, 198, 6), '#fbf6ea', { key: 'hdcard', tear: 1.2 });
+  cut(rect(808, 336, 60, 26, 2), 'rgba(240,230,190,0.8)', { key: 'hdcardtape', shadow: false, grain: 0.3, shade: false });
+  // engine block (grey) with 2 cylinders
+  cut(rect(756, 400, 66, 62, 8), PAL.grey, { key: 'hdeng', sb: 4, sy: 3 });
+  for (let i = 0; i < 2; i++) cut(rect(764 + i * 28, 382, 20, 22, 4), PAL.charcoal, { key: 'hdcyl' + i, sb: 3, sy: 2 });
   // radiator (grill)
-  cut(rect(840, 420, 66, 104, 4), '#c9ccd2', { key: 'hdrad', sb: 4, sy: 3, pat: pat.stripes('rgba(74,69,80,0.45)', 3, 11, 0) });
+  cut(rect(874, 388, 50, 82, 4), '#c9ccd2', { key: 'hdrad', sb: 4, sy: 3, pat: pat.stripes('rgba(74,69,80,0.45)', 3, 10, 0) });
   // the coolant loop: blue arrows engine -> radiator (top) and back (bottom), moving
   const k = clamp(seg(TT, t0 + 0.2, t0 + 0.9));
   if (k > 0) {
-    simpleArrow(796, 440, 834, 440, { col: COL.cool, w: 7, head: 14, part: k, key: 'hdcl1' });
-    simpleArrow(834, 508, 796, 508, { col: COL.cool, w: 7, head: 14, part: k, key: 'hdcl2' });
+    simpleArrow(828, 408, 866, 408, { col: COL.cool, w: 6, head: 12, part: k, key: 'hdcl1' });
+    simpleArrow(866, 452, 828, 452, { col: COL.cool, w: 6, head: 12, part: k, key: 'hdcl2' });
     const u = mod(TT * 0.9, 1);
-    dot(lerp(796, 834, u), 440, 6, COL.coolD); dot(lerp(834, 796, u), 508, 6, COL.coolD);
+    dot(lerp(828, 866, u), 408, 5, COL.coolD); dot(lerp(866, 828, u), 452, 5, COL.coolD);
   }
-  vtext('làm mát', 795, 595, 50, { col: COL.coolD });
+  vtext('làm mát', 840, 528, 50, { col: COL.coolD });
   ctx.restore();
 }
 
@@ -177,7 +176,7 @@ function HD_engineCard(t0) {
 SCENES.warm = function () {
   const t0 = ET('warm'), tG = VW('warm', 'giả'), tL = VW('warm', 'làm');
   const therm = lerp(0.35, 0.82, EZ.io(seg(TT, t0 + 0.4, t0 + 2.2))) + 0.015 * Math.sin(TT * 3);
-  HD_head({ jaw: 0.02 + 0.02 * Math.sin(TT * 1.6), therm });
+  HD_head({ jaw: 0, therm });
   HD_hero();
   ptag('giả thuyết', 762, 470, tG, 54, { rot: 0.04 });
   const q = pop(tL); if (q > 0.01) {
@@ -195,7 +194,7 @@ SCENES.warm = function () {
 // ---------------------------------------------------------------------
 SCENES.jaw = function () {
   const t0 = ET('jaw'), tH = VW('jaw', 'há'), tC = VW('jaw', 'cơ'), tD = VW('jaw', 'đẩy'), tM = VW('jaw', 'máu');
-  const jaw = 0.02 * (1 - ev(tH, 0.2)) + springEase(TT - tH, 90, 13);
+  const jaw = springEase(TT - tH, 90, 13);
   const arcs = clamp(seg(TT, tC, tC + 1.2));
   const blood = EZ.io(seg(TT, tD, tD + 1.0));
   const bw = 30 + 8 * EZ.io(seg(TT, tM, tM + 0.6));
@@ -209,7 +208,7 @@ SCENES.jaw = function () {
     ctx.restore();
   }
   HD_label('máu', 245, 1090, tM - 0.1, COL.blood, 62);
-  if (TT > tM - 0.1) simpleArrow(300, 1070, 420, 1040, { col: COL.blood, w: 5, head: 16, part: ev(tM, 0.4), key: 'hdmauar' });
+  if (TT > tM - 0.1) simpleArrow(300, 1070, 405, 1045, { col: COL.blood, w: 5, head: 16, part: ev(tM, 0.4), key: 'hdmauar' });
   viTag('03', TITLES.jaw);
   viCaption(['há hàm:', 'nhiều máu qua đầu'], [1, 'máu'], { at: 0.6, col: COL.bloodL });
 };
@@ -227,9 +226,9 @@ SCENES.air = function () {
   HD_head({ jaw, blood: 1, bw: 38, air, heatX, therm: 0.82 + 0.015 * Math.sin(TT * 3) });
   HD_hero();
   HD_label('máu', 245, 1090, -1, COL.blood, 62);
-  simpleArrow(300, 1070, 420, 1040, { col: COL.blood, w: 5, head: 16, key: 'hdmauar' });
+  simpleArrow(300, 1070, 405, 1045, { col: COL.blood, w: 5, head: 16, key: 'hdmauar' });
   HD_label('khí mát', 830, 1100, Math.min(tK, tH + 0.6), COL.coolD, 58);
-  HD_label('nhiệt', 640, 790, tU + 0.2, COL.heatD, 56);
+  HD_label('nhiệt', 600, 800, tU + 0.2, COL.heatD, 56);
   viTag('04', TITLES.air);
   viCaption(['hít khí mát vào', 'hút bớt nhiệt'], [0, 'khí mát'], { at: 0.6, col: COL.coolL });
 };
@@ -244,12 +243,12 @@ SCENES.cool = function () {
   const jaw = HD_JMAX * (1 - EZ.io(seg(TT, t0 + 0.55, t0 + 3.2)));
   const out = 1 - EZ.io(seg(TT, t0 + 0.55, t0 + 1.6));
   const cooled = EZ.io(seg(TT, t0 + 0.5, tL + 0.4));
-  const tc = EZ.io(seg(TT, tL, tL + 1.6));
+  const tc = EZ.io(seg(TT, tL, tL + 1.2));
   HD_head({ jaw, blood: 1, bw: 38, air: 1, airAl: out, heatX: out, cooled, therm: lerp(0.82, 0.3, tc) + 0.015 * Math.sin(TT * 3), thermCool: tc });
   HD_hero();
   HD_label('máu', 245, 1090, -1, COL.blood, 62);
-  simpleArrow(300, 1070, 420, 1040, { col: COL.blood, w: 5, head: 16, key: 'hdmauar' });
-  if (out > 0.01) { HD_label('khí mát', 830, 1100, -1, COL.coolD, 58, out); HD_label('nhiệt', 640, 790, -1, COL.heatD, 56, out); }
+  simpleArrow(300, 1070, 405, 1045, { col: COL.blood, w: 5, head: 16, key: 'hdmauar' });
+  if (out > 0.01) { HD_label('khí mát', 830, 1100, -1, COL.coolD, 58, out); HD_label('nhiệt', 600, 800, -1, COL.heatD, 56, out); }
   HD_engineCard(tN);
   viTag('05', TITLES.cool);
   viCaption(['máu mát hơn', 'lên não'], [0, 'mát hơn'], { at: 0.6, col: COL.coolL });

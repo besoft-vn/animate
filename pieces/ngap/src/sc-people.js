@@ -3,7 +3,7 @@
 //  hook   (0–7.75)     desk: Minh with an O₂ 100% mask still yawns; "thiếu ô xi?" crossed out. Brain [540,560,80].
 //  lay    (35.5–42.5)  living room: Minh (left) yawns, Lan (right) sees / hears / reads "ngáp"; silence: Lan twitches.
 //  payoff (42.5–47.25) SLAM: Lan yawns huge, the brain above her too; "ngáp lây!", "1/2 – 2/3 số người".
-//  end    (53.0–60.75) the hook's desk again, later on the clock; Minh + Lan; the brain fans itself; "bạn?" at the viewer.
+//  end    (53.0–end)   the hook's desk again, later on the clock; Minh + Lan; the brain fans itself; "bạn?" to the viewer.
 //  Colour: pink = the brain only, orange = heat only, blue = cool only; props are neutrals (wood, cream, green tank).
 // =====================================================================
 const PE_WALL_DESK = PAL.sky, PE_WALL_LIVING = '#f1dfb0';
@@ -24,12 +24,12 @@ function PE_deskBack(hh, mm) {
   cut(ellipsePts(960, 736, 26, 14, 0, 14), PAL.yellow, { key: 'pelbulb', sb: 4, grain: false });
   cut(ellipsePts(990, PE_DESK_Y - 8, 60, 16, 0, 22), PAL.charcoal, { key: 'pelbase', sb: 5 });
 }
-function PE_deskFront() {
+function PE_deskFront(mugX = 885) {
   cut(rect(-40, PE_DESK_Y, W + 80, 900, 6), PAL.wood, { key: 'pedesk', tear: 0.6, sy: -6, pat: pat.grainWood('rgba(120,70,30,0.18)') });
   cut(rect(-40, PE_DESK_Y - 6, W + 80, 26, 6), PAL.woodL, { key: 'pedeskedge', tear: 0.5, sb: 6, sy: 4 });
   cut(rect(150, 1215, 780, 230, 14), PAL.woodL, { key: 'pedrawer', sb: 6, sy: 3, grain: 0.3 });
   cut(capsulePts(490, 1250, 590, 1250, 22, 6), PAL.woodD, { key: 'peknob', sb: 4 });
-  mug(885, PE_DESK_Y - 92, 0.95, PAL.yellow, 'pemug');
+  mug(mugX, PE_DESK_Y - 92, 0.95, PAL.yellow, 'pemug');
 }
 
 // ---- an oxygen tank (green, neutral prop) rising from behind the desk; returns the valve point
@@ -55,7 +55,7 @@ function PE_o2tag(x, y, k) {
   ctx.restore();
 }
 // the clear mask (over nose + mouth) at (mx, my), rotated a; tube from the valve
-function PE_mask(mx, my, a, valve, strap) {
+function PE_mask(mx, my, a, valve, strap, ears = null, stretch = 0) {
   const [vx, vy] = valve;
   // the tube: a soft sag from the valve up to the mask's bottom
   const ex = mx + Math.sin(a) * 40, ey = my + Math.cos(a) * 42;
@@ -64,16 +64,17 @@ function PE_mask(mx, my, a, valve, strap) {
   ink(P, { w: 5, color: 'rgba(255,255,255,0.55)', amt: 0.4, key: 'petubeh' });
   if (strap > 0.01) {
     ctx.save(); ctx.globalAlpha = clamp(strap);
-    ink([[mx - 52, my - 14], [PE_MINH.x - 118, PE_MINH.y - 190]], { w: 5, color: '#7f8f95', amt: 0.3, key: 'pestl' });
-    ink([[mx + 52, my - 14], [PE_MINH.x + 118, PE_MINH.y - 190]], { w: 5, color: '#7f8f95', amt: 0.3, key: 'pestr' });
+    const eL = ears ? ears[0] : [PE_MINH.x - 118, PE_MINH.y - 190], eR = ears ? ears[1] : [PE_MINH.x + 118, PE_MINH.y - 190];
+    ink([[mx - 52, my - 14], eL], { w: 5, color: '#7f8f95', amt: 0.3, key: 'pestl' });
+    ink([[mx + 52, my - 14], eR], { w: 5, color: '#7f8f95', amt: 0.3, key: 'pestr' });
     ctx.restore();
   }
   ctx.save(); ctx.translate(mx, my); ctx.rotate(a);
-  const M = ellipsePts(0, 0, 58, 44, 0, 30);
+  const M = ellipsePts(0, 0, 58 + 6 * stretch, 44 + 16 * stretch, 0, 30);
   trace(M, true); ctx.fillStyle = 'rgba(236,246,248,0.42)'; ctx.fill();
   ctx.strokeStyle = '#7f9aa5'; ctx.lineWidth = 5; ctx.lineJoin = 'round'; trace(M, true); ctx.stroke();
   ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(-14, -10, 26, Math.PI * 1.1, Math.PI * 1.45); ctx.stroke();
-  cut(rect(-14, 36, 28, 18, 4), '#b8c4c8', { key: 'pemaskv', sb: 3, grain: false });
+  cut(rect(-14, 36 + 16 * stretch, 28, 18, 4), '#b8c4c8', { key: 'pemaskv', sb: 3, grain: false });
   ctx.restore();
 }
 
@@ -83,7 +84,7 @@ function PE_mask(mx, my, a, valve, strap) {
 SCENES.hook = function () {
   const tO = VW('hook', 'ô'), tCho = VW('hook', 'cho'), tTho = VW('hook', 'thở'), tO2 = VW('hook', 'ô', 2);
   const tVan = VW('hook', 'vẫn');
-  const yT0 = tVan - 0.25, yawnM = yawnCurve(TT, yT0, 1.9);   // open 6.1–6.95, hold, close by 8.0
+  const yT0 = tVan - 0.35, yawnM = yawnCurve(TT, yT0, 2.0);   // open 6.0–6.9, hold to 7.4, close by 8.0
   PE_deskBack(3, 8 + Math.floor(TT * 2) * 0.5);
   // the tank comes up from behind the desk on "cho"
   const tk = pop(tCho, SPRING.smooth);
@@ -93,13 +94,16 @@ SCENES.hook = function () {
   const look = TT < tO ? 0.3 * Math.sin(TT * 1.6) : TT < tTho ? -0.8 : 0;
   const mood = TT > tO2 + 0.4 && TT < yT0 ? 'sleepy' : undefined;
   bust(PE_MINH.x, PE_MINH.y + breath, PE_MINH.s, { who: 'minh', yawn: yawnM, look, mood, key: 'peminh' });
-  // the mask: from the tank to the face (on "thở"), then slides down to the chin as the jaw drops
+  // the mask: from the tank to the face (on "thở") and it STAYS ON — the yawn happens behind the clear plastic.
+  // It follows the head's tip-back (bust rotates the head by -0.1·yawn about the neck) and stretches with the jaw.
   if (tk > 0.02) {
     const mk = TT < tTho - 0.6 ? 0 : springEase(TT - (tTho - 0.6), 150, 24);
-    const fx = PE_MINH.x, fy = PE_MINH.y - 130 + breath;               // over nose + mouth, below the eyes
-    const slide = EZ.io(seg(TT, yT0 + 0.1, yT0 + 0.7));
-    const mx = lerp(valve[0] + 40, fx, mk) + slide * 30, my = lerp(valve[1] + 30, fy, mk) + slide * 110;
-    PE_mask(mx, my, lerp(-0.4, 0, mk) + slide * 0.35, valve, clamp((mk - 0.85) / 0.15) * (1 - slide));
+    const piv = [PE_MINH.x, PE_MINH.y + breath - 30 * PE_MINH.s], ang = -0.1 * yawnM;
+    const rp = (x, y) => { const c = Math.cos(ang), si = Math.sin(ang), dx = x - piv[0], dy = y - piv[1]; return [piv[0] + dx * c - dy * si, piv[1] + dx * si + dy * c]; };
+    const [fx, fy] = rp(PE_MINH.x, PE_MINH.y - 130 + breath + 14 * yawnM);   // over nose + mouth, below the eyes
+    const ears = [rp(PE_MINH.x - 118, PE_MINH.y - 190 + breath), rp(PE_MINH.x + 118, PE_MINH.y - 190 + breath)];
+    const mx = lerp(valve[0] + 40, fx, mk), my = lerp(valve[1] + 30, fy, mk);
+    PE_mask(mx, my, lerp(-0.4, 0, mk) + ang, valve, clamp((mk - 0.85) / 0.15), ears, yawnM);
   }
   PE_deskFront();
   // tank label (≥ 50 px) — in front of the desk edge
@@ -127,15 +131,16 @@ const PE_LMINH = { x: 300, y: 1000, s: 1.45 }, PE_LLAN = { x: 740, y: 1000, s: 1
 function PE_livingBack() {
   room(PE_WALL_LIVING, 1180, PAL.woodL, 'pelr');
   // window (upper left)
-  cut(rect(70, 410, 270, 260, 6), PAL.paper, { key: 'pewin', sb: 8 });
-  ctx.save(); trace(rect(88, 428, 234, 224, 3), true); ctx.clip();
-  ctx.fillStyle = PAL.sky; ctx.fillRect(80, 420, 250, 240);
-  const cx = 60 + mod(TT * 22, 320);
-  cut(ellipsePts(cx, 520, 50, 22, 0, 18), PAL.paper, { key: 'pecl1', shadow: false, grain: false });
-  cut(ellipsePts(cx + 34, 506, 32, 20, 0, 16), PAL.paper, { key: 'pecl2', shadow: false, grain: false });
+  // window (upper right, clear of the tags on the left and of the brain above Lan)
+  cut(rect(866, 380, 230, 250, 6), PAL.paper, { key: 'pewin', sb: 8 });
+  ctx.save(); trace(rect(884, 398, 200, 214, 3), true); ctx.clip();
+  ctx.fillStyle = PAL.sky; ctx.fillRect(876, 390, 220, 230);
+  const cx = 840 + mod(TT * 22, 280);
+  cut(ellipsePts(cx, 480, 46, 20, 0, 18), PAL.paper, { key: 'pecl1', shadow: false, grain: false });
+  cut(ellipsePts(cx + 30, 467, 30, 18, 0, 16), PAL.paper, { key: 'pecl2', shadow: false, grain: false });
   ctx.restore();
-  ink([[205, 428], [205, 652]], { w: 8, color: PAL.paper, amt: 0.2, key: 'pewb1' });
-  ink([[88, 540], [322, 540]], { w: 8, color: PAL.paper, amt: 0.2, key: 'pewb2' });
+  ink([[984, 398], [984, 612]], { w: 8, color: PAL.paper, amt: 0.2, key: 'pewb1' });
+  ink([[884, 505], [1084, 505]], { w: 8, color: PAL.paper, amt: 0.2, key: 'pewb2' });
   // plant (far right)
   plant(985, 860, 0.85, PAL.charcoal, 'peplant');
   // sofa back + arms
@@ -151,7 +156,7 @@ function PE_livingFront() {
 function PE_phone(k, wob = 0) {
   if (k <= 0.01) return;
   const dy = (1 - k) * 420;
-  hand(712, 1205 + dy, 0.85, -2.05, PE_LLAN_SKIN, PAL.mustard, { key: 'pephh' });
+  hand(726, 1172 + dy, 0.72, -2.55, PE_LLAN_SKIN, PAL.mustard, { key: 'pephh' });   // forearm from her side, palm under the phone
   ctx.save(); ctx.translate(660, 1105 + dy); ctx.rotate(-0.08 + wob);
   cut(rect(-110, -72, 220, 144, 18), PAL.navy, { key: 'peph', sb: 10 });
   cut(rect(-96, -58, 192, 116, 8), PAL.paper, { key: 'pephs', shadow: false, grain: false });
@@ -162,7 +167,7 @@ const PE_LLAN_SKIN = PAL.skin2;
 // an icon card (eye / ear) with its word, popping at t0
 function PE_iconCard(kind, word, x, y, t0) {
   const s = pop(t0); if (s <= 0.01) return;
-  ctx.save(); ctx.translate(x, y); ctx.rotate(kind === 'eye' ? -0.05 : 0.05); ctx.scale(s * 0.86, s * 0.86);
+  ctx.save(); ctx.translate(x, y); ctx.rotate(kind === 'ear' ? 0.05 : -0.05); ctx.scale(s * 0.86, s * 0.86);
   cut(rect(-92, -84, 184, 168, 6), PAL.paper, { key: 'pec' + kind, tear: 1.4, sb: 8 });
   cut(rect(-30, -98, 60, 26, 2), 'rgba(240,230,190,0.8)', { key: 'pect' + kind, shadow: false, grain: 0.3, shade: false });
   const I = PAL.ink;
@@ -173,6 +178,11 @@ function PE_iconCard(kind, word, x, y, t0) {
     ctx.strokeStyle = I; ctx.lineWidth = 6; ctx.lineJoin = 'round'; ctx.stroke();
     dot(Math.sin(TT * 2) * 6, 0, 16, PAL.navy); dot(Math.sin(TT * 2) * 6 + 5, -5, 5, '#fff');
     ctx.restore();
+  } else if (kind === 'book') {
+    const fl = Math.sin(TT * 4) * 4;
+    cut([[0, -6], [-58, -14], [-58, -58 + fl], [0, -50]], PAL.paper, { key: 'pebk1', sb: 4, grain: false, line: PAL.ink, lw: 4 });
+    cut([[0, -6], [58, -14], [58, -58 - fl], [0, -50]], PAL.paper, { key: 'pebk2', sb: 4, grain: false, line: PAL.ink, lw: 4 });
+    for (let i = 0; i < 3; i++) { ink([[-48, -46 + i * 11], [-10, -42 + i * 11]], { w: 3, color: COL.textD, amt: 0.2, key: 'pebl' + i }); ink([[10, -42 + i * 11], [48, -46 + i * 11]], { w: 3, color: COL.textD, amt: 0.2, key: 'pebr' + i }); }
   } else {
     cut(ellipsePts(0, -26, 30, 42, 0, 22), PAL.skin1, { key: 'peear', sb: 4, grain: false });
     ink(arcPts(2, -28, 16, Math.PI * 0.6, Math.PI * 1.9, 10), { w: 5, color: '#a96f4f', amt: 0.2, key: 'peeari' });
@@ -182,6 +192,23 @@ function PE_iconCard(kind, word, x, y, t0) {
   ctx.restore();
 }
 
+// a held yawn: opens t0→t1, held wide t1→t2, closes t2→t3
+function PE_yawnHold(t, t0, t1, t2, t3) {
+  if (t <= t0 || t >= t3) return 0;
+  if (t < t1) return EZ.io(seg(t, t0, t1));
+  if (t < t2) return 1;
+  return 1 - EZ.io(seg(t, t2, t3));
+}
+// Minh's arms stretching up behind his shoulders (k 0..1), drawn BEFORE the bust so they come out from behind it
+function PE_stretch(x, y, k) {
+  if (k <= 0.02) return;
+  const s = 1.1, L = 200 * s;
+  for (const sd of [-1, 1]) {
+    const a = -Math.PI / 2 + sd * 0.42, sx = x + sd * 120, sy = y + 20;
+    hand(sx + Math.cos(a) * L * k, sy + Math.sin(a) * L * k, s, a, PAL.skin1, PAL.blue, { key: 'pestr' + sd });
+  }
+}
+
 // ---------------------------------------------------------------------
 //  LAY (35.5–42.5) — "Lạ nhất là ngáp lây: chỉ cần thấy, nghe, thậm chí đọc chữ ngáp..."  (silence 41.75–42.375)
 // ---------------------------------------------------------------------
@@ -189,20 +216,23 @@ SCENES.lay = function () {
   const tNgap = VW('lay', 'ngáp'), tThay = VW('lay', 'thấy'), tNghe = VW('lay', 'nghe'), tDoc = VW('lay', 'đọc');
   const tSil = VL('lay').t1;
   PE_livingBack();
-  // Minh yawns big on "ngáp lây", then turns to Lan
-  const ym = yawnCurve(TT, tNgap - 0.2, 2.6);
+  // Minh yawns BIG on "ngáp lây": open by ~37.2, held wide (≥ 0.9) to ~39.3, closes; arms stretch up meanwhile
+  const ym = PE_yawnHold(TT, tNgap - 0.3, tNgap + 0.4, tNgap + 2.5, tNgap + 3.0);
   const mb = Math.sin(TT * TAU * 0.4) * 4;
+  const st = EZ.io(seg(TT, tNgap, tNgap + 0.6)) * (1 - EZ.io(seg(TT, tNgap + 1.7, tNgap + 2.2)));
+  PE_stretch(PE_LMINH.x, PE_LMINH.y + mb, st);
   bust(PE_LMINH.x, PE_LMINH.y + mb, PE_LMINH.s, { who: 'minh', yawn: ym, look: TT < tNgap ? 0.6 : TT > tNgap + 2.5 ? 1 : 0.2, key: 'pelminh' });
   // Lan watches him; her mouth twitches once she has read the word, trembling through the silence
   const tw = TT > tDoc + 0.5 ? 0.06 + 0.09 * (0.5 + 0.5 * Math.sin(TT * 23)) * (0.6 + 0.4 * Math.sin(TT * 7.3)) : 0;
   const lb = Math.sin(TT * TAU * 0.33 + 1) * 4;
   const ltilt = TT > tSil ? Math.sin(TT * 31) * 0.012 : 0;
-  bust(PE_LLAN.x, PE_LLAN.y + lb, PE_LLAN.s, { who: 'lan', yawn: tw, look: TT < tDoc ? -1 : TT < tDoc + 0.6 ? 0.3 : 0, tilt: ltilt, mood: TT > tNgap && TT < tNgap + 2.4 ? 'wow' : undefined, key: 'pellan' });
-  PE_livingFront();
+  bust(PE_LLAN.x, PE_LLAN.y + lb, PE_LLAN.s, { who: 'lan', yawn: tw, look: TT < tDoc ? -1 : TT < tDoc + 0.6 ? -0.3 : -0.1, tilt: ltilt, mood: TT > tNgap && TT < tNgap + 2.4 ? 'wow' : undefined, key: 'pellan' });
   PE_phone(pop(tDoc - 0.15, SPRING.smooth), TT > tSil ? Math.sin(TT * 27) * 0.012 : 0);
-  // the senses: eye on "thấy", ear on "nghe"
-  PE_iconCard('eye', 'thấy', 520, 530, tThay);
-  PE_iconCard('ear', 'nghe', 520, 712, tNghe);
+  PE_livingFront();
+  // the senses: eye on "thấy", ear on "nghe", book on "đọc"
+  PE_iconCard('eye', 'thấy', 520, 498, tThay);
+  PE_iconCard('ear', 'nghe', 520, 655, tNghe);
+  PE_iconCard('book', 'đọc', 520, 812, tDoc);
   // the hero above Lan: exact at [740,560,70] at the start; looks at Minh; anxious (wow + shiver) at the end
   const anx = TT > tDoc + 0.4;
   const shiver = TT > tSil ? Math.sin(TT * 40) * 2.5 : 0;
@@ -237,10 +267,10 @@ SCENES.payoff = function () {
 };
 
 // ---------------------------------------------------------------------
-//  END (53.0–60.75) — "Vậy đấy: một cái ngáp là não đang tự hạ nhiệt, và có khi chính bạn vừa ngáp xong."
+//  END (53.0–end) — "Vậy đấy: có lẽ ngáp là não đang tự hạ nhiệt, và có khi chính bạn vừa ngáp xong."
 // ---------------------------------------------------------------------
 SCENES.end = function () {
-  const E = ET('end'), tTu = VW('end', 'tự'), tBan = VW('end', 'chính'), tNg1 = VW('end', 'ngáp'), tNg2 = VW('end', 'ngáp', 2);
+  const E = ET('end'), tLe = VW('end', 'lẽ'), tTu = VW('end', 'tự'), tBan = VW('end', 'chính'), tNg1 = VW('end', 'ngáp'), tNg2 = VW('end', 'ngáp', 2);
   // the clock is later now (4:40 instead of 3:10), still ticking
   PE_deskBack(4, 40 + Math.floor((TT - E) * 2) * 0.5);
   // Minh starts exactly as in the hook, then makes room for Lan
@@ -253,19 +283,13 @@ SCENES.end = function () {
   bust(lx, 1040 + Math.sin(TT * TAU * 0.33) * 4, 1.45, { who: 'lan', yawn: yl, look: atYou ? 0 : -0.8, mood: atYou ? 'wow' : undefined, key: 'peelan' });
   const ym = yawnCurve(TT, tNg2 - 0.2, 1.9);
   bust(mx, my + Math.sin(TT * TAU * 0.35) * 4, ms, { who: 'minh', yawn: ym, look: atYou ? 0 : mv * 0.8, mood: atYou ? 'wow' : undefined, key: 'peeminh' });
-  PE_deskFront();
+  PE_deskFront(165);
   // the hero: [540,560,80] at the start, then above Minh; on "tự hạ nhiệt" it fans itself, happy and cool
   const fan = pop(tTu - 0.1);
   heroBrain(lerp(PE_HERO_HOOK[0], 360, mv), PE_HERO_HOOK[1], PE_HERO_HOOK[2], { warm: heroWarmAt(TT), fan, mood: atYou ? 'wow' : TT > tTu - 0.1 ? 'happy' : 'calm', look: atYou ? 0 : TT < tTu ? 0.6 * Math.sin(TT * 1.7) : 0, yawn: 0.4 * yawnCurve(TT, tNg2 - 0.1, 1.7), key: 'hero' });
-  // "bạn?" with a paper arrow coming OUT at the viewer (it widens toward its tip, down-front)
-  const ak = pop(tBan + 0.15, SPRING.smooth);
-  if (ak > 0.01) {
-    const x0 = 612, y0 = 690, x1 = 585, y1 = lerp(y0 + 40, 1120, ak), w0 = 26, w1 = 70 * ak + 26;
-    const nx = (y1 - y0), ny = -(x1 - x0), L = Math.hypot(nx, ny), ux = nx / L, uy = ny / L;
-    const hy = y1 - 90 * ak, hx = lerp(x0, x1, (hy - y0) / (y1 - y0));
-    cut([[x0 - ux * w0 / 2, y0 - uy * w0 / 2], [x0 + ux * w0 / 2, y0 + uy * w0 / 2], [hx + ux * w1 / 2, hy + uy * w1 / 2], [hx + ux * w1, hy + uy * w1], [x1, y1 + 30 * ak], [hx - ux * w1, hy - uy * w1], [hx - ux * w1 / 2, hy - uy * w1 / 2]], PAL.navy, { key: 'pearrow', tear: 0.8, sb: 10 });
-  }
-  ptag('bạn?', 640, 620, tBan, 72, { rot: 0.05 + 0.03 * Math.sin(TT * 2.5) });
-  viCaption(['ngáp = não', 'tự hạ nhiệt'], [1, 'hạ nhiệt'], { at: tTu - E, col: COL.coolL });
+  // "giả thuyết" beside the brain on "có lẽ"; "bạn?" between the heads (no face covered) on "chính"
+  ptag('giả thuyết', 215, 668, tLe, 52, { rot: -0.04 });
+  ptag('bạn?', 615, 655, tBan, 72, { rot: 0.05 + 0.03 * Math.sin(TT * 2.5) });
+  viCaption(['ngáp: não tự', 'hạ nhiệt?'], [1, 'hạ nhiệt?'], { at: tTu - E, col: COL.coolL });
   viTag('10', TITLES.end);
 };
