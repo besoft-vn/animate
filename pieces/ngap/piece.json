@@ -1,0 +1,13 @@
+{
+  "name": "ngap",
+  "title": "Vì sao ta ngáp — và vì sao ngáp lây?",
+  "series": "Vạn vật vận hành như thế nào",
+  "date": "2026-11-20",
+  "format": { "width": 1080, "height": 1920, "fps": 24, "bpm": 120 },
+  "storyFormat": "F5 fixed-hero journey (the hero is the brain), morph-joined, one slam on the payoff (Lan catches the yawn)",
+  "style": "cut-paper",
+  "scenes": ["src/props.js", "src/sc-people.js", "src/sc-head.js", "src/sc-charts.js"],
+  "voice": { "file": "voice/voice.wav", "music": -14 },
+  "captions": { "font": "Pangolin", "size": 62 },
+  "review": { "safe": { "top": 240, "bottom": 420, "right": 140 }, "refs": {}, "wpsMax": 5.0 }
+}

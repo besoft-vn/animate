@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 1.2,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Ngáp không phải vì thiếu ô xi: cho thở ô xi tinh khiết, người ta vẫn ngáp như thường.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "warm",
+   "text": "Giả thuyết mạnh nhất hiện nay: ngáp là cách bộ não tự làm mát.",
+   "after": 0.5,
+   "file": "warm.mp3"
+  },
+  {
+   "id": "jaw",
+   "text": "Hàm há thật rộng, cơ mặt căng ra, đẩy thêm máu chảy qua đầu.",
+   "after": 0.5,
+   "file": "jaw.mp3"
+  },
+  {
+   "id": "air",
+   "text": "Một hơi hít sâu kéo khí mát vào miệng, hút bớt nhiệt của dòng máu.",
+   "after": 0.5,
+   "file": "air.mp3"
+  },
+  {
+   "id": "cool",
+   "text": "Máu mát hơn chảy lên não, như nước làm mát chảy qua động cơ.",
+   "after": 0.5,
+   "file": "cool.mp3"
+  },
+  {
+   "id": "season",
+   "text": "Ở Arizona, mùa đông gần một nửa số người ngáp lây, mùa hè chưa tới một phần tư.",
+   "after": 0.5,
+   "file": "season.mp3"
+  },
+  {
+   "id": "lay",
+   "text": "Lạ nhất là ngáp lây: chỉ cần thấy, nghe, thậm chí đọc chữ ngáp...",
+   "after": 1.6,
+   "file": "lay.mp3"
+  },
+  {
+   "id": "payoff",
+   "text": "Khoảng một nửa đến hai phần ba số người sẽ ngáp theo.",
+   "after": 0.6,
+   "file": "payoff.mp3"
+  },
+  {
+   "id": "social",
+   "text": "Ngáp lây mạnh nhất giữa người thân, và trẻ thường chỉ bị lây từ khoảng bốn tuổi.",
+   "after": 0.5,
+   "file": "social.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Vậy đấy: một cái ngáp là não đang tự hạ nhiệt, và có khi chính bạn vừa ngáp xong.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}

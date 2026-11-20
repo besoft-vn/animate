@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vì sao ta ngáp — và vì sao ngáp lây?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Vì sao ta ngáp — và vì sao ngáp lây?" — 9:16, cut-paper, voiced (vi), 24fps, 120 BPM.
+//  Format F5 (fixed-hero journey): the hero is THE BRAIN ("bộ não"), a pink paper cutout with a face. It floats above
+//  Minh's head while he yawns (pure oxygen does not stop it), drops into a cut-away profile head where it heats up,
+//  the jaw stretches, cool air is breathed in, cooler blood flows up and the brain cools; then the seasons study;
+//  then the contagion: Lan watches Minh yawn ... SLAM: Lan yawns too. Family > strangers, kids from ~4. The end is the
+//  start, changed: the same desk, now BOTH yawning, the brain cool with a paper fan, and a nudge at the viewer.
+//  KHUNG HÌNH GỌN: one subject per frame, flat paper, light grain, no fields of dots.
+//  Colour (one colour = one meaning): ORANGE = heat / warm; BLUE = cool air / cooling; DEEP RED = blood;
+//  PINK = the brain (the hero) only; everything else: warm neutrals (cream, wood, navy text).
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). The payoff era "payoff" starts on the
+//  SLAM: a hard cut inside the 1.6s pause after "lay". Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const HAND = '"Pangolin", "Comic Neue", cursive';
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'warm', 'jaw', 'air', 'cool', 'season', 'lay', 'payoff', 'social', 'end'];
+const SLAM_ID = 'payoff';
+const SLAM = snap8(VL('lay').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- the bridges' contract: where the hero (heroBrain, centre of the brain body, radius r) MUST be at each boundary.
+// [x, y, r]. Scenes keep it exactly there during [tc - 0.5, tc + 0.5]. Cameras: identity within 0.5s of a boundary.
+// The hero's temperature (heroWarmAt in props.js) is part of the contract too: warm (orange flush) through "air",
+// cooling during "cool", cool (pink) from "season" on.
+const BR = {
+  hookWarm:     { a: [540, 560, 80],  b: [470, 640, 130] },  // floating above Minh's head (desk) -> inside the profile head
+  warmJaw:      { a: [470, 640, 130], b: [470, 640, 130] },
+  jawAir:       { a: [470, 640, 130], b: [470, 640, 130] },
+  airCool:      { a: [470, 640, 130], b: [470, 640, 130] },
+  coolSeason:   { a: [470, 640, 130], b: [540, 500, 80] },   // profile head -> the narrator spot above the two seasons
+  seasonLay:    { a: [540, 500, 80],  b: [740, 560, 70] },   // -> floating above Lan's head (Lan on the right)
+  // lay -> payoff: SLAM (hard cut, no bridge); payoff is complete on its first frame, hero still at [740, 560, 70]
+  payoffSocial: { a: [740, 560, 70],  b: [540, 480, 70] },   // -> top centre over the "who catches it" chart
+  socialEnd:    { a: [540, 480, 70],  b: [540, 560, 80] },   // -> above Minh's head again (desk, as in the hook)
+};
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'không phải vì thiếu ô xi', warm: 'giả thuyết: não tự làm mát', jaw: 'há hàm: máu chảy qua đầu nhiều hơn',
+  air: 'khí mát hút bớt nhiệt của máu', cool: 'máu mát hơn lên não', season: 'mùa đông ngáp lây nhiều hơn',
+  lay: 'thấy, nghe, đọc chữ ngáp...', payoff: 'ngáp theo!', social: 'người thân lây mạnh nhất', end: 'não đang tự hạ nhiệt',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1).filter((t) => t !== SLAM),
+  cues: { slam: SLAM, bloom: SLAM },
+  acts: [
+    { name: '1 Không phải ô xi', role: 'build',   t0: 0,             t1: ET('jaw') },
+    { name: '2 Làm mát não',     role: 'journey', t0: ET('jaw'),     t1: ET('lay') },
+    { name: '3 Ngáp lây',        role: 'peak',    t0: ET('lay'),     t1: snap8(VL('lay').t1) },
+    { name: '4 Lặng',            role: 'silence', t0: snap8(VL('lay').t1), t1: SLAM - 0.125 },
+    { name: '5 Ngáp theo!',      role: 'gift',    t0: SLAM,          t1: SLAM + 2.25 },
+    { name: '6 Hạ nhiệt',        role: 'goodbye', t0: SLAM + 2.25,   t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;
