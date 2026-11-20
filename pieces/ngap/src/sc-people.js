@@ -289,7 +289,7 @@ SCENES.end = function () {
   heroBrain(lerp(PE_HERO_HOOK[0], 360, mv), PE_HERO_HOOK[1], PE_HERO_HOOK[2], { warm: heroWarmAt(TT), fan, mood: atYou ? 'wow' : TT > tTu - 0.1 ? 'happy' : 'calm', look: atYou ? 0 : TT < tTu ? 0.6 * Math.sin(TT * 1.7) : 0, yawn: 0.4 * yawnCurve(TT, tNg2 - 0.1, 1.7), key: 'hero' });
   // "giả thuyết" beside the brain on "có lẽ"; "bạn?" between the heads (no face covered) on "chính"
   ptag('giả thuyết', 215, 668, tLe, 52, { rot: -0.04 });
-  ptag('bạn?', 615, 655, tBan, 72, { rot: 0.05 + 0.03 * Math.sin(TT * 2.5) });
+  ptag('còn bạn?', 540, 1150, tBan, 72, { rot: 0.05 + 0.03 * Math.sin(TT * 2.5) });
   viCaption(['ngáp: não tự', 'hạ nhiệt?'], [1, 'hạ nhiệt?'], { at: tTu - E, col: COL.coolL });
   viTag('10', TITLES.end);
 };
