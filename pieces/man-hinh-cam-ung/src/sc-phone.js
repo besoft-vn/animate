@@ -66,10 +66,11 @@ function ph_phone(o = {}) {
   // a soft drive pulse running along the rows one after another (end: the chip still scanning), under the glass
   const sc = o.scan ?? 0;
   if (sc > 0.01) {
-    const per = 0.5, cyc = (TT / per), k = Math.floor(cyc) % PH_ROWS, f = cyc - Math.floor(cyc), len = 70;
+    const per = 0.6, cyc = (TT / per), k = Math.floor(cyc) % PH_ROWS, f = cyc - Math.floor(cyc), len = 90;
     const u0 = lerp(PH_S - 20 - len, 20, EZ.io(f));
     ctx.save(); ctx.globalAlpha = sc * Math.sin(Math.PI * f);
-    faceRR(fp, u0, ph_rowV(k) - 8, len, 16, 8, { fill: COL.fieldM, stroke: false });
+    faceRR(fp, 20, ph_rowV(k) - 11, PH_S - 40, 22, 11, { fill: COL.fieldL, stroke: COL.fieldM, w: 3 });
+    faceRR(fp, u0, ph_rowV(k) - 9, len, 18, 9, { fill: COL.fieldM, stroke: COL.field, w: 3 });
     ctx.restore();
   }
   out.rowEnd = []; out.colEnd = [];                              // the screen-left end of each row / lower end of each column
@@ -97,7 +98,12 @@ function ph_phone(o = {}) {
   // ---- the dip (end): a pale-blue patch + ring under the tip
   const dp = clamp(o.dip ?? 0);
   if (dp > 0.01) {
-    const r = 62 + 5 * Math.sin(TT * 2.4);
+    const r = 62 + 8 * Math.sin(TT * Math.PI);
+    // a slow pale ripple leaving the dip, once per 1.5 s
+    const rp = mod(TT, 1.5) / 1.5, rr = (70 + 70 * rp) * dp;
+    ctx.save(); ctx.globalAlpha = dp * 0.7 * (1 - rp);
+    faceEll(gp, PH_S / 2, PH_L / 2, rr, rr, { stroke: COL.fieldM, w: 4 });
+    ctx.restore();
     ctx.save(); ctx.globalAlpha = dp * 0.55;
     faceEll(gp, PH_S / 2, PH_L / 2, r * dp, r * dp, { fill: COL.fieldL });
     ctx.globalAlpha = dp * 0.9;
@@ -216,15 +222,15 @@ SCENES.end = function () {
   // "không nhìn thấy": the grid shows faintly under the glass (breathing a little); the tiles dim
   const gv = EZ.io(seg(TT, tKh, tKh + 0.9));
   const dip = clamp(spring(TT, tLay - 0.15, { k: 90, damp: 0.7 })) + 0.35 * EZ.io(seg(TT, tDien, tLay)) * (1 - clamp(spring(TT, tLay - 0.15, { k: 90, damp: 0.7 })));
-  ph_phone({ tiles: 1 - 0.85 * gv, gridAl: gv * (0.42 + 0.08 * Math.sin(TT * 2.2)), rows: 1, cols: 1, dip, scan: 0.75 * EZ.io(seg(TT, tKh + 0.4, tKh + 1.0)) });
+  ph_phone({ tiles: 1 - 0.85 * gv, gridAl: gv * (0.46 + 0.16 * Math.sin(TT * Math.PI)), rows: 1, cols: 1, dip, scan: 0.75 * EZ.io(seg(TT, tKh + 0.4, tKh + 1.0)) });
   // the hero: touching the whole era (bare finger), a slow look around; a small press on "lấy"; happy at the end
   const e = ph_env('end', 0.5, 0.6);
   const sq = 0.35 * Math.max(0, kick(TT, tLay, { k: 120, damp: 0.5 })) * (TT < tLay + 1.2 ? 1 : 0);
   const look = (TT < tChi ? 0.4 * Math.sin((TT - t0) * 1.4) : -0.35 + 0.25 * Math.sin((TT - t0) * 1.1)) * e;
-  heroFinger(TOUCH[0], TOUCH[1], HR, { look, squash: sq, tilt: 0.13 * Math.cos((TT - t0) * Math.PI * 0.8) * e, mood: TT > tLay + 0.4 ? 'happy' : 'calm' });
+  heroFinger(TOUCH[0], TOUCH[1], HR, { look, squash: sq, tilt: 0.2 * Math.cos((TT - t0) * Math.PI) * e, mood: TT > tLay + 0.4 ? 'happy' : 'calm' });
   // the faint found point over the tip (after the hero)
   const ck = clamp(spring(TT, tLay + 0.1, { k: 140, damp: 0.6 }));
   crosshair(TOUCH_PT[0], TOUCH_PT[1], 30, ck, { al: 0.45 });
   viTag('10', 'chỗ bị lấy mất');
-  viCaption(['màn hình chỉ thấy chỗ', 'điện trường bị lấy mất'], [1, 'bị lấy mất'], { at: tChi - t0 - 0.3, col: COL.fieldL });
+  viCaption(['không thấy ngón tay,', 'chỉ thấy chỗ bị lấy mất'], [1, 'bị lấy mất'], { at: tKh - t0, col: COL.fieldL });
 };

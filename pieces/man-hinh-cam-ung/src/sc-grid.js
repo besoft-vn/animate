@@ -41,13 +41,19 @@ const gr_pulsePh = (t0) => (TT - t0) / GR_PULSE_P;
 
 // the sweep's scan-line phase (in sweeps): fast from "quét", slows almost to a hold in the pause, continues in locate
 const GR_R0 = 1 / 0.42, GR_R1 = 1 / 9;
-function gr_scanPh(t) {
+function gr_scanRaw(t) {
   const tq = VW('sweep', 'quét'), a = VL('sweep').t1 - 0.1, b = a + 0.55;
   if (t < tq) return null;
   let p = GR_R0 * (Math.min(t, a) - tq);
   if (t > a) { const u = Math.min(t, b) - a, D = b - a; p += GR_R0 * u + (GR_R1 - GR_R0) * u * u / (2 * D); }
   if (t > b) p += GR_R1 * (t - b);
   return p;
+}
+let GR_OFF = null;
+function gr_scanPh(t) {
+  const p = gr_scanRaw(t); if (p == null) return null;
+  if (GR_OFF == null) { const q = gr_scanRaw(SLAM); GR_OFF = 0.86 - (q - Math.floor(q)); }
+  return p + GR_OFF;
 }
 
 // ---------------------------------------------------------------------
@@ -62,14 +68,14 @@ function gr_board(o = {}) {
   // wiring: rows (left ends) -> chip left pins; columns (bottom ends) -> chip top pins
   const [cx, cy, cs] = GR_CHIP;
   ctx.save(); ctx.globalAlpha = clamp(bd * 1.5);
-  GR_ROWS.forEach((y, j) => {
-    const d = -cs * 0.36 + (4 - j) * cs * 0.18, wx = 262 - j * 6;
-    polyPath([[GR_X0, y], [wx, y], [wx, cy + d], [cx - cs / 2 - 16, cy + d]], false); hair(PAL.inner, 3); ctx.stroke();
-  });
-  GR_COLS.forEach((x, i) => {
-    const d = -cs * 0.27 + i * cs * 0.18;
-    polyPath([[x, GR_Y1], [x, GR_Y1 + 6], [cx + d, cy - cs / 2 - 20], [cx + d, cy - cs / 2 - 16]], false); hair(PAL.inner, 3); ctx.stroke();
-  });
+  // rows: short stubs into ONE vertical trunk at x 250, down to the chip's left side
+  const TX = 250, TY = GR_Y1 + 16;
+  GR_ROWS.forEach((y) => { polyPath([[GR_X0, y], [TX, y]], false); hair(PAL.edge, 2.5); ctx.stroke(); });
+  polyPath([[TX, GR_ROWS[0]], [TX, cy], [cx - cs / 2 - 16, cy]], false); hair(PAL.edge, 2.5); ctx.stroke();
+  // columns: short stubs into ONE horizontal trunk, then down into the chip's top
+  GR_COLS.forEach((x) => { polyPath([[x, GR_Y1], [x, TY]], false); hair(PAL.edge, 2.5); ctx.stroke(); });
+  polyPath([[GR_COLS[0], TY], [GR_COLS[3], TY]], false); hair(PAL.edge, 2.5); ctx.stroke();
+  polyPath([[cx, TY], [cx, cy - cs / 2 - 16]], false); hair(PAL.edge, 2.5); ctx.stroke();
   ctx.restore();
   chipIcon(cx, cy, cs, { al: clamp(bd * 1.5) });
   // row strips (horizontal), then column strips (vertical) on top
@@ -113,8 +119,9 @@ function gr_board(o = {}) {
   }));
   // the scan line (sweep): a bright line moving top -> bottom with a pale band behind it
   if (o.scan != null) {
-    const u = o.scan - Math.floor(o.scan), y = lerp(GR_Y0 - 10, GR_Y1 + 10, u), a = clamp(o.scanAl ?? 1);
-    ctx.save(); ctx.globalAlpha = a * 0.5;
+    const u = o.scan - Math.floor(o.scan), y = lerp(GR_Y0 - 10, GR_Y1 + 10, u);
+    const dim = clamp(Math.min((y - 660) / 40, (880 - y) / 40)), a = clamp(o.scanAl ?? 1) * (1 - 0.72 * dim);
+    ctx.save(); ctx.globalAlpha = a * 0.16;
     ctx.fillStyle = COL.fieldL; ctx.fillRect(GR_X0 - 14, Math.max(GR_Y0 - 10, y - 70), GR_X1 - GR_X0 + 28, Math.min(70, y - GR_Y0 + 10));
     ctx.globalAlpha = a;
     polyPath([[GR_X0 - 14, y], [GR_X1 + 14, y]], false); hair(COL.field, 5); ctx.stroke();
@@ -167,7 +174,7 @@ SCENES.drop = function () {
     pulse: gr_pulsePh(t0), pulseAl: 0.55,
     meters: gr_meters(dip), discs: seg(TT, Math.min(t0 + 0.3, tG - 0.6), Math.min(t0 + 0.3, tG - 0.6) + 1.2), dip,
   });
-  gr_label('hụt', 640, 790, tN + 0.5, { align: 'left' });
+  gr_label('hụt', 665, 670, tN + 0.5, { align: 'left' });
   const [hx, hy] = TOUCH;
   heroFinger(hx, hy, HR, { key: 'hero', look: (TT < tN ? 0 : 0.6 * Math.sin((TT - tN) * 1.6)) * gr_env('drop'), mood: TT >= tI - 0.1 && TT < tI + 1.3 ? 'wow' : 'calm' });
   viTag('06', 'tín hiệu hụt');
@@ -188,8 +195,8 @@ SCENES.sweep = function () {
   const S = gr_sweepState(TT);
   // before "quét", the drive pulse is still ticking (as in drop); it hands over to the scan line
   gr_board({ ...S, pulse: TT < tQ + 0.2 ? gr_pulsePh(ET('drop')) : null, pulseAl: 0.55 * (1 - ev(tQ, 0.2)) });
-  gr_label('hụt', 640, 790, 0, { now: true, align: 'left' });
-  gr_label('~120 lần/giây', 720, 445, VW('sweep', 'một') - 0.05, { size: 54 });
+  gr_label('hụt', 665, 670, 0, { now: true, align: 'left' });
+  gr_label('~120 lần/giây', 690, 445, VW('sweep', 'một') - 0.05, { size: 54 });
   const [hx, hy] = TOUCH, tH = VW('sweep', 'hụt');
   heroFinger(hx, hy, HR, { key: 'hero', look: 0.5 * Math.sin((TT - t0) * 2.2) * gr_env('sweep', 0.5) * (1 - ev(tH, 0.5)), mood: TT >= tH ? 'wow' : 'calm' });
   viTag('07', 'quét cả lưới');
@@ -212,23 +219,23 @@ SCENES.locate = function () {
   // guide lines from the crosshair to the left and bottom grid edges, with "y" / "x"
   const [tx, ty] = TOUCH_PT;
   ctx.save(); ctx.setLineDash([12, 10]); ctx.lineDashOffset = -(TT - t0) * 20;
-  polyPath([[tx - 72, ty], [GR_X0 - 10, ty]], false); hair(PAL.edge, 3); ctx.stroke();
-  polyPath([[tx, ty + 72], [tx, GR_Y1 + 4]], false); hair(PAL.edge, 3); ctx.stroke();
+  polyPath([[tx - 130, ty], [GR_X0 - 10, ty]], false); hair(PAL.edge, 3); ctx.stroke();
+  polyPath([[tx, ty + 130], [tx, GR_Y1 + 4]], false); hair(PAL.edge, 3); ctx.stroke();
   ctx.setLineDash([]); ctx.restore();
   for (const [ex, ey] of [[GR_X0 - 10, ty], [tx, GR_Y1 + 4]]) { ctx.beginPath(); ctx.arc(ex, ey, 6, 0, TAU); ctx.fillStyle = PAL.edge; ctx.fill(); }
+  // the crosshair around the tip, BEHIND the hero (it circles the fingertip; the hero hides the centre): big at the cut, settles, then breathes gently
+  const s = 1 + 0.35 * Math.exp(-(TT - t0) * 5) * Math.cos((TT - t0) * 14) + 0.06 * Math.sin((TT - t0) * TAU * 0.8) * ev(t0 + 0.8, 0.5);
+  crosshair(tx, ty, 86 * s, 1);
+  // from "chỗ": a soft echo ring leaves the crosshair once a beat-pair (the found point keeps "pinging")
+  if (TT > tC) { const u = mod(TT - tC, 1.5) / 1.5; ctx.save(); ctx.globalAlpha = 0.45 * (1 - u) * ev(tC, 0.3); ctx.beginPath(); ctx.arc(tx, ty, 92 + 70 * EZ.o2(u), 0, TAU); hair(PAL.accent, 3); ctx.stroke(); ctx.restore(); }
   gr_label('y', 250, 752, 0, { now: true, size: 50 });
-  gr_label('~120 lần/giây', 720, 445, 0, { now: true, size: 54, al: 1 - EZ.io(seg(TT, t0 + 1.0, t0 + 1.8)) });
+  gr_label('~120 lần/giây', 690, 445, 0, { now: true, size: 54, al: 1 - EZ.io(seg(TT, t0 + 1.0, t0 + 1.8)) });
   gr_label('x', 570, 1040, 0, { now: true, size: 50, align: 'left' });
   // "hụt" hands over to "chỗ chạm"
-  gr_label('hụt', 640, 790, 0, { now: true, align: 'left', al: 1 - ev(tC - 0.2, 0.25) });
-  gr_label('chỗ chạm', 640, 790, tC - 0.05, { align: 'left' });
+  gr_label('hụt', 665, 670, 0, { now: true, align: 'left', al: 1 - ev(tC - 0.2, 0.25) });
+  gr_label('chỗ chạm', 665, 670, tC - 0.05, { align: 'left' });
   const [hx, hy] = TOUCH;
   heroFinger(hx, hy, HR, { key: 'hero', mood: 'happy', look: 0.35 * Math.sin((TT - t0) * 1.5) * gr_env('locate', 0.5, 0.5) });
-  // the crosshair on the tip, over the hero: big at the cut, settles, then breathes gently
-  const s = 1 + 0.35 * Math.exp(-(TT - t0) * 5) * Math.cos((TT - t0) * 14) + 0.06 * Math.sin((TT - t0) * TAU * 0.8) * ev(t0 + 0.8, 0.5);
-  crosshair(tx, ty, 46 * s, 1);
-  // from "chỗ": a soft echo ring leaves the crosshair once a beat-pair (the found point keeps "pinging")
-  if (TT > tC) { const u = mod(TT - tC, 1.5) / 1.5; ctx.save(); ctx.globalAlpha = 0.45 * (1 - u) * ev(tC, 0.3); ctx.beginPath(); ctx.arc(tx, ty, 50 + 70 * EZ.o2(u), 0, TAU); hair(PAL.accent, 3); ctx.stroke(); ctx.restore(); }
   viTagNow('08', 'chỗ chạm');
   viCaption(['tâm vùng hụt', '= chỗ chạm'], [1, 'chỗ chạm'], { now: true, col: '#e4e4ea' });
 };
