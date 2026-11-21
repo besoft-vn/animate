@@ -52,7 +52,7 @@ function gr_scanRaw(t) {
 let GR_OFF = null;
 function gr_scanPh(t) {
   const p = gr_scanRaw(t); if (p == null) return null;
-  if (GR_OFF == null) { const q = gr_scanRaw(SLAM); GR_OFF = 0.86 - (q - Math.floor(q)); }
+  if (GR_OFF == null) { const q = gr_scanRaw(SLAM); GR_OFF = 0.76 - (q - Math.floor(q)); }
   return p + GR_OFF;
 }
 
@@ -205,8 +205,8 @@ SCENES.sweep = function () {
 
 // ---------------------------------------------------------------------
 //  LOCATE (08) — HARD CUT on the SLAM. "Tâm của vùng hụt ấy chính là chỗ ngón tay bạn đang chạm."
-//  Complete on frame 1: sweep's last board (dip, ring, slow scan line fading) + the dark crosshair on the tip
-//  (springs in big, settles, keeps a gentle pulse), grey guide lines to the left / bottom grid edges ("y" / "x");
+//  Complete on frame 1: sweep's last board (dip, ring, slow scan line) + the dark crosshair (r 86) circling the tip
+//  BEHIND the hero (springs in big, settles, gentle pulse + echo rings), grey guide lines to the left / bottom grid edges ("y" / "x");
 //  "chỗ": the label "chỗ chạm" replaces "hụt". Hero happy at TOUCH. Camera: CAMS.locate (starts at sweep's zoom).
 // ---------------------------------------------------------------------
 SCENES.locate = function () {
@@ -223,7 +223,7 @@ SCENES.locate = function () {
   polyPath([[tx, ty + 130], [tx, GR_Y1 + 4]], false); hair(PAL.edge, 3); ctx.stroke();
   ctx.setLineDash([]); ctx.restore();
   for (const [ex, ey] of [[GR_X0 - 10, ty], [tx, GR_Y1 + 4]]) { ctx.beginPath(); ctx.arc(ex, ey, 6, 0, TAU); ctx.fillStyle = PAL.edge; ctx.fill(); }
-  // the crosshair around the tip, BEHIND the hero (it circles the fingertip; the hero hides the centre): big at the cut, settles, then breathes gently
+  // the crosshair circles the tip BEHIND the hero (the hero hides its centre): big at the cut, settles, breathes
   const s = 1 + 0.35 * Math.exp(-(TT - t0) * 5) * Math.cos((TT - t0) * 14) + 0.06 * Math.sin((TT - t0) * TAU * 0.8) * ev(t0 + 0.8, 0.5);
   crosshair(tx, ty, 86 * s, 1);
   // from "chỗ": a soft echo ring leaves the crosshair once a beat-pair (the found point keeps "pinging")

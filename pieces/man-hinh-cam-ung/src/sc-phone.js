@@ -104,7 +104,7 @@ function ph_phone(o = {}) {
     ctx.save(); ctx.globalAlpha = dp * 0.7 * (1 - rp);
     faceEll(gp, PH_S / 2, PH_L / 2, rr, rr, { stroke: COL.fieldM, w: 4 });
     ctx.restore();
-    ctx.save(); ctx.globalAlpha = dp * 0.55;
+    ctx.save(); ctx.globalAlpha = dp * 0.85;
     faceEll(gp, PH_S / 2, PH_L / 2, r * dp, r * dp, { fill: COL.fieldL });
     ctx.globalAlpha = dp * 0.9;
     faceEll(gp, PH_S / 2, PH_L / 2, r * dp, r * dp, { stroke: COL.fieldM, w: 4 });
@@ -155,6 +155,28 @@ function ph_label(str, x, y, t0, o = {}) {
   ctx.restore();
   vtext(str, x, y + dy, size, { col: o.col ?? PAL.text, al: a });
 }
+
+
+// ---- a caption whose lines spring in on their own words (local variant of viCaption); the highlight block appears
+// on its own word. ats: absolute times per line; o: { hi: [line, 'word'], hiAt, col }
+function ph_captionDraw(lines, ats, o) {
+  ctx.save(); ctx.font = `400 60px ${VFONT}`; ctx.textBaseline = 'alphabetic';
+  let any = 0;
+  lines.forEach((s, i) => {
+    const a = clamp(spring(TT, ats[i], { k: 120, damp: 0.8 })); if (a <= 0.001) return; any = Math.max(any, a);
+    ctx.globalAlpha = a;
+    const y = 1360 + i * 72 + (1 - a) * 16, w = ctx.measureText(s).width, x = CX - w / 2;
+    const hk = o.hi && o.hi[0] === i && s.includes(o.hi[1]) ? clamp(spring(TT, o.hiAt ?? ats[i], { k: 140, damp: 0.8 })) : 0;
+    if (hk > 0.001) {
+      const k = s.indexOf(o.hi[1]), pre = ctx.measureText(s.slice(0, k)).width, hw = ctx.measureText(o.hi[1]).width;
+      ctx.fillStyle = o.col ?? COL.fieldL; ctx.fillRect(x + pre - 8, y - 46, (hw + 16) * hk, 60);
+    }
+    ctx.fillStyle = PAL.text; ctx.textAlign = 'left'; ctx.fillText(s, x, y);
+  });
+  if (any > 0) { ctx.globalAlpha = any; polyPath([[CX - 22, 1290], [CX + 22, 1290]], false); hair(PAL.edge); ctx.stroke(); }
+  ctx.restore();
+}
+const ph_caption = (lines, ats, o = {}) => { const f = () => ph_captionDraw(lines, ats, o); if (DEFER) DEFER.push(f); else f(); };
 
 // ---------------------------------------------------------------------
 //  HOOK (0–6.5) — "Màn hình cảm ứng không đo bạn ấn mạnh hay nhẹ, nó dò ngón tay dẫn điện của bạn."
@@ -220,9 +242,9 @@ SCENES.grid = function () {
 SCENES.end = function () {
   const t0 = ET('end'), tKh = VW('end', 'không'), tChi = VW('end', 'chỉ'), tDien = VW('end', 'điện'), tLay = VW('end', 'lấy');
   // "không nhìn thấy": the grid shows faintly under the glass (breathing a little); the tiles dim
-  const gv = EZ.io(seg(TT, tKh, tKh + 0.9));
-  const dip = clamp(spring(TT, tLay - 0.15, { k: 90, damp: 0.7 })) + 0.35 * EZ.io(seg(TT, tDien, tLay)) * (1 - clamp(spring(TT, tLay - 0.15, { k: 90, damp: 0.7 })));
-  ph_phone({ tiles: 1 - 0.85 * gv, gridAl: gv * (0.46 + 0.16 * Math.sin(TT * Math.PI)), rows: 1, cols: 1, dip, scan: 0.75 * EZ.io(seg(TT, tKh + 0.4, tKh + 1.0)) });
+  const gv = EZ.io(seg(TT, tKh, tKh + 0.9)), gc = EZ.io(seg(TT, VE('end', 'tay') - 0.1, VE('end', 'tay') + 0.8));
+  const dip = clamp(spring(TT, tLay - 0.15, { k: 90, damp: 0.7 })) + 0.6 * EZ.io(seg(TT, tDien, tLay)) * (1 - clamp(spring(TT, tLay - 0.15, { k: 90, damp: 0.7 })));
+  ph_phone({ tiles: 1 - 0.85 * gv, gridAl: gv * (0.46 + 0.16 * Math.sin(TT * Math.PI)), rows: 1, cols: gc, dip, scan: 0.75 * EZ.io(seg(TT, tKh + 0.4, tKh + 1.0)) });
   // the hero: touching the whole era (bare finger), a slow look around; a small press on "lấy"; happy at the end
   const e = ph_env('end', 0.5, 0.6);
   const sq = 0.35 * Math.max(0, kick(TT, tLay, { k: 120, damp: 0.5 })) * (TT < tLay + 1.2 ? 1 : 0);
@@ -232,5 +254,7 @@ SCENES.end = function () {
   const ck = clamp(spring(TT, tLay + 0.1, { k: 140, damp: 0.6 }));
   crosshair(TOUCH_PT[0], TOUCH_PT[1], 30, ck, { al: 0.45 });
   viTag('10', 'chỗ bị lấy mất');
-  viCaption(['không thấy ngón tay,', 'chỉ thấy chỗ bị lấy mất'], [1, 'bị lấy mất'], { at: tKh - t0, col: COL.fieldL });
+  // "hụt": the word from the grid scenes, beside the dip
+  ph_label('hụt', 760, 690, tLay + 0.2, { col: PAL.text, to: [640, 760] });
+  ph_caption(['không thấy ngón tay,', 'chỉ thấy chỗ bị lấy mất'], [tKh, tChi], { hi: [1, 'bị lấy mất'], hiAt: tLay, col: COL.fieldL });
 };

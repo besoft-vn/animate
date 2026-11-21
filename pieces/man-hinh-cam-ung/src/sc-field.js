@@ -176,7 +176,9 @@ SCENES.finger = function () {
   const sq = (0.22 * EZ.o2(ev(tC + 0.3, 0.12)) + 0.12 * kick(TT, tC + 0.3, { k: 260, damp: 0.35 }) + 0.2 * Math.sin(Math.PI * seg(mod(TT - tB - 0.5, 1.6), 0, 0.8)) * ev(tB + 0.5, 0.01)) * (1 - EZ.io(seg(TT, t1 - 1.2, t1 - 0.55)));
   const mood = TT >= tK + 0.1 && TT < tK + 1.6 ? 'wow' : TT >= tB + 0.3 && TT < tB + 1.6 ? 'happy' : 'calm';
   const e = fd_env('finger');
-  heroFinger(TOUCH[0], hy, HR, { squash: Math.max(0, sq), mood, look: (TT < tK ? 0 : TT < tB ? -0.5 : 0.3 + 0.5 * Math.sin((TT - tB) * 2.4)) * e, tilt: 0.11 * Math.sin((TT - tB - 0.5) * TAU / 1.7) * ev(tB + 0.5, 0.6) * e });
+  // once touching, cancel heroFinger's idle bob so the tip sits exactly ON the glass top (y 770)
+  const sqc = Math.max(0, sq), bobF = (1 - sqc) * Math.sin(TT * TAU * 0.7) * HR * 0.05 * d * (1 - EZ.io(seg(TT, t1 - 1.2, t1 - 0.55)));
+  heroFinger(TOUCH[0], hy - bobF, HR, { squash: sqc, mood, look: (TT < tK ? 0 : TT < tB ? -0.5 : 0.3 + 0.5 * Math.sin((TT - tB) * 2.4)) * e, tilt: 0.11 * Math.sin((TT - tB - 0.5) * TAU / 1.7) * ev(tB + 0.5, 0.6) * e });
   viTag('05', 'ngón tay kéo đi');
   // the caption follows the line: first the pull, then where it goes (summary of "dẫn vào cơ thể bạn")
   if (TT < tB + 0.9) viCaption(['ngón tay kéo', 'điện trường đi'], [1, 'điện trường'], { at: tC - t0 });
@@ -192,10 +194,6 @@ SCENES.glove = function () {
   const t0 = ET('glove'), t1 = EE('glove'), tL = VW('glove', 'len', 2), tD = VW('glove', 'điện', 2), tCh = VW('glove', 'chẳng'), tLa = VW('glove', 'làm');
   fd_section();
   fd_padLabels(0, 0, true);
-  FD_ARCS.forEach((A, i) => {
-    const sw = 1 + 0.35 * Math.sin(Math.PI * ev(tD + i * 0.08, 0.6));
-    fieldLine(fd_arcPts(i), { w: 4 * sw });
-  });
   vlabel('len không dẫn điện', 95, 560, tL - 0.05, 52, { align: 'left' });
   fd_meter(1 + 0.01 * Math.sin(TT * 4), ev(t0 + 0.4, 0.5), ev(tCh, 0.8));
   vlabel('đủ', 830, 1062, tCh + 0.25, 52, { align: 'left', col: COL.field });
@@ -204,7 +202,14 @@ SCENES.glove = function () {
   const e = fd_env('glove');
   const sq = 0.16 * e + 0.05 * e * Math.sin(Math.PI * ev(tL, 0.5));
   const mood = TT >= tLa - 0.4 && TT < t1 - 0.6 ? 'sad' : 'calm';
-  heroFinger(TOUCH[0], TOUCH[1], HR, { glove: 1, squash: sq, mood, look: (TT < tCh ? -0.3 : TT < tLa ? 0.5 : 0.2) * e });
+  // tip exactly on the glass while touching (cancel the idle bob in the middle of the era)
+  const bobG = (1 - sq) * Math.sin(TT * TAU * 0.7) * HR * 0.05;
+  heroFinger(TOUCH[0], TOUCH[1] - bobG * e, HR, { glove: 1, squash: sq, mood, look: (TT < tCh ? -0.3 : TT < tLa ? 0.5 : 0.2) * e });
+  // the field passes STRAIGHT THROUGH the wool, unchanged: the arcs are drawn over the glove (director's call)
+  FD_ARCS.forEach((A, i) => {
+    const sw = 1 + 0.35 * Math.sin(Math.PI * ev(tD + i * 0.08, 0.6));
+    fieldLine(fd_arcPts(i), { w: 4 * sw });
+  });
   viTag('09', 'găng len');
   viCaption(['len không dẫn điện:', 'màn hình làm ngơ'], [1, 'làm ngơ'], { at: tL - t0, col: '#e4e4ea' });
 };
