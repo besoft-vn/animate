@@ -260,5 +260,5 @@ SCENES.end = function () {
   ph_label('hụt', 760, 690, tLay - 0.05, { col: PAL.text, to: [618, 752] });
   // "không nhìn thấy": the grid under the glass gets its name once the columns are in
   ph_label('lưới', 200, 600, VW('end', 'tay') + 0.1, { col: PAL.text, to: [290, 700] });
-  ph_caption(['không thấy ngón tay,', 'chỉ thấy chỗ bị lấy mất'], [t0 + 0.1, tChi], { his: [[0, 'không thấy', tKh + 0.05, '#e4e4ea'], [1, 'bị lấy mất', tLay, COL.fieldL]] });
+  ph_caption(['không thấy ngón tay,', 'chỉ thấy chỗ bị lấy mất'], [t0 + 0.1, VW('end', 'nó') - 0.1], { his: [[0, 'không thấy', tKh + 0.05, '#e4e4ea'], [1, 'bị lấy mất', tLay, COL.fieldL]] });
 };
