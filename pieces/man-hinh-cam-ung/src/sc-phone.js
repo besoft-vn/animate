@@ -255,6 +255,8 @@ SCENES.end = function () {
   crosshair(TOUCH_PT[0], TOUCH_PT[1], 30, ck, { al: 0.45 });
   viTag('10', 'chỗ bị lấy mất');
   // "hụt": the word from the grid scenes, beside the dip
-  ph_label('hụt', 760, 690, tLay + 0.2, { col: PAL.text, to: [640, 760] });
+  ph_label('hụt', 760, 690, tLay - 0.05, { col: PAL.text, to: [618, 752] });
+  // "không nhìn thấy": the grid under the glass gets its name once the columns are in
+  ph_label('lưới', 200, 600, VE('end', 'tay') + 0.1, { col: PAL.text, to: [290, 700] });
   ph_caption(['không thấy ngón tay,', 'chỉ thấy chỗ bị lấy mất'], [tKh, tChi], { hi: [1, 'bị lấy mất'], hiAt: tLay, col: COL.fieldL });
 };
