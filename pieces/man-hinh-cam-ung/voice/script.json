@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Màn hình cảm ứng không đo bạn ấn mạnh hay nhẹ, nó dò ngón tay dẫn điện của bạn.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "grid",
+   "text": "Dưới mặt kính là một lưới điện cực trong suốt: hàng nằm ngang, cột nằm dọc.",
+   "after": 0.5,
+   "file": "grid.mp3"
+  },
+  {
+   "id": "cap",
+   "text": "Mỗi chỗ hàng cắt cột là một tụ điện tí hon, có điện trường nhô lên qua lớp kính.",
+   "after": 0.5,
+   "file": "cap.mp3"
+  },
+  {
+   "id": "scan",
+   "text": "Con chip lần lượt gửi xung điện vào từng hàng, rồi đo xem mỗi cột nhận lại bao nhiêu.",
+   "after": 0.5,
+   "file": "scan.mp3"
+  },
+  {
+   "id": "finger",
+   "text": "Ngón tay chạm vào sẽ kéo một phần điện trường đó đi, dẫn vào cơ thể bạn.",
+   "after": 0.5,
+   "file": "finger.mp3"
+  },
+  {
+   "id": "drop",
+   "text": "Vì vậy, các điểm giao ngay dưới ngón tay nhận được ít tín hiệu hơn hẳn.",
+   "after": 0.5,
+   "file": "drop.mp3"
+  },
+  {
+   "id": "sweep",
+   "text": "Chip quét cả lưới chừng một trăm hai mươi lần mỗi giây, tìm vùng bị hụt.",
+   "after": 1.6,
+   "file": "sweep.mp3"
+  },
+  {
+   "id": "locate",
+   "text": "Tâm của vùng hụt ấy chính là chỗ ngón tay bạn đang chạm.",
+   "after": 0.6,
+   "file": "locate.mp3"
+  },
+  {
+   "id": "glove",
+   "text": "Đeo găng len thì khác: len không dẫn điện, điện trường chẳng hụt, màn hình làm ngơ.",
+   "after": 0.5,
+   "file": "glove.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Vậy đấy: màn hình không nhìn thấy ngón tay, nó chỉ thấy chỗ điện trường bị lấy mất.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}

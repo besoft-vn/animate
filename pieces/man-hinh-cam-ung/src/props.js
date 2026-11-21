@@ -11,9 +11,7 @@ const COL = {
   field: '#3f8fd8', fieldL: '#d6e8f8', fieldM: '#9cc8ee',
   skin: '#e0876a', skinL: '#fbe3d8', skinM: '#f2b8a2',
   wool: '#a89f8c', woolL: '#efe9dc',
-  dip: '#f4a26b',                    // (unused by default) keep BLUE for the signal; a weakened reading is a SHORTER/PALER blue
 };
-const VFONT = '"Pangolin", "DejaVu Sans", sans-serif';
 const VFONT = '"Pangolin", "DejaVu Sans", sans-serif';
 
 // ---- screen-space text (Pangolin). o: { col, align, al, weight }
@@ -94,8 +92,6 @@ function heroFinger(x, y, r = HR, o = {}) {
     // the nail: a rounded cap on the upper part, seen a little from the front
     polyPath(rrectPts(x - w * 0.62, y - r * 1.18, w * 1.24, r * 0.62, r * 0.28, 6), true);
     ctx.fillStyle = '#ffffff'; ctx.fill(); hair(COL.skinM, 3); ctx.stroke();
-    // two knuckle creases near the tip
-    polyPath(arcPts(x, y + r * 0.62, w * 0.42, Math.PI * 0.15, Math.PI * 0.85, 8), false); hair(COL.skinM, 2.5); ctx.stroke();
   } else {
     // the glove: knitted rib lines + a cuff
     for (let k = -2; k <= 2; k++) { polyPath([[x + k * w * 0.32, y - r * 0.9], [x + k * w * 0.32, y + r * 1.1]], false); hair(COL.wool, 2); ctx.globalAlpha *= 0.5; ctx.stroke(); ctx.globalAlpha = clamp(o.al ?? 1); }
