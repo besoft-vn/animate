@@ -158,7 +158,7 @@ function ph_label(str, x, y, t0, o = {}) {
 
 
 // ---- a caption whose lines spring in on their own words (local variant of viCaption); the highlight block appears
-// on its own word. ats: absolute times per line; o: { hi: [line, 'word'], hiAt, col }
+// on its own word. ats: absolute times per line; o: { his: [[line, 'word', at, colour], ...] }
 function ph_captionDraw(lines, ats, o) {
   ctx.save(); ctx.font = `400 60px ${VFONT}`; ctx.textBaseline = 'alphabetic';
   let any = 0;
@@ -166,10 +166,11 @@ function ph_captionDraw(lines, ats, o) {
     const a = clamp(spring(TT, ats[i], { k: 120, damp: 0.8 })); if (a <= 0.001) return; any = Math.max(any, a);
     ctx.globalAlpha = a;
     const y = 1360 + i * 72 + (1 - a) * 16, w = ctx.measureText(s).width, x = CX - w / 2;
-    const hk = o.hi && o.hi[0] === i && s.includes(o.hi[1]) ? clamp(spring(TT, o.hiAt ?? ats[i], { k: 140, damp: 0.8 })) : 0;
-    if (hk > 0.001) {
-      const k = s.indexOf(o.hi[1]), pre = ctx.measureText(s.slice(0, k)).width, hw = ctx.measureText(o.hi[1]).width;
-      ctx.fillStyle = o.col ?? COL.fieldL; ctx.fillRect(x + pre - 8, y - 46, (hw + 16) * hk, 60);
+    for (const [li, word, at, col] of o.his ?? []) {
+      const hk = li === i && s.includes(word) ? clamp(spring(TT, at, { k: 140, damp: 0.8 })) : 0;
+      if (hk <= 0.001) continue;
+      const k = s.indexOf(word), pre = ctx.measureText(s.slice(0, k)).width, hw = ctx.measureText(word).width;
+      ctx.fillStyle = col; ctx.fillRect(x + pre - 8, y - 46, (hw + 16) * hk, 60);
     }
     ctx.fillStyle = PAL.text; ctx.textAlign = 'left'; ctx.fillText(s, x, y);
   });
@@ -243,9 +244,9 @@ SCENES.grid = function () {
 SCENES.end = function () {
   const t0 = ET('end'), tKh = VW('end', 'không'), tChi = VW('end', 'chỉ'), tDien = VW('end', 'điện'), tLay = VW('end', 'lấy');
   // "không nhìn thấy": the grid shows faintly under the glass (breathing a little); the tiles dim
-  const gv = EZ.io(seg(TT, tKh, tKh + 0.9)), gc = EZ.io(seg(TT, VE('end', 'tay') - 0.1, VE('end', 'tay') + 0.8));
+  const gv = EZ.io(seg(TT, tKh - 0.3, tKh + 1.7)), gc = EZ.io(seg(TT, VE('end', 'tay') - 0.1, VE('end', 'tay') + 0.8));
   const dip = clamp(spring(TT, tLay - 0.15, { k: 90, damp: 0.7 })) + 0.6 * EZ.io(seg(TT, tDien, tLay)) * (1 - clamp(spring(TT, tLay - 0.15, { k: 90, damp: 0.7 })));
-  ph_phone({ tiles: 1 - 0.85 * gv, gridAl: gv * (0.46 + 0.16 * Math.sin(TT * Math.PI)), rows: 1, cols: gc, dip, scan: 0.75 * EZ.io(seg(TT, tKh + 0.4, tKh + 1.0)) });
+  ph_phone({ tiles: 1 - 0.85 * gv, gridAl: gv * (0.46 + 0.16 * Math.sin(TT * Math.PI)), rows: 1, cols: gc, dip, scan: EZ.io(seg(TT, VE('end', 'tay'), VE('end', 'tay') + 0.4)) });
   // the hero: touching the whole era (bare finger), a slow look around; a small press on "lấy"; happy at the end
   const e = ph_env('end', 0.5, 0.6);
   const sq = 0.35 * Math.max(0, kick(TT, tLay, { k: 120, damp: 0.5 })) * (TT < tLay + 1.2 ? 1 : 0);
@@ -258,6 +259,6 @@ SCENES.end = function () {
   // "hụt": the word from the grid scenes, beside the dip
   ph_label('hụt', 760, 690, tLay - 0.05, { col: PAL.text, to: [618, 752] });
   // "không nhìn thấy": the grid under the glass gets its name once the columns are in
-  ph_label('lưới', 200, 600, tKh + 0.45, { col: PAL.text, to: [290, 700] });
-  ph_caption(['không thấy ngón tay,', 'chỉ thấy chỗ bị lấy mất'], [t0 + 0.1, tChi], { hi: [1, 'bị lấy mất'], hiAt: tLay, col: COL.fieldL });
+  ph_label('lưới', 200, 600, VW('end', 'tay') + 0.1, { col: PAL.text, to: [290, 700] });
+  ph_caption(['không thấy ngón tay,', 'chỉ thấy chỗ bị lấy mất'], [t0 + 0.1, tChi], { his: [[0, 'không thấy', tKh + 0.05, '#e4e4ea'], [1, 'bị lấy mất', tLay, COL.fieldL]] });
 };

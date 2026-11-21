@@ -174,8 +174,8 @@ SCENES.finger = function () {
   if (ka > 0) simpleArrow(440, 610, 440, 610 - 150 * ka, { w: 5, head: 22, al: ta });
   // keeps pulling: a second short arrow climbs the shaft once a beat
   if (ka >= 1) { const q = mod(TT - tB - 0.6, 1.4) / 1.4, qa = Math.sin(Math.PI * q) * (1 - seg(TT, t1 - 0.9, t1 - 0.6));
-    if (qa > 0.01) simpleArrow(400, 610 - 130 * q, 400, 565 - 130 * q, { w: 4, head: 14, al: qa * 0.8 * ta }); }
-  vlabel('vào cơ thể', 420, 435, tB + 0.1, 52, { align: 'right', al: ta });
+    if (qa > 0.01) simpleArrow(462, 610 - 130 * q, 462, 570 - 130 * q, { w: 4, head: 12, al: qa * 0.8 * ta }); }
+  vlabel('vào cơ thể', 420, 525, tB + 0.1, 52, { align: 'right', al: ta });
   // the hero: HOVER -> TOUCH on "chạm" (tip on the glass), squash while pressing, back to plain near the bridge
   const d = EZ.io(seg(TT, Math.max(t0 + 0.5, tC - 0.12), tC + 0.32));
   const hy = lerp(HOVER[1], TOUCH[1], d);
