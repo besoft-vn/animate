@@ -1,0 +1,10 @@
+0.90-6.09s  Màn hình cảm ứng không đo bạn ấn mạnh hay nhẹ, nó dò ngón tay dẫn điện của bạn.
+6.59-11.85s  Dưới mặt kính là một lưới điện cực trong suốt: hàng nằm ngang, cột nằm dọc.
+12.35-18.00s  Mỗi chỗ hàng cắt cột là một tụ điện tí hon, có điện trường nhô lên qua lớp kính.
+18.50-25.06s  Con chip lần lượt gửi xung điện vào từng hàng, rồi đo xem mỗi cột nhận lại bao nhiêu.
+25.56-32.36s  Ngón tay chạm vào sẽ kéo một phần điện trường đó đi, dẫn vào cơ thể bạn.
+32.86-37.14s  Vì vậy, các điểm giao ngay dưới ngón tay nhận được ít tín hiệu hơn hẳn.
+37.64-42.04s  Chip quét cả lưới chừng một trăm hai mươi lần mỗi giây, tìm vùng bị hụt.
+43.64-47.09s  Tâm của vùng hụt ấy chính là chỗ ngón tay bạn đang chạm.
+47.69-53.85s  Đeo găng len thì khác: len không dẫn điện, điện trường chẳng hụt, màn hình làm ngơ.
+54.35-59.47s  Vậy đấy: màn hình không nhìn thấy ngón tay, nó chỉ thấy chỗ điện trường bị lấy mất.

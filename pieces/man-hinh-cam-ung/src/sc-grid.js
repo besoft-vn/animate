@@ -232,7 +232,7 @@ SCENES.locate = function () {
   gr_label('~120 lần/giây', 690, 445, 0, { now: true, size: 54, al: 1 - EZ.io(seg(TT, t0 + 1.0, t0 + 1.8)) });
   gr_label('x', 570, 1040, 0, { now: true, size: 50, align: 'left' });
   // "hụt" hands over to "chỗ chạm"
-  gr_label('hụt', 665, 670, 0, { now: true, align: 'left', al: 1 - ev(tC - 0.2, 0.25) });
+  gr_label('hụt', 665, 670, 0, { now: true, align: 'left', al: 1 - ev(tC - 0.45, 0.25) });
   gr_label('chỗ chạm', 665, 670, tC - 0.05, { align: 'left' });
   const [hx, hy] = TOUCH;
   heroFinger(hx, hy, HR, { key: 'hero', mood: 'happy', look: 0.35 * Math.sin((TT - t0) * 1.5) * gr_env('locate', 0.5, 0.5) });

@@ -20,13 +20,14 @@ const BRIDGES = [
 // picture, not the scale; locate then eases back to identity before its bridge out.
 const SW_U = (t) => seg(t, ET('sweep') + 0.5, SLAM);
 CAMS.sweep = (t) => camOf({ z: 1 + 0.06 * SW_U(t), p: TOUCH_PT, to: [TOUCH_PT[0], TOUCH_PT[1] + 26 * Math.sin(2 * Math.PI * SW_U(t))] });
-CAMS.locate = (t) => camOf({ z: lerp(1.06, 1.0, EZ.io(seg(t, SLAM, EE('locate') - 0.5))), p: TOUCH_PT, to: TOUCH_PT });
-CAMS.end = (t) => { const u = seg(t, ET('end') + 0.5, DURATION); return camOf({ z: 1 + 0.08 * EZ.io(u), p: TOUCH_PT, to: [540 + 30 * Math.sin(3 * Math.PI * u), TOUCH_PT[1] + 40 * Math.sin(2.5 * Math.PI * u)] }); };
+CAMS.locate = (t) => { const u = seg(t, SLAM + 1.0, EE('locate') - 0.5); return camOf({ z: lerp(1.06, 1.0, EZ.io(seg(t, SLAM, EE('locate') - 0.5))) + 0.04 * Math.sin(Math.PI * u), p: TOUCH_PT, to: [TOUCH_PT[0] + 24 * Math.sin(2 * Math.PI * u), TOUCH_PT[1] + 36 * Math.sin(Math.PI * u)] }); };
+CAMS.end = (t) => { const u = seg(t, ET('end') + 0.5, DURATION); return camOf({ z: 1 + 0.08 * EZ.io(u) + 0.03 * Math.sin(3 * Math.PI * u), p: TOUCH_PT, to: [540 + 40 * Math.sin(3 * Math.PI * u), TOUCH_PT[1] + 56 * Math.sin(2.5 * Math.PI * u)] }); };
 // KHÔNG ĐƠ: hairlines on white barely change the picture, so every era without its own camera breathes: a slow
 // push-in and back out (≤ 5%) with a small drift, identity within 0.5 s of both boundaries.
-const BREATHE = (id, z = 0.05, dy = 26) => (t) => {
+// stillcheck (mp4, 27×48) needs more than hairlines: z ≤ 8 %, a vertical drift and a small sideways sway.
+const BREATHE = (id, z = 0.08, dy = 50, dx = 26) => (t) => {
   const u = seg(t, ET(id) + 0.5, EE(id) - 0.5), k = Math.sin(Math.PI * u);
-  return camOf({ z: 1 + z * k, p: [540, 820], to: [540, 820 + dy * Math.sin(2 * Math.PI * u)] });
+  return camOf({ z: 1 + z * k, p: [540, 820], to: [540 + dx * Math.sin(3 * Math.PI * u), 820 + dy * Math.sin(2 * Math.PI * u)] });
 };
 for (const id of IDS) if (!CAMS[id]) CAMS[id] = BREATHE(id);
-CAMS.hook = (t) => { const u = seg(t, 0, EE('hook') - 0.5), k = Math.sin(Math.PI * u); return camOf({ z: 1 + 0.06 * k, p: [540, 820], to: [540 + 20 * Math.sin(3 * Math.PI * u), 820 + 36 * Math.sin(2 * Math.PI * u)] }); };
+CAMS.hook = (t) => { const u = seg(t, 0, EE('hook') - 0.5), k = Math.sin(Math.PI * u); return camOf({ z: 1 + 0.08 * k, p: [540, 820], to: [540 + 30 * Math.sin(3 * Math.PI * u), 820 + 50 * Math.sin(2 * Math.PI * u)] }); };
