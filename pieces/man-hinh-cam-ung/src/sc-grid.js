@@ -25,7 +25,8 @@ const gr_env = (id, pad = 0.5, ramp = 0.6) => EZ.io(seg(TT, ET(id) + pad, ET(id)
 // a label on a soft white pill, springing in at t0 (now: already in)
 function gr_label(str, x, y, t0, o = {}) {
   const size = o.size ?? 54;
-  const a = (o.now ? 1 : clamp(spring(TT, t0, { k: 140, damp: 0.8 }))) * clamp(o.al ?? 1);
+  // o.out: the label is gone by `out` (fades over the 0.3 s before it) so the bridge morph never cuts it
+  const a = (o.now ? 1 : clamp(spring(TT, t0, { k: 140, damp: 0.8 }))) * clamp(o.al ?? 1) * (o.out != null ? 1 - EZ.io(ev(o.out - 0.3, 0.3)) : 1);
   if (a <= 0.001) return;
   const dy = o.now ? 0 : (1 - clamp(spring(TT, t0, { k: 140, damp: 0.8 }))) * 14;
   ctx.save(); ctx.font = `400 ${size}px ${VFONT}`; const w = ctx.measureText(str).width; ctx.restore();
@@ -149,10 +150,11 @@ SCENES.scan = function () {
     build: seg(TT, t0, t0 + 1.0),
     pulse: TT >= tX - 0.15 ? gr_pulsePh(tX - 0.15) : null, pulseAl: ev(tX - 0.15, 0.15),
     meters: TT >= tM ? meters : null, meterAl: ev(tM, 0.2),
+    discs: seg(TT, VW('scan', 'đo') - 0.1, VW('scan', 'đo') + 1.1), dip: 0,
   });
-  gr_label('bình thường', 750, 440, tB - 0.1, { size: 52 });
+  gr_label('bình thường', 750, 440, tM + 0.1, { size: 52, out: EE('scan') - 0.6 });
   // hero hovering above the grid: drifts a little, eyes follow the pulse, then the meters
-  const e = gr_env('scan'), [hx, hy] = HOVER;
+  const e = gr_env('scan'), [hx, hy0] = HOVER, hy = lerp(hy0, 440, gr_env('scan', 0.6, 0.7));
   const ph = TT >= tX ? gr_pulsePh(tX - 0.15) : 0, pu = ph - Math.floor(ph);
   const look = TT < tX ? 0 : TT < tM ? lerp(-0.8, 0.8, pu) : 0.4 * Math.sin((TT - tM) * 1.4);
   heroFinger(hx + 18 * Math.sin((TT - t0) * 1.1) * e, hy - 10 * Math.sin((TT - t0) * 1.7) * e, HR,
@@ -172,13 +174,13 @@ SCENES.drop = function () {
   const dip = EZ.io(ev(tN + 0.1, 0.7));
   gr_board({
     pulse: gr_pulsePh(t0), pulseAl: 0.55,
-    meters: gr_meters(dip), discs: seg(TT, Math.min(t0 + 0.3, tG - 0.6), Math.min(t0 + 0.3, tG - 0.6) + 1.2), dip,
+    meters: gr_meters(dip), discs: 1, dip,
   });
-  gr_label('hụt', 665, 670, tN + 0.5, { align: 'left' });
+  gr_label('hụt', 665, 670, tN + 0.5, { align: 'left', out: EE('drop') - 0.6 });
   const [hx, hy] = TOUCH;
   heroFinger(hx, hy, HR, { key: 'hero', look: (TT < tN ? 0 : 0.6 * Math.sin((TT - tN) * 1.6)) * gr_env('drop'), mood: TT >= tI - 0.1 && TT < tI + 1.3 ? 'wow' : 'calm' });
   viTag('06', 'tín hiệu hụt');
-  viCaption(['dưới ngón tay:', 'tín hiệu hụt'], [1, 'hụt'], { at: tN - t0 });
+  viCaption(['dưới ngón tay:', 'tín hiệu hụt'], [1, 'hụt'], { at: 0.1 });
 };
 
 // ---------------------------------------------------------------------
@@ -195,7 +197,7 @@ SCENES.sweep = function () {
   const S = gr_sweepState(TT);
   // before "quét", the drive pulse is still ticking (as in drop); it hands over to the scan line
   gr_board({ ...S, pulse: TT < tQ + 0.2 ? gr_pulsePh(ET('drop')) : null, pulseAl: 0.55 * (1 - ev(tQ, 0.2)) });
-  gr_label('hụt', 665, 670, 0, { now: true, align: 'left' });
+  gr_label('hụt', 665, 670, t0 + 0.5, { align: 'left' });
   gr_label('~120 lần/giây', 690, 445, VW('sweep', 'một') - 0.05, { size: 54 });
   const [hx, hy] = TOUCH, tH = VW('sweep', 'hụt');
   heroFinger(hx, hy, HR, { key: 'hero', look: 0.5 * Math.sin((TT - t0) * 2.2) * gr_env('sweep', 0.5) * (1 - ev(tH, 0.5)), mood: TT >= tH ? 'wow' : 'calm' });
@@ -205,17 +207,14 @@ SCENES.sweep = function () {
 
 // ---------------------------------------------------------------------
 //  LOCATE (08) — HARD CUT on the SLAM. "Tâm của vùng hụt ấy chính là chỗ ngón tay bạn đang chạm."
-//  Complete on frame 1: sweep's last board (dip, ring, slow scan line) + the dark crosshair (r 86) circling the tip
+//  Complete on frame 1: sweep's last board (dip, ring; the scan line is gone) + the dark crosshair (r 86) circling the tip
 //  BEHIND the hero (springs in big, settles, gentle pulse + echo rings), grey guide lines to the left / bottom grid edges ("y" / "x");
-//  "chỗ": the label "chỗ chạm" replaces "hụt". Hero happy at TOUCH. Camera: CAMS.locate (starts at sweep's zoom).
+//  "hụt" fades before "chỗ" (the caption says "chỗ chạm"). Hero happy at TOUCH. Camera: CAMS.locate (starts at sweep's zoom).
 // ---------------------------------------------------------------------
 SCENES.locate = function () {
   const t0 = SLAM, tC = VW('locate', 'chỗ');
   const S = gr_sweepState(TT);
-  // after the hold, the chip goes back to scanning (gently faster again) under the found point
-  const uR = Math.max(0, TT - (t0 + 1.2)), DR = 1.2, R2 = 0.4;
-  S.scan += R2 * (uR < DR ? uR * uR / (2 * DR) : DR / 2 + (uR - DR));
-  gr_board({ ...S, scanAl: S.scanAl * (1 - 0.45 * EZ.io(seg(TT, t0 + 0.6, t0 + 1.6))), ring: 1 });
+  gr_board({ ...S, scan: null, ring: 1 });   // the scan has done its job: no scan line under the crosshair
   // guide lines from the crosshair to the left and bottom grid edges, with "y" / "x"
   const [tx, ty] = TOUCH_PT;
   ctx.save(); ctx.setLineDash([12, 10]); ctx.lineDashOffset = -(TT - t0) * 20;
@@ -228,12 +227,11 @@ SCENES.locate = function () {
   crosshair(tx, ty, 86 * s, 1);
   // from "chỗ": a soft echo ring leaves the crosshair once a beat-pair (the found point keeps "pinging")
   if (TT > tC) { const u = mod(TT - tC, 1.5) / 1.5; ctx.save(); ctx.globalAlpha = 0.45 * (1 - u) * ev(tC, 0.3); ctx.beginPath(); ctx.arc(tx, ty, 92 + 70 * EZ.o2(u), 0, TAU); hair(PAL.accent, 3); ctx.stroke(); ctx.restore(); }
-  gr_label('y', 250, 752, 0, { now: true, size: 50 });
+  gr_label('y', 250, 752, 0, { now: true, size: 50, out: EE('locate') - 0.6 });
   gr_label('~120 lần/giây', 690, 445, 0, { now: true, size: 54, al: 1 - EZ.io(seg(TT, t0 + 1.0, t0 + 1.8)) });
-  gr_label('x', 570, 1040, 0, { now: true, size: 50, align: 'left' });
-  // "hụt" hands over to "chỗ chạm"
+  gr_label('x', 570, 1040, 0, { now: true, size: 50, align: 'left', out: EE('locate') - 0.6 });
+  // "hụt" fades just before "chỗ"
   gr_label('hụt', 665, 670, 0, { now: true, align: 'left', al: 1 - ev(tC - 0.45, 0.25) });
-  gr_label('chỗ chạm', 665, 670, tC - 0.05, { align: 'left' });
   const [hx, hy] = TOUCH;
   heroFinger(hx, hy, HR, { key: 'hero', mood: 'happy', look: 0.35 * Math.sin((TT - t0) * 1.5) * gr_env('locate', 0.5, 0.5) });
   viTagNow('08', 'chỗ chạm');

@@ -59,7 +59,7 @@ function ph_phone(o = {}) {
     }
     for (let k = 0; k < PH_COLS; k++) {
       const p = EZ.o2(clamp((o.cols ?? 0) * 1.6 - k * 0.2)), len = (PH_L - 44) * p;
-      if (len > 2) faceRR(fp, ph_colU(k) - rw / 2, 22, rw, len, rw / 2, { fill: PAL.face, stroke: PAL.edge });
+      if (len > 2) faceRR(fp, ph_colU(k) - rw / 2, 22, rw, len, rw / 2, { stroke: PAL.edge });
     }
     ctx.restore();
   }
@@ -75,7 +75,7 @@ function ph_phone(o = {}) {
   }
   out.rowEnd = []; out.colEnd = [];                              // the screen-left end of each row / lower end of each column
   for (let k = 0; k < PH_ROWS; k++) out.rowEnd.push(isoP(fp(PH_S - 20, ph_rowV(k))));
-  for (let k = 0; k < PH_COLS; k++) out.colEnd.push(isoP(fp(ph_colU(k), PH_L - 22)));
+  for (let k = 0; k < PH_COLS; k++) out.colEnd.push(isoP(fp(ph_colU(k), PH_L - 60)));   // on the strip, near its lower end
   // ---- the glass plate (a thin slab, translucent: what is under it shows through, paler)
   setIso({ ...PH_ISO, oy: PH_ISO.oy - drop - glassUp });
   isoBox(-PH_L / 2, -PH_S / 2, PH_T, PH_L, PH_S, PH_G, { r: PH_R, fill: 'rgba(255,255,255,0.32)' });
@@ -95,19 +95,19 @@ function ph_phone(o = {}) {
     faceEll(gp, PH_S / 2, PH_L / 2, r, r, { stroke: COL.field, w: 5 });
     ctx.restore();
   }
-  // ---- the dip (end): a pale-blue patch + ring under the tip
+  // ---- the dip (end): a HOLE in the signal — a white disc that hides the grid under the tip, a dashed pale-blue rim,
+  // and a faint dashed ring closing in on it (the field being taken), once per 1.5 s
   const dp = clamp(o.dip ?? 0);
   if (dp > 0.01) {
-    const r = 62 + 8 * Math.sin(TT * Math.PI);
-    // a slow pale ripple leaving the dip, once per 1.5 s
-    const rp = mod(TT, 1.5) / 1.5, rr = (70 + 70 * rp) * dp;
-    ctx.save(); ctx.globalAlpha = dp * 0.7 * (1 - rp);
-    faceEll(gp, PH_S / 2, PH_L / 2, rr, rr, { stroke: COL.fieldM, w: 4 });
-    ctx.restore();
-    ctx.save(); ctx.globalAlpha = dp * 0.85;
-    faceEll(gp, PH_S / 2, PH_L / 2, r * dp, r * dp, { fill: COL.fieldL });
-    ctx.globalAlpha = dp * 0.9;
-    faceEll(gp, PH_S / 2, PH_L / 2, r * dp, r * dp, { stroke: COL.fieldM, w: 4 });
+    const r = (66 + 6 * Math.sin(TT * Math.PI)) * dp;
+    const rp = mod(TT, 1.5) / 1.5, rr = (150 - 80 * EZ.io(rp)) * dp;
+    ctx.save(); ctx.setLineDash([12, 12]); ctx.lineDashOffset = TT * 20;
+    ctx.globalAlpha = dp * 0.6 * Math.sin(Math.PI * rp);
+    facePath(gp, ellipsePts(PH_S / 2, PH_L / 2, rr, rr, 0, 40), true); hair(COL.fieldM, 4); ctx.stroke();
+    ctx.globalAlpha = dp * 0.92;
+    facePath(gp, ellipsePts(PH_S / 2, PH_L / 2, r, r, 0, 40), true); ctx.fillStyle = PAL.face; ctx.fill();
+    ctx.globalAlpha = dp;
+    hair(COL.fieldM, 4); ctx.stroke();
     ctx.restore();
   }
   ISO = keep;
@@ -134,8 +134,8 @@ function ph_gauge(k, xk, al = 1) {
   // the X (grey, never the accent)
   const d = 86, cy = y + 20, a1 = clamp(xk), a2 = clamp(xk - 1);
   ctx.save(); ctx.globalAlpha = clamp(al);
-  if (a1 > 0) { polyPath([[x - d, cy - d], [x - d + 2 * d * a1, cy - d + 2 * d * a1]], false); hair(PAL.text, 8); ctx.stroke(); }
-  if (a2 > 0) { polyPath([[x + d, cy - d], [x + d - 2 * d * a2, cy - d + 2 * d * a2]], false); hair(PAL.text, 8); ctx.stroke(); }
+  if (a1 > 0) { polyPath([[x - d, cy - d], [x - d + 2 * d * a1, cy - d + 2 * d * a1]], false); hair(PAL.text, 11); ctx.stroke(); }
+  if (a2 > 0) { polyPath([[x + d, cy - d], [x + d - 2 * d * a2, cy - d + 2 * d * a2]], false); hair(PAL.text, 11); ctx.stroke(); }
   ctx.restore();
 }
 
@@ -199,8 +199,8 @@ SCENES.hook = function () {
     blip: TT > tap1 ? (TT - tap1) / 0.6 : 0,
     rings: [(TT - tDan) / 0.9, (TT - tDan - 0.4) / 0.9, (TT - tDan - 0.8) / 0.9],
   });
-  // "ấn mạnh hay nhẹ": the force gauge springs in, crossed out on "nhẹ"; it leaves after "nó"
-  const gk = clamp(spring(TT, tMa - 0.25, { k: 150, damp: 0.6 })), xT = tNhe + 0.05;
+  // "ấn mạnh hay nhẹ": the force gauge springs in just before "mạnh" and is crossed out on "mạnh"; it leaves after "nó"
+  const gk = clamp(spring(TT, tMa - 0.4, { k: 150, damp: 0.6 })), xT = tMa - 0.05;
   ph_gauge(gk, seg(TT, xT, xT + 0.4) * 2, 1 - seg(TT, tNo + 0.5, tNo + 0.95));
   // the hero last
   const look = TT > tMa - 0.2 && TT < tNo + 0.6 ? -0.8 : 0.15 * Math.sin(TT * 1.6);
@@ -216,20 +216,21 @@ SCENES.hook = function () {
 SCENES.grid = function () {
   const t0 = ET('grid'), tK = VW('grid', 'kính'), tL = VW('grid', 'lưới'), tH = VW('grid', 'hàng'), tC = VW('grid', 'cột');
   const lift = clamp(spring(TT, tK - 0.1, { k: 80, damp: 0.72 }));
-  // rows on "hàng"; the columns start just after "ngang" so their label holds long enough before the bridge
-  const tCs = Math.min(tC - 0.35, VE('grid', 'ngang') + 0.05);
-  const rows = seg(TT, tH - 0.05, tH + 0.9), cols = seg(TT, tCs, tCs + 0.9);
+  // rows draw in as soon as the glass is off ("lưới"), columns next (done by ~10 s), so both read well before the
+  // words "hàng" / "cột" name them; the labels land on their words (cột a little early) and leave before the bridge
+  const tR = tK + 0.25, tCs = tR + 1.6, lOut = 1 - seg(TT, EE('grid') - 0.9, EE('grid') - 0.62);
+  const rows = seg(TT, tR, tR + 0.75), cols = seg(TT, tCs, tCs + 0.85);
   // "lưới điện cực trong suốt": the strips' layer shows faintly first, then they draw in
   const fl = 16 * Math.sin((TT - t0) * Math.PI) * lift * ph_env('grid', 0.3, 0.5);
   const P = ph_phone({ bodyDy: 110 * lift - 0.4 * fl, float: fl, lift, tiles: 1 - EZ.io(seg(TT, tK + 0.2, tL + 0.2)), gridAl: 1, rows, cols });
   // labels
   const ge = P.glassEdge;
-  ph_label('kính', 850, 520, tK + 0.15, { to: [ge[0] + 6, ge[1] - 4] });
-  ph_label('hàng', 190, 1010, tH + 0.1, { to: P.rowEnd[1] });
-  ph_label('cột', 870, 1092, tCs + 0.15, { to: P.colEnd[0] });
+  ph_label('kính', 850, 520, tK + 0.15, { to: [ge[0] + 6, ge[1] - 4], al: lOut });
+  ph_label('hàng', 190, 1010, tH - 0.1, { to: P.rowEnd[1], al: lOut });
+  ph_label('cột', 700, 1180, Math.min(tC - 0.4, VE('grid', 'ngang')), { to: P.colEnd[3], al: lOut });
   // the hero: at HOVER the whole era, a gentle look-down bob, eyes following what is labelled
   const e = ph_env('grid');
-  const look = TT < tK ? 0 : TT < tH ? -0.6 : TT < tCs ? -0.45 : 0.6;
+  const look = TT < tK ? 0 : TT < tH ? -0.6 : TT < tC - 0.4 ? -0.45 : 0.4;
   const mood = TT > tK + 0.2 && TT < tK + 1.3 ? 'wow' : 'calm';
   heroFinger(HOVER[0] + 10 * Math.sin((TT - t0) * 1.3) * e, HOVER[1] + 14 * Math.cos((TT - t0) * Math.PI) * e, HR, { look: look * e, mood });
   viTag('02', 'lưới điện cực');
@@ -257,6 +258,6 @@ SCENES.end = function () {
   // "hụt": the word from the grid scenes, beside the dip
   ph_label('hụt', 760, 690, tLay - 0.05, { col: PAL.text, to: [618, 752] });
   // "không nhìn thấy": the grid under the glass gets its name once the columns are in
-  ph_label('lưới', 200, 600, VE('end', 'tay') + 0.1, { col: PAL.text, to: [290, 700] });
-  ph_caption(['không thấy ngón tay,', 'chỉ thấy chỗ bị lấy mất'], [tKh, tChi], { hi: [1, 'bị lấy mất'], hiAt: tLay, col: COL.fieldL });
+  ph_label('lưới', 200, 600, tKh + 0.45, { col: PAL.text, to: [290, 700] });
+  ph_caption(['không thấy ngón tay,', 'chỉ thấy chỗ bị lấy mất'], [t0 + 0.1, tChi], { hi: [1, 'bị lấy mất'], hiAt: tLay, col: COL.fieldL });
 };

@@ -23,6 +23,8 @@ const FD_STEAL = {
   4: { e: [528, 750], h: 150, up: [[528, 700], [520, 600], [502, 472]] },
 };
 // 0 within `pad` s of either end of the era, 1 in the middle (eased)
+// text alpha: in after the bridge's window has opened, out by EE − 0.6 (the morph never shows half-cut text)
+const fd_txt = (id) => seg(TT, ET(id) + 0.45, ET(id) + 0.75) * (1 - seg(TT, EE(id) - 0.9, EE(id) - 0.6));
 const fd_env = (id, pad = 0.5, ramp = 0.6) => EZ.io(seg(TT, ET(id) + pad, ET(id) + pad + ramp)) * (1 - EZ.io(seg(TT, EE(id) - pad - ramp, EE(id) - pad)));
 
 // a flat slab seen from the side in the isometric look: a light thickness line below, white face, grey hairline
@@ -58,15 +60,16 @@ function fd_section(o = {}) {
     // a few faint glints on the glass top (inner lines), so it reads as glass
     polyPath([[FD_GLASS.x + 30, 784], [FD_GLASS.x + 110, 784]], false); hair(PAL.inner); ctx.stroke();
     polyPath([[FD_GLASS.x + FD_GLASS.w - 140, 784], [FD_GLASS.x + FD_GLASS.w - 40, 784]], false); hair(PAL.inner); ctx.stroke();
-    vtext('kính', FD_GLASS.x + 34, 818, 50, { align: 'left', col: PAL.textD, al: clamp(kG * 3 - 2) });
+    vtext('kính', FD_GLASS.x + 34, 818, 50, { align: 'left', col: PAL.text, al: clamp(kG * 3 - 2) * (o.tal ?? 1) });
     ctx.restore();
   }
 }
 // pad labels (below the pads); t0s = [row, column] spring-in times (or now)
-function fd_padLabels(tRow, tCol, now) {
-  if (now) { vtext('hàng (phát)', 515, 985, 50, { align: 'right' }); vtext('cột (nhận)', 565, 985, 50, { align: 'left' }); return; }
-  vlabel('hàng (phát)', 515, 985, tRow, 50, { align: 'right' });
-  vlabel('cột (nhận)', 565, 985, tCol, 50, { align: 'left' });
+function fd_padLabels(tRow, tCol, now, al = 1) {
+  if (al <= 0.001) return;
+  if (now) { vtext('hàng (phát)', 515, 985, 50, { align: 'right', col: PAL.text, al }); vtext('cột (nhận)', 565, 985, 50, { align: 'left', col: PAL.text, al }); return; }
+  vlabel('hàng (phát)', 515, 985, tRow, 50, { align: 'right', col: PAL.text, al });
+  vlabel('cột (nhận)', 565, 985, tCol, 50, { align: 'left', col: PAL.text, al });
 }
 // the arc i as points (n = 24 -> 25 points). hk 0..1: from the low height (inside the glass) to the full height
 const fd_arcPts = (i, hk = 1) => { const A = FD_ARCS[i]; return arcBetween([A.a, FD_PADY], [A.b, FD_PADY], lerp(A.h0, A.h, hk)); };
@@ -83,7 +86,7 @@ function fd_stolenPts(i, s, up) {
   return Q;
 }
 // the column reading: a bar under the column label (v 0..1; weaker = shorter AND paler)
-function fd_meter(v, al = 1, pulse = 0) {
+function fd_meter(v, al = 1, pulse = 0, tal = 1) {
   if (al <= 0.001) return;
   const x = 580, y = 1032, w = 220, h = 34;
   ctx.save(); ctx.globalAlpha = clamp(al);
@@ -92,13 +95,13 @@ function fd_meter(v, al = 1, pulse = 0) {
   polyPath(rrectPts(x + 5, y + 5, fw, h - 10, 6, 4), true); ctx.fillStyle = mixHex(COL.fieldM, COL.field, seg(vv, 0.6, 1)); ctx.fill();
   if (pulse > 0 && pulse < 1) { polyPath(rrectPts(x - 12 * pulse, y - 12 * pulse, w + 24 * pulse, h + 24 * pulse, 10 + 8 * pulse, 4), true); ctx.globalAlpha = clamp(al) * (1 - pulse) * 0.9; hair(COL.field, 3); ctx.stroke(); }
   ctx.restore();
-  vtext('tín hiệu', 552, 1062, 50, { align: 'right', col: PAL.textD, al });
+  vtext('tín hiệu', 552, 1062, 50, { align: 'right', col: PAL.text, al: al * tal });
 }
 // a big grey "?" that pops in
-function fd_pop(str, x, y, t0, size = 96) {
+function fd_pop(str, x, y, t0, size = 96, al = 1) {
   const s = spring(TT, t0, { k: 240, damp: 0.5 }); if (s <= 0.001) return;
   ctx.save(); ctx.translate(x, y); ctx.rotate(0.08 + 0.05 * Math.sin(TT * 2.2)); ctx.scale(Math.max(0, s), Math.max(0, s)); ctx.translate(-x, -y);
-  vtext(str, x, y, size, { col: PAL.textD, al: clamp(s * 1.5) });
+  vtext(str, x, y, size, { col: PAL.textD, al: clamp(s * 1.5) * al });
   ctx.restore();
 }
 
@@ -109,14 +112,15 @@ function fd_pop(str, x, y, t0, size = 96) {
 // ---------------------------------------------------------------------
 SCENES.cap = function () {
   const t0 = ET('cap'), tH = VW('cap', 'hàng'), tC = VW('cap', 'cột'), tT = VW('cap', 'tụ'), tE = VW('cap', 'điện', 2), tN = VW('cap', 'nhô'), tK = VW('cap', 'kính');
-  fd_section({ kG: ev(t0 + 0.05, 0.7), kI: ev(t0 + 0.2, 0.6), kP: [spring(TT, tH - 0.35, { k: 150, damp: 0.6 }), spring(TT, tC - 0.3, { k: 150, damp: 0.6 })] });
-  fd_padLabels(tH - 0.1, tC - 0.05);
+  const ta = fd_txt('cap');
+  fd_section({ tal: ta, kG: ev(t0 + 0.05, 0.7), kI: ev(t0 + 0.2, 0.6), kP: [spring(TT, tH - 0.35, { k: 150, damp: 0.6 }), spring(TT, tC - 0.3, { k: 150, damp: 0.6 })] });
+  fd_padLabels(tH - 0.1, tC - 0.05, false, ta);
   // the capacitor bracket under both pads + its name
   const kb = EZ.o2(ev(tT - 0.15, 0.5));
   if (kb > 0) {
     const xm = 540, half = 210 * kb;
     polyPath([[xm - half, 1004], [xm - half, 1018], [xm + half, 1018], [xm + half, 1004]], false); hair(PAL.edge, 3); ctx.stroke();
-    vlabel('tụ điện tí hon', 540, 1092, tT, 58);
+    vlabel('tụ điện tí hon', 540, 1092, tT, 58, { al: ta });
   }
   // the field: grows on "điện trường" (inside the glass), the upper arcs rise on "nhô lên"
   const rise = EZ.io(ev(tN - 0.05, 0.9));
@@ -128,8 +132,9 @@ SCENES.cap = function () {
     fieldLine(fd_arcPts(i, i >= 2 ? hk : 1), { part, w: 4 * sw });
   });
   // "nhô lên": a small grey up-arrow beside the risen arcs
-  const ua = ev(tN, 0.3) * (1 - ev(tK + 0.7, 0.4));
-  if (ua > 0) simpleArrow(820, 760, 820, 760 - 110 * EZ.o2(ev(tN, 0.5)), { al: ua, w: 5 });
+  const ua = ev(tN, 0.3) * ta;
+  if (ua > 0) simpleArrow(790, 770, 790, 770 - 110 * EZ.o2(ev(tN, 0.5)), { al: ua, w: 5 });
+  vlabel('nhô lên', 790, 630, tN + 0.1, 50, { al: ta });
   // the hero hovering, watching (drifts a little in the middle of the era)
   const e = fd_env('cap'), [hx, hy] = HOVER, u = TT - t0;
   const look = TT < tH ? 0 : TT < tC ? -0.6 : TT < tT ? 0.6 : TT < tN ? 0 : -0.2;
@@ -147,8 +152,9 @@ SCENES.cap = function () {
 // ---------------------------------------------------------------------
 SCENES.finger = function () {
   const t0 = ET('finger'), t1 = EE('finger'), tC = VW('finger', 'chạm'), tK = VW('finger', 'kéo'), tB = VW('finger', 'cơ'), tD = VW('finger', 'điện');
-  fd_section();
-  fd_padLabels(0, 0, true);
+  const ta = fd_txt('finger');
+  fd_section({ tal: ta });
+  fd_padLabels(0, 0, true, ta);
   // the field: the upper 3 arcs bend into the tip, one after another
   const up = EZ.io(ev(tB - 0.1, 0.9));
   FD_ARCS.forEach((A, i) => {
@@ -159,17 +165,17 @@ SCENES.finger = function () {
     if (i >= 2) sw += 0.6 * Math.max(0, Math.sin((TT - tB) * TAU / 1.4 - (i - 2) * 0.5)) * ev(tB + 0.6, 0.4) * (1 - seg(TT, t1 - 0.9, t1 - 0.6));
     fieldLine(fd_stolenPts(i, s, up), { w: 4 * sw, head: s < 0.05 || up > 0.9 });
   });
-  vlabel('bị kéo đi', 250, 640, tK + 0.35, 52);
+  vlabel('bị kéo đi', 250, 660, tK + 0.35, 52, { al: ta });
   // the column reading: full, then down to ~60% as the lines are pulled away
   const v = 1 - 0.4 * EZ.io(ev(tK + 0.2, 1.1)) + 0.015 * Math.sin(TT * 4) + 0.06 * Math.sin((TT - tB) * TAU / 1.3) * ev(tB + 0.6, 0.5) * fd_env('finger');
-  fd_meter(v, ev(t0 + 0.4, 0.5));
+  fd_meter(v, ev(t0 + 0.4, 0.5), 0, ta);
   // "vào cơ thể": a grey arrow up beside the hero + label
   const ka = EZ.o2(ev(tB - 0.05, 0.6));
-  if (ka > 0) simpleArrow(650, 650, 650, 650 - 170 * ka, { w: 5, head: 22 });
+  if (ka > 0) simpleArrow(440, 610, 440, 610 - 150 * ka, { w: 5, head: 22, al: ta });
   // keeps pulling: a second short arrow climbs the shaft once a beat
   if (ka >= 1) { const q = mod(TT - tB - 0.6, 1.4) / 1.4, qa = Math.sin(Math.PI * q) * (1 - seg(TT, t1 - 0.9, t1 - 0.6));
-    if (qa > 0.01) simpleArrow(610, 690 - 150 * q, 610, 640 - 150 * q, { w: 4, head: 14, al: qa * 0.8 }); }
-  vlabel('vào cơ thể', 680, 585, tB + 0.1, 52, { align: 'left' });
+    if (qa > 0.01) simpleArrow(400, 610 - 130 * q, 400, 565 - 130 * q, { w: 4, head: 14, al: qa * 0.8 * ta }); }
+  vlabel('vào cơ thể', 420, 435, tB + 0.1, 52, { align: 'right', al: ta });
   // the hero: HOVER -> TOUCH on "chạm" (tip on the glass), squash while pressing, back to plain near the bridge
   const d = EZ.io(seg(TT, Math.max(t0 + 0.5, tC - 0.12), tC + 0.32));
   const hy = lerp(HOVER[1], TOUCH[1], d);
@@ -192,12 +198,13 @@ SCENES.finger = function () {
 // ---------------------------------------------------------------------
 SCENES.glove = function () {
   const t0 = ET('glove'), t1 = EE('glove'), tL = VW('glove', 'len', 2), tD = VW('glove', 'điện', 2), tCh = VW('glove', 'chẳng'), tLa = VW('glove', 'làm');
-  fd_section();
-  fd_padLabels(0, 0, true);
-  vlabel('len không dẫn điện', 95, 560, tL - 0.05, 52, { align: 'left' });
-  fd_meter(1 + 0.01 * Math.sin(TT * 4), ev(t0 + 0.4, 0.5), ev(tCh, 0.8));
-  vlabel('đủ', 830, 1062, tCh + 0.25, 52, { align: 'left', col: COL.field });
-  fd_pop('?', 660, 640, tLa + 0.05);
+  const ta = fd_txt('glove');
+  fd_section({ tal: ta });
+  fd_padLabels(0, 0, true, ta);
+  vlabel('len không dẫn điện', 540, 540, tL - 0.05, 52, { al: ta });
+  fd_meter(1 + 0.01 * Math.sin(TT * 4), ev(t0 + 0.4, 0.5), ev(tCh, 0.8), ta);
+  vlabel('đủ', 822, 1062, tCh + 0.25, 52, { align: 'left', col: COL.field, al: ta });
+  fd_pop('?', 660, 640, tLa + 0.05, 96, ta);
   // the hero: gloved, touching all era; a soft press in the middle, sad on "làm ngơ"
   const e = fd_env('glove');
   const sq = 0.16 * e + 0.05 * e * Math.sin(Math.PI * ev(tL, 0.5));
