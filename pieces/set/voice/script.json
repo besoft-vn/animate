@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Vệt sét chói nhất không lao từ trời xuống, nó vọt từ mặt đất lên.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "cloud",
+   "text": "Mọi chuyện bắt đầu trong một đám mây dông cao hơn mười cây số.",
+   "after": 0.5,
+   "file": "cloud.mp3"
+  },
+  {
+   "id": "collide",
+   "text": "Gió cuốn những tinh thể băng nhỏ bay lên, va vào các hạt mưa đá mềm đang rơi.",
+   "after": 0.5,
+   "file": "collide.mp3"
+  },
+  {
+   "id": "charge",
+   "text": "Mỗi cú va chạm tách điện tích: dương bay lên đỉnh, âm dồn xuống đáy mây.",
+   "after": 0.5,
+   "file": "charge.mp3"
+  },
+  {
+   "id": "leader",
+   "text": "Khi điện tích đủ lớn, một tia tiên đạo mờ dò đường xuống, từng bước ngắn.",
+   "after": 0.5,
+   "file": "leader.mp3"
+  },
+  {
+   "id": "meet",
+   "text": "Gần mặt đất, một tia ngược từ ngọn cây vươn lên, và hai tia chạm nhau.",
+   "after": 1.6,
+   "file": "meet.mp3"
+  },
+  {
+   "id": "strike",
+   "text": "Lập tức, một luồng sáng chói vọt từ đất ngược lên mây: đó là tia chớp ta thấy.",
+   "after": 0.6,
+   "file": "strike.mp3"
+  },
+  {
+   "id": "heat",
+   "text": "Trong tích tắc, không khí trong kênh sét nóng gấp năm lần bề mặt Mặt Trời.",
+   "after": 0.5,
+   "file": "heat.mp3"
+  },
+  {
+   "id": "thunder",
+   "text": "Không khí nở bung đột ngột, tạo thành tiếng nổ mà ta gọi là sấm.",
+   "after": 0.5,
+   "file": "thunder.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Lần tới thấy chớp, hãy nhớ: ánh sáng ấy vừa đi từ dưới đất lên.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}
