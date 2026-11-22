@@ -38,3 +38,4 @@
 
 - Shot yếu nhất: "meet" — tia ngược chỉ dài ~100 px (cây gần chân mây), tiên đạo là nét chì mảnh; nhãn "từng bước"/"sấm" chỉ đứng ~1–1,5 s vì chữ rơi sát cầu nối.
 - Chưa kiểm chứng: không nghe được bằng tai (chỉ đo LUFS/Whisper). 60,5 s (vượt mốc 60 s nửa giây).
+- Drive: đã lưu (My Drive / Vạn vật vận hành như thế nào — Video). Lưu ý: rclone báo client_id dùng chung sắp bị khai tử trong 2026.
