@@ -54,7 +54,7 @@ function iceCrystal(x, y, r, o = {}) {
 // o: { key, a, minus (0..1 shows a "−") }
 function hailPellet(x, y, r, o = {}) {
   const key = o.key || 'hp', a = o.a ?? 1, R = RNG(key + 'lump');
-  const P = []; for (let i = 0; i < 14; i++) { const an = i / 14 * TAU, rr = r * (0.9 + 0.14 * R()); P.push([x + Math.cos(an) * rr, y + Math.sin(an) * rr]); }
+  const P = []; for (let i = 0; i < 14; i++) { const an = i / 14 * TAU, rr = r * (0.9 + 0.14 * R.f()); P.push([x + Math.cos(an) * rr, y + Math.sin(an) * rr]); }
   gfill(P, COL.hail, { a, key: key + 'f' });
   litHatch(P, { key: key + 'h', gap: 8, a: 0.5 * a });
   gline(P, { w: 4, key: key + 'o', a, closed: true });
