@@ -193,7 +193,7 @@ SCENES.heat = function () {
     for (let i = 1; i <= 4; i++) gpencil([[tx + 22, tTop + i * 48], [tx + 44, tTop + i * 48]], { w: 3, key: 'c_tht' + i, part: kt });
     ctx.restore();
   }
-  c_lab('≈ 28.000 °C', 772, 885, 58, tsat + 0.25, tEnd, { col: COL.hot, key: 'c_lt', d: 0.2 });
+  c_lab('≈ 28.000 °C', 745, 885, 54, tsat + 0.25, tEnd, { col: COL.hot, key: 'c_lt', d: 0.2 });
   // the sun ×5 (left, up): on "nóng gấp"
   const ks = ev(tn, 0.4), sfa = 1 - seg(TT, tEnd - 0.25, tEnd);
   if (ks > 0) { ctx.save(); ctx.globalAlpha *= sfa; c_sun(170, 560, 58 + 4 * Math.sin(TAU * u / 1.2), ks, 'c_sun'); ctx.restore(); }

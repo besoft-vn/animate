@@ -101,7 +101,7 @@ SCENES.leader = function () {
   b_label('tia tiên đạo', 245, 930, 58, tTien, off);
   b_label('(mờ)', 245, 1000, 58, tTien + 0.4, off);
   if (TT > tTien + 0.3 && TT < off) { ctx.save(); ctx.globalAlpha *= b_fade(off); arrowPencil([[330, 880], [400, 800]], ev(tDo, 0.3), { key: 'b_lda', w: 4 }); ctx.restore(); }
-  b_label('từng bước', 800, 760, 54, tTung, off, { d: 0.35 });
+  b_label('từng bước', 770, 760, 52, tTung, off, { d: 0.35 });
   viTag('tia tiên đạo');
   pageCaption(['Tia tiên đạo mờ', 'dò từng bước xuống'], [[1, 'từng bước']], { size: 62, at: 0.3 });
 };
