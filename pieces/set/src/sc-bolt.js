@@ -88,7 +88,7 @@ SCENES.leader = function () {
   b_label('tia tiên đạo', 245, 930, 58, tTien, off);
   b_label('(mờ)', 245, 1000, 58, tTien + 0.4, off);
   if (TT > tTien + 0.3 && TT < off) { ctx.save(); ctx.globalAlpha *= b_fade(off); arrowPencil([[330, 880], [400, 800]], ev(tDo, 0.3), { key: 'b_lda', w: 4 }); ctx.restore(); }
-  b_label('từng bước', 830, 790, 56, tTung, off, { d: 0.35 });
+  b_label('từng bước', 800, 760, 54, tTung, off, { d: 0.35 });
   viTag('tia tiên đạo');
   pageCaption(['Tia tiên đạo mờ', 'dò từng bước xuống'], [[1, 'từng bước']], { size: 62, at: 0.3 });
 };
@@ -117,7 +117,7 @@ SCENES.meet = function () {
   heroTia(hx, hy, HR, { key: 'hero', badge: 1, mood: wow ? 'wow' : 'calm', look: TT < tNguoc ? [0.3 * Math.sin(TT), 0.9] : [0.6, 1], sx: 1 - br, sy: 1 + br });
   // the touch: a small ink sparkle at the meeting point
   sparkle(MEET[0], MEET[1] + 40, 110, seg(TT, tTouch, tTouch + 0.6), 'b_spk');
-  b_label('tia ngược', 830, 880, 58, tNguoc + 0.15, null);
+  b_label('tia ngược', 812, 800, 54, tNguoc + 0.15, null);
   viTag('tia ngược');
   pageCaption(['Tia ngược từ ngọn cây', 'vươn lên đón'], [[0, 'Tia ngược']], { size: 62, at: 0.3 });
 };

@@ -12,7 +12,7 @@
   // ================= MUSIC =================
   to = 'm';
   pad(0.0, ET('collide') + 0.1, ['D3', 'A3', 'F4'], 0.026, { type: 'triangle', cut: 800, att: 0.3, rel: 0.3 });
-  motif(0.6, 0.14);
+  motif(0.6, 0.07);
   pad(ET('collide'), SIL, ['D3', 'A3', 'E4'], 0.024, { cut: 750, att: 0.4, rel: 0.05, send: 0.3 });
   each(ET('collide'), SIL, E8, (t, k) => {
     const st = t < ET('charge') ? 0 : t < ET('leader') ? 1 : 2;
