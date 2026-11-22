@@ -16,6 +16,19 @@ function b_sub(P, a, b) {
   out.push(b_at(P, b));
   return out;
 }
+// a crisp straight-segment stroke through exactly the given vertices (no smoothing: same jags as leader/streamer)
+function b_stroke(P, w, col, a = 1) {
+  if (!P || P.length < 2 || a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineJoin = 'miter'; ctx.miterLimit = 3; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]); for (let i = 1; i < P.length; i++) ctx.lineTo(P[i][0], P[i][1]); ctx.stroke(); ctx.restore();
+}
+// the blazing channel: halo, ink rim, yellow core, white heart — straight through the channel vertices
+function b_bolt(P, w, halo, a = 1) {
+  b_stroke(P, w * 3.2, COL.flash, 0.3 * halo * a);
+  b_stroke(P, w + 10, SK.ink, a);
+  b_stroke(P, w, COL.flash, a);
+  b_stroke(P, w * 0.32, SK.sheet, 0.9 * a);
+}
 // the full channel, ordered the way the return stroke runs: tree top -> MEET -> cloud base
 const b_FULL = [...BOLT_STREAM].reverse().concat([...BOLT_LEADER].reverse().slice(1));
 const b_STREAM_UP = [...BOLT_STREAM].reverse();
@@ -48,7 +61,7 @@ function b_charges(popT, swellT) {
     const k = popT == null ? 1 : popS(popT + i * 0.16); if (k <= 0) return;
     const sw = swellT == null ? 0 : 0.18 * Math.sin(Math.PI * seg(TT, swellT + i * 0.05, swellT + 0.5 + i * 0.05));
     const jx = 5 * Math.sin(TT * 2.3 + i * 1.7), jy = 4 * Math.sin(TT * 3.1 + i * 2.3);
-    chargeSign(x + jx, 718 + jy, 22 * k * (1 + sw), -1, { key: 'b_ch' + i });
+    chargeSign(x + jx, 668 + jy, 22 * k * (1 + sw), -1, { key: 'b_ch' + i });
   });
 }
 // a short fade-in/out factor for a label: in at t0 (over d), out over [t1 - 0.3, t1]
@@ -56,7 +69,7 @@ const b_fade = (t1) => 1 - seg(TT, t1 - 0.3, t1);
 function b_label(str, x, y, size, t0, t1, o = {}) {
   const f = t1 == null ? 1 : b_fade(t1); if (TT < t0 || f <= 0) return;
   ctx.save(); ctx.globalAlpha *= f;
-  label(str, x, y, size, { reveal: ev(t0, o.d ?? 0.45), key: 'b_lb' + str, align: o.align, col: o.col });
+  label(str, x, y, size, { reveal: ev(t0, o.d ?? 0.3), key: 'b_lb' + str, align: o.align, col: o.col });
   ctx.restore();
 }
 // a cubic Bezier point
@@ -105,56 +118,63 @@ SCENES.meet = function () {
   // the streamer grows UP from the tree top: most of the way by "lên", the last bit on "chạm"
   const sp = 0.8 * EZ.o2(seg(TT, tNguoc, tLen)) + 0.2 * EZ.io(seg(TT, tCham, tTouch));
   if (sp > 0) {
-    leaderPath(b_STREAM_UP, sp, { key: 'b_st', w: 8, a: 0.95 });
+    const Q = writeOn(b_STREAM_UP, sp);
+    if (Q && Q.length > 1) { b_stroke(Q, 7, SK.graph, 1); gpencil(Q, { key: 'b_st', w: 4, a: 0.9, amp: 1 }); }
     if (sp < 1) { const [ex, ey] = b_at(b_STREAM_UP, sp); gpencil(loopPts(ex, ey, 12, 12, 0.1), { key: 'b_stt', w: 3, a: 0.7 }); }
   }
   // "+" near the tree top (blue = positive), drifting up a little
   [[778, 1010], [624, 1030]].forEach(([x, y], i) => { const k = popS(tCay + i * 0.2); if (k > 0) chargeSign(x + 4 * Math.sin(TT * 2 + i), y - 10 * Math.sin(TT * 1.6 + i * 2), 22 * k, 1, { key: 'b_pp' + i }); });
-  // the hero at MEET: exact at the bridge, alive in between, still from 33.0 (holding its breath into the slam)
-  const env = Math.sin(Math.PI * seg(TT, 29.0, 33.0));
-  const hx = MEET[0] + 10 * Math.sin(TT * 1.9) * env, hy = MEET[1] - 18 * Math.abs(Math.sin(TT * 2.4)) * env;
+  // the hero: exact at MEET at the bridge, then steps aside (by 30.2) to STRIKE_HERO so the touch is seen; bobs till 33.5
+  const mv = EZ.io(seg(TT, 29.0, 30.2));
+  const [mx, my] = b_bz(mv, MEET, [700, 800], [800, 720], STRIKE_HERO);
+  const env = seg(TT, 30.2, 30.7) * (1 - seg(TT, 33.0, 33.5));
+  const hx = mx + 8 * Math.sin((TT - 30.2) * 1.9) * env, hy = my - 16 * Math.abs(Math.sin((TT - 30.2) * 2.4)) * env;
   const wow = TT >= tTouch, br = TT > 33.0 ? 0.02 * Math.sin(TT * 3) : 0;
   heroTia(hx, hy, HR, { key: 'hero', badge: 1, mood: wow ? 'wow' : 'calm', look: TT < tNguoc ? [0.3 * Math.sin(TT), 0.9] : [0.6, 1], sx: 1 - br, sy: 1 + br });
-  // the touch: a small ink sparkle at the meeting point
-  sparkle(MEET[0], MEET[1] + 40, 110, seg(TT, tTouch, tTouch + 0.6), 'b_spk');
-  b_label('tia ngược', 812, 800, 54, tNguoc + 0.15, null);
+  // the touch: a brief pale yellow glow + an ink sparkle right at the meeting point
+  const gk = TT < tTouch ? 0 : Math.exp(-(TT - tTouch) / 0.45) * Math.min(1, (TT - tTouch) / 0.08);
+  if (gk > 0.02) { scribbleFill(loopPts(MEET[0], MEET[1], 44, 44, 0.05), COL.flash, { key: 'b_tgl', gap: 9, w: 5, base: 0.4, a: 0.85 * gk }); b_stroke([MEET, MEET], 26, '#fff6c4', gk); }
+  sparkle(MEET[0], MEET[1], 95, seg(TT, tTouch, tTouch + 0.7), 'b_spk');
+  b_label('tia ngược', 440, 1000, 56, tNguoc + 0.15, null);
+  if (TT > tNguoc + 0.3) arrowPencil([[545, 975], [650, 928]], ev(tNguoc + 0.35, 0.3), { key: 'b_sta', w: 4 });
   viTag('tia ngược');
   pageCaption(['Tia ngược từ ngọn cây', 'vươn lên đón'], [[0, 'Tia ngược']], { size: 62, at: 0.3 });
 };
 
 // ---- STRIKE (opens on the SLAM): "Lập tức, một luồng sáng chói vọt từ đất ngược lên mây: đó là tia chớp ta thấy."
-const b_RUNS = [34.6, 35.6, 36.6];
+const b_RUNS = [[34.5, 0.85], [35.6, 0.4], [36.6, 0.4]];
 SCENES.strike = function () {
   sketchPage({ grid: 'plain' });
   const E = ET('strike'), tDat = VW('strike', 'đất');
   // extra glow: the slam bloom + a burst as each return stroke reaches the cloud
   let ex = Math.exp(-(TT - E) / 0.35);
-  for (const r of b_RUNS) if (TT >= r) ex = Math.max(ex, TT < r + 0.4 ? 0.5 + 0.5 * (TT - r) / 0.4 : Math.exp(-(TT - r - 0.4) / 0.3));
+  for (const [r, d] of b_RUNS) if (TT >= r) ex = Math.max(ex, TT < r + d ? 0.5 + 0.5 * (TT - r) / d : Math.exp(-(TT - r - d) / 0.3));
   const calm = EZ.io(seg(TT, 38.6, 39.6)), gp = 0.08 * Math.sin((TT - 39) * 2 * Math.PI / 1.3) * calm;
   const base = lerp(0.6, 0.3, calm) + gp, g = clamp(base + 0.4 * ex);
   stormCloud({ glow: g, dark: 0.5 });
   hill({ tint: clamp(lerp(0.45, 0.22, calm) + gp + 0.35 * ex) });
   tree({ lit: clamp(base + 0.4 * ex) });
   // the whole channel blazing, from the first frame
-  boltPath(b_FULL, { w: 30 + 6 * ex, halo: clamp(0.6 + 0.4 * ex + gp * 2), key: 'b_bolt' });
+  b_bolt(b_FULL, 30 + 6 * ex, clamp(0.6 + 0.4 * ex + gp * 2));
   // the return stroke: a white-yellow pulse runs from the tree top UP to the cloud, 3× (flicker)
-  for (const r of b_RUNS) {
-    const u = (TT - r) / 0.4; if (u < 0 || u > 1.25) continue;
-    const Q = b_sub(b_FULL, u - 0.28, u); if (!Q) continue;
-    gline(Q, { w: 80, col: COL.flash, key: 'b_puh', a: 0.45, second: false, amp: 0.5 });
-    gline(Q, { w: 34, col: '#fffbe2', key: 'b_puc', a: 0.95, second: false, amp: 0.4 });
+  for (const [r, d] of b_RUNS) {
+    const u = (TT - r) / d; if (u < 0 || u > 1.2) continue;
+    const big = d > 0.5 ? 1 : 0.7, Q = b_sub(b_FULL, u - (d > 0.5 ? 0.45 : 0.28), Math.min(1, u)); if (!Q) continue;
+    b_stroke(Q, 90 * big, COL.flash, 0.5);
+    b_stroke(Q, 38 * big, '#fffbe2', 0.97);
+    if (u <= 1) { const [fx, fy] = b_at(b_FULL, u); b_stroke([[fx, fy], [fx, fy]], 120 * big, COL.flash, 0.55); b_stroke([[fx, fy], [fx, fy]], 62 * big, '#fffdf0', 1); }
   }
   // the big yellow up-arrow: from the ground up to the cloud (grows with the first run), then labelled
   const aOff = EE('strike') - 1.0, af = b_fade(aOff + 0.3);
   if (af > 0) {
     ctx.save(); ctx.globalAlpha *= af;
-    bigArrow(330, 1100, 330, 760, { col: COL.flash, w: 60, head: 100, part: lerp(0.3, 1, EZ.o2(seg(TT, E, E + 0.5))), key: 'b_up', a: 1 });
+    bigArrow(330, 1100, 330, 760, { col: COL.flash, w: 60, head: 100, part: lerp(0.3, 1, EZ.o2(seg(TT, E, E + 0.85))), key: 'b_up', a: 1 });
     ctx.restore();
   }
   b_label('lên mây', 170, 800, 60, tDat - 0.55, aOff);
   b_label('từ đất', 170, 1090, 60, tDat - 0.6, aOff);
   // the hero: knocked aside, no badge, dazzled — shields its eyes, then lowers its arms as the glow calms
-  let kick = 0; for (const r of b_RUNS) if (TT >= r) kick = Math.max(kick, Math.exp(-(TT - r) / 0.35) * Math.min(1, (TT - r) / 0.08));
+  let kick = 0; for (const [r] of b_RUNS) if (TT >= r) kick = Math.max(kick, Math.exp(-(TT - r) / 0.35) * Math.min(1, (TT - r) / 0.08));
   const env = 1 - EZ.io(seg(TT, 40.8, 41.6));
   const hx = STRIKE_HERO[0] + (26 * kick + 14 * Math.sin((TT - E) * 1.9)) * env, hy = STRIKE_HERO[1] + 14 * Math.sin((TT - E) * 2.7) * env;
   const arm = lerp(1.25, 0.45, EZ.io(seg(TT, 39.2, 39.8)));
@@ -172,7 +192,7 @@ SCENES.thunder = function () {
   hill({ tint: 0.18 * fade }); tree({ lit: 0.3 * fade });
   // the channel dims out; a faint graphite trace stays where the air burst from
   leaderPath(b_FULL, 1, { key: 'b_ghost', w: 5, a: 0.5 * (1 - fade) + 0.1 });
-  if (fade > 0.01) boltPath(b_FULL, { w: 26, halo: 0.5 * fade, a: fade, key: 'b_bolt' });
+  if (fade > 0.01) b_bolt(b_FULL, 26, 0.5 * fade, fade);
   // "nở bung": two chunky graphite arrows push OUTWARD from the channel, sliding out
   const pa = EZ.o2(seg(TT, tNo, tNo + 0.4)), push = 50 * EZ.o2(seg(TT, tNo, tNo + 2.0)), pf = 1 - seg(TT, tBoom + 0.6, tBoom + 1.0);
   if (pa > 0 && pf > 0) {

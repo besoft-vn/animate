@@ -10,15 +10,6 @@ const c_RIDE_C = c_CR + HR * 0.95, c_RIDE_P = c_PR + HR * 0.92; // hero centre a
 // alpha for something wrapping through the band y0..y1 (fades in/out over f px at both ends)
 const c_bandA = (y, y0 = 430, y1 = 1240, f = 90) => clamp(Math.min((y - y0) / f, (y1 - y) / f));
 const c_wrap = (y, y0 = 430, y1 = 1240) => y0 + mod(y - y0, y1 - y0);
-// a soft-hail pellet — same as props' hailPellet (which calls RNG(...)() — not a function in this kit; uses R.f())
-function c_hail(x, y, r, o = {}) {
-  const key = o.key || 'hp', a = o.a ?? 1, R = RNG(key + 'lump');
-  const P = []; for (let i = 0; i < 14; i++) { const an = i / 14 * TAU, rr = r * (0.9 + 0.14 * R.f()); P.push([x + Math.cos(an) * rr, y + Math.sin(an) * rr]); }
-  gfill(P, COL.hail, { a, key: key + 'f' });
-  litHatch(P, { key: key + 'h', gap: 8, a: 0.5 * a });
-  gline(P, { w: 4, key: key + 'o', a, closed: true });
-  const k = clamp(o.minus ?? 0); if (k > 0.01) chargeSign(x + r * 0.85, y + r * 0.7, 18 + 4 * k, -1, { key: key + 'm', a: k * a });
-}
 // a soft graphite blob (wash) inside the cloud
 function c_blob(x, y, rx, ry, a, key) {
   smudge(x, y, rx * 1.3, ry * 1.3, a);
@@ -55,13 +46,13 @@ SCENES.collide = function () {
   c_C_LANES.forEach(([x, y, ph], i) => {
     const y1 = c_wrap(y - 80 * u), xx = x + 10 * Math.sin(u * 1.1 + ph);
     cpos.push([xx, y1]);
-    iceCrystal(xx, y1, c_CR - 2 + i * 2, { rot: ph + u * 0.5, key: 'c_ic' + i, a: c_bandA(y1) });
+    iceCrystal(xx, y1, c_CR - 2 + i * 2, { rot: ph + u * 0.5, key: 'c_ic' + i, a: c_bandA(y1), plus: i < 2 ? EZ.o2(ev(tva + 0.45 + i * 0.3, 0.3)) : 0 });
   });
   const ppos = [];
   c_P_LANES.forEach(([x, y, ph], i) => {
     const y1 = c_wrap(y + 45 * u), xx = x + 8 * Math.sin(u * 0.9 + ph);
     ppos.push([xx, y1]);
-    c_hail(xx, y1, c_PR - 2 + i * 2, { key: 'c_hp' + i, a: c_bandA(y1) });
+    hailPellet(xx, y1, c_PR - 2 + i * 2, { key: 'c_hp' + i, a: c_bandA(y1) });
   });
   // THE pair: crystal C0 (hero rides it, rising) and pellet P0 (falling); they bump on "va"
   const kb = EZ.o2(seg(TT, tva, tva + 0.6));
@@ -71,7 +62,7 @@ SCENES.collide = function () {
   const p0y = TT < tva ? 790 - 45 * (tva - TT) : 790 + (900 + c_RIDE_P - 790) * fP;
   const kpm = EZ.o2(ev(tva + 0.1, 0.35));
   iceCrystal(c0x, c0y, c_CR + 2, { rot: 0.4 + u * 0.5, key: 'c_ic0', plus: kpm, a: c_bandA(c0y, 400, 1300, 80) });
-  c_hail(p0x, p0y, c_PR, { key: 'c_hp0', minus: kpm });
+  hailPellet(p0x, p0y, c_PR, { key: 'c_hp0', minus: kpm });
   sparkle(576, 782, 70, seg(TT, tva - 0.05, tva + 0.45), 'c_spk');
   // labels: "tinh thể băng" (blue) pointing to the crystal in lane 2, "mưa đá mềm" pointing to the pellet in lane 2
   c_lab('tinh thể băng', 700, 470, 56, tt, tEnd, { col: COL.pos, key: 'c_ltinh' });
@@ -137,7 +128,7 @@ SCENES.charge = function () {
     const [tx, ty] = c_MT[i], k = EZ.io(seg(TT, tam + i * 0.14, tam + 1.4 + i * 0.14));
     const jx = 15 * Math.sin(u * 1.2 + i * 2.1) * (1 - k) + 8 * Math.sin(u * 0.7 + i) * k, jy = 18 * Math.sin(u * 1.6 + i * 1.3) * (1 - k) + 6 * Math.sin(u * 1.0 + i * 3) * k;
     const x = lerp(sx, tx, k) + jx, y = lerp(sy, ty, k) + jy, ks = EZ.o2(ev(ttach + 0.2 + i * 0.1, 0.3));
-    c_hail(x, y, 36, { key: 'c_mp' + i });
+    hailPellet(x, y, 36, { key: 'c_mp' + i });
     if (ks > 0) chargeSign(x, y, 22 * (0.4 + 0.6 * EZ.back(ks)), -1, { key: 'c_ms' + i });
   });
   // a bump tick on "va chạm" between a crystal and a pellet in the middle
@@ -151,7 +142,7 @@ SCENES.charge = function () {
   let hx = lerp(ax, bx, kd) + 14 * bob * Math.sin(TAU * (TT - 17.0) / 1.5), hy = lerp(ay, by, kd) + 18 * bob * Math.sin(TAU * (TT - 17.0) / 1.2);
   if (TT <= 17.0) [hx, hy] = [ax, ay];
   if (TT >= e1 - 0.5) [hx, hy] = [bx, by];
-  c_hail(hx, hy + c_RIDE_P, c_PR, { key: 'c_hp0', minus: 1 });
+  hailPellet(hx, hy + c_RIDE_P, c_PR, { key: 'c_hp0', minus: 1 });
   const look = TT < ttach ? [-0.4, 0.3] : TT < tam ? [-0.3, -0.9] : [-0.6, 0.8];
   heroTia(hx, hy, HR, { key: 'hero', badge: 1, look, mood: TT > td && TT < tam ? 'wow' : 'calm' });
   viTag('tách điện tích');
@@ -161,7 +152,7 @@ SCENES.charge = function () {
 // ---------------------------------------------------------------------
 //  HEAT
 // ---------------------------------------------------------------------
-const c_chanPts = () => { const P = []; for (let y = 400; y <= 1270; y += 20) P.push([470 + 26 * Math.sin((y - 380) / 140) + 10 * Math.sin(y / 53), y]); return P; };
+const c_chanPts = () => { const P = []; for (let y = 430; y <= 1230; y += 20) P.push([520 + 26 * Math.sin((y - 380) / 140) + 10 * Math.sin(y / 53), y]); return P; };
 function c_sun(x, y, r, k, key) {
   if (k <= 0) return;
   const rr = r * EZ.back(k), sp = TT * 0.4;
@@ -182,13 +173,13 @@ SCENES.heat = function () {
   gline(P, { w: 58 + 6 * pu, col: COL.flash, key: 'c_chc', second: false, amp: 1.4 });
   gline(P, { w: 16, col: SK.sheet, a: 0.85, key: 'c_chw', second: false, amp: 1 });
   // heat shimmer: short graphite wiggles near the channel, drifting up and fading on a cycle
-  [[330, 560], [615, 650], [320, 930], [625, 1080], [610, 840]].forEach(([x, y], i) => {
+  [[385, 560], [665, 640], [375, 930], [675, 1080], [660, 820]].forEach(([x, y], i) => {
     const ph = mod(u / 1.6 + i * 0.37, 1), a = Math.sin(Math.PI * ph) * 0.9, yy = y - 50 * ph, Q = [];
     for (let k = 0; k <= 8; k++) Q.push([x + 9 * Math.sin(k * 0.9 + TT * 7 + i), yy - k * 10]);
     gpencil(Q, { w: 4, a, key: 'c_shm' + i, amp: 1, step: 6 });
   });
   // the thermometer (right): a tube with a red column rising (from "sét", reaching the top on "nóng")
-  const tx = 760, tTop = 925, tBot = 1170, kt = EZ.o2(ev(tsat - 0.3, 0.4)), kc = EZ.io(seg(TT, tsat, tn + 0.5));
+  const tx = 800, tTop = 925, tBot = 1170, kt = EZ.o2(ev(tsat - 0.3, 0.4)), kc = EZ.io(seg(TT, tsat, tn + 0.5));
   const fa = 1 - seg(TT, tEnd - 0.25, tEnd);
   if (kt > 0) {
     ctx.save(); ctx.globalAlpha *= fa;
@@ -202,13 +193,13 @@ SCENES.heat = function () {
     for (let i = 1; i <= 4; i++) gpencil([[tx + 22, tTop + i * 48], [tx + 44, tTop + i * 48]], { w: 3, key: 'c_tht' + i, part: kt });
     ctx.restore();
   }
-  c_lab('≈ 28.000 °C', 745, 885, 58, tsat + 0.1, tEnd, { col: COL.hot, key: 'c_lt' });
+  c_lab('≈ 28.000 °C', 772, 885, 58, tsat + 0.25, tEnd, { col: COL.hot, key: 'c_lt', d: 0.2 });
   // the sun ×5 (left, up): on "nóng gấp"
   const ks = ev(tn, 0.4), sfa = 1 - seg(TT, tEnd - 0.25, tEnd);
   if (ks > 0) { ctx.save(); ctx.globalAlpha *= sfa; c_sun(170, 560, 58 + 4 * Math.sin(TAU * u / 1.2), ks, 'c_sun'); ctx.restore(); }
-  c_lab("× 5", 312, 585, 72, tn + 0.15, tEnd, { key: 'c_lx5', d: 0.25 });
-  c_lab('bề mặt', 200, 720, 56, tg, tEnd, { key: 'c_lbm', d: 0.3 });
-  c_lab('Mặt Trời', 200, 785, 56, tg + 0.2, tEnd, { key: 'c_lmt', d: 0.3 });
+  c_lab('gấp 5 lần', 205, 705, 58, tn + 0.15, tEnd, { key: 'c_lx5', d: 0.25 });
+  c_lab('bề mặt', 205, 772, 56, tg, tEnd, { key: 'c_lbm', d: 0.25 });
+  c_lab('Mặt Trời', 205, 839, 56, tg + 0.15, tEnd, { key: 'c_lmt', d: 0.25 });
   // the hero: exactly at BR.strikeHeat.b, leans back from the heat and sweats, back at BR.heatThunder.a by 47.25
   const [hx0, hy0] = BR.strikeHeat.b, kl = EZ.io(seg(TT, e0 + 0.6, e0 + 1.3)) * (1 - EZ.io(seg(TT, tEnd - 0.75, tEnd - 0.05)));
   const flinch = Math.sin(Math.PI * seg(TT, tn, tn + 0.45));
