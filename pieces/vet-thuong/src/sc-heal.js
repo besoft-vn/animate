@@ -22,11 +22,13 @@ function HL_fibros(fl, k1, k2, speed = 1) {
   ctx.save(); trace(skCutPts(0), true); ctx.clip();
   for (const f of F) {
     if (f.k <= 0.02) continue;
-    const r = 40 * Math.min(1, f.k), [a, b] = skCutX(f.y), amp = Math.max(8, (b - a) / 2 - r * 1.45);
-    const s = Math.sin(TT * 1.7 * speed + f.ph), x = (a + b) / 2 + amp * s;
-    fibroblast(x, f.y + (1 - Math.min(1, f.k)) * 40, r, { key: f.key, a: 0.1 * Math.cos(TT * 1.7 * speed + f.ph) });
+    const r = 40 * Math.min(1, f.k), [a, b] = skCutX(f.y), amp = Math.min(34, Math.max(8, (b - a) / 2 - r * 1.45 - 18));
+    const s = Math.sin(TT * 1.7 * speed + f.ph), x = (a + b) / 2 - 18 + amp * s, y = f.y + (1 - Math.min(1, f.k)) * 40;
+    fibroblast(x, y, r, { key: f.key, a: 0.1 * Math.cos(TT * 1.7 * speed + f.ph) });
+    f.x = x; f.yy = y; f.r = r;
   }
   ctx.restore();
+  return F;
 }
 
 // ---------------------------------------------------------------------
@@ -39,12 +41,17 @@ SCENES.fill = function () {
   const cp = EZ.io(seg(TT, tMach, tMach + 1.5));
   const red = 1 - EZ.io(seg(TT, E, E + 1.1));
   skinSlice({ blood: 1, scab: 1, scabDry: 1, redness: red, fill: fl, collagen: cg, capil: cp, partnerO: { look: -0.7, mood: TT > tLap + 0.4 ? 'happy' : 'calm' } });
-  HL_fibros(fl, pop(E + 0.15), pop(tDet - 0.1));
-  // labels: collagen (teal) on "cô", new vessels (red) on "mạch"
-  ptag('cô-la-gen', 800, 930, tCo, 52, { color: COL.colD, rot: 0.03 });
-  simpleArrow(668, 955, 606, 985, { part: seg(TT, tCo + 0.1, tCo + 0.4), col: COL.colD, w: 6, head: 20, key: 'hlarc' });
-  ptag('mạch máu mới', 235, 880, tMach, 52, { color: COL.bloodD, rot: -0.03 });
-  simpleArrow(330, 912, 468, 955, { part: seg(TT, tMach + 0.1, tMach + 0.4), col: COL.bloodD, w: 6, head: 20, key: 'hlarm' });
+  const FB = HL_fibros(fl, pop(E + 0.15), pop(tDet - 0.1));
+  // labels: the CELL = "nguyên bào sợi" (left, arrow to fibroblast A); the FIBRES = "cô-la-gen" (right, arrow to a
+  // fibre's right end, clear of the cells); the new vessels = "mạch máu mới" (below the vessel, arrow up to a loop)
+  const tNg = E + 0.25, A = FB[0];
+  ptag('nguyên bào sợi', 245, 790, tNg, 50, { color: COL.colD, rot: -0.03 });
+  if (A.x != null) simpleArrow(372, 826, A.x - A.r * 1.5 - 6, A.yy - 4, { part: seg(TT, tNg + 0.15, tNg + 0.45), col: COL.colD, w: 6, head: 20, key: 'hlarf' });
+  const ty = lerp(SK.bot + 10, SK.fillTop, fl), yf = lerp(SK.bot - 30, ty + 30, 0.625), xf = skCutX(yf)[1] - 12;
+  ptag('cô-la-gen', 805, 905, tCo, 52, { color: COL.colD, rot: 0.03 });
+  simpleArrow(672, 925, xf + 8, yf + 2, { part: seg(TT, tCo + 0.5, tCo + 0.8), col: COL.colD, w: 6, head: 20, key: 'hlarc' });
+  ptag('mạch máu mới', 240, 1092, tMach, 52, { color: COL.bloodD, rot: -0.03 });
+  simpleArrow(345, 1060, 474, 975, { part: seg(TT, tMach + 0.1, tMach + 0.4), col: COL.bloodD, w: 6, head: 20, key: 'hlarm' });
   // the hero watches the hole fill: wow at the weavers, happy when it is full
   const mood = TT > tLap + 0.4 ? 'happy' : TT > E + 0.4 ? 'wow' : 'calm';
   heroCell(290, 650, 60, { mood, look: 0.5 + 0.35 * Math.sin(TT * 1.7) });
@@ -115,14 +122,18 @@ SCENES.meet = function () {
   const tLien = VW('meet', 'liền'), tDay = VW('meet', 'đẩy');
   // the slice without its scab: blood only up to just under the new-skin row, the notch above it is open air
   skinSlice({ blood: 0.776, fill: 1, collagen: 1, capil: 1, heroX: null, partner: null });
-  ctx.save(); trace(skCutPts(0), true); ctx.clip(); cut(rect(300, SK.top - 30, 480, 736 - SK.top, 0), COL.sky, { key: 'hlair', shadow: false, tear: 0, grain: 0.3 }); ctx.restore();
-  // the lid: pushed up on "đẩy", then flicked off up-right (gone by ~42.4)
-  const up = EZ.io(seg(TT, tDay, tDay + 0.7)), fly = EZ.i2(seg(TT, tDay + 0.7, 42.4));
-  if (fly < 0.999) HL_lid(780 * fly, -46 * up - 760 * fly, 0.05 * up + 0.55 * fly);
+  // under the scab the notch is already new skin (pale pink, level with the surface): revealed as the scab goes
+  ctx.save(); trace(skCutPts(0), true); ctx.clip(); cut(rect(300, SK.top - 4, 480, 736 - SK.top, 0), COL.skinNew, { key: 'hlnewskin', shadow: false, tear: 0.4, grain: 0.3 }); ctx.restore();
+  const t0 = tDay - 0.1, up = EZ.o3(seg(TT, t0, t0 + 0.8)), fall = seg(TT, t0 + 0.8, 42.4);
+  const push = -16 * Math.sin(Math.PI * seg(TT, t0, t0 + 1.1));   // the new-skin row pushes up under the scab
+  // new top cells grow into the notch once the scab is gone (level with the old surface)
+  const g = pop(42.0, SPRING.smooth);
+  if (g > 0.02) for (const [x, y, r] of [[418, 640, 36], [540, 628, 30], [662, 640, 36]]) skinCell(x, y + (1 - Math.min(1, g)) * 30, r * Math.min(1, g), { key: 'hlnt' + x, c: COL.skinNew });
   // the new skin row: trailing cells + the two edge cells, touching; a hug on "liền lại"
   const hug = 7 * Math.sin(Math.PI * seg(TT, tLien, tLien + 0.8));
   const hop = TT < tLien - 0.2 ? -9 * Math.abs(Math.sin((TT - SLAM) * Math.PI * 2)) : 0;
-  const push = -10 * Math.sin(Math.PI * seg(TT, tDay, tDay + 0.9));   // the row nudges up as it pushes the scab
+  const lid = () => HL_lid(40 * up + 760 * EZ.i2(fall), -62 * up + 1500 * EZ.i2(fall), 0.2 * up + 1.1 * fall);
+  if (fall <= 0) lid();                       // still on: behind the cells (the cells are under it)
   for (const x of [364, 426]) skinCell(x, SK.epiY + push * 0.6, 32, { key: 'hlnL' + x, c: COL.skinNew });
   for (const x of [716, 654]) skinCell(x, SK.epiY + push * 0.6, 32, { key: 'hlnR' + x, c: COL.skinNew });
   heroCell(580 - hug, SK.epiY + hop + push, 50, { partner: true, mood: 'happy' });
@@ -133,7 +144,9 @@ SCENES.meet = function () {
   });
   // the big tag in the sky, there from the first frame; a bounce on "liền"
   const bump = Math.sin(Math.PI * seg(TT, tLien, tLien + 0.5)) * 0.12;
+  if (fall > 0 && fall < 0.999) lid();       // falling: in front of everything
   tag('liền rồi!', 540, 455, 88, { rot: -0.04 + 0.025 * Math.sin(TT * 2.2), s: 1 + bump });
+  // the lid: pushed up and tilted (~0.8 s), then it tips off to the right and FALLS down out of frame (gone by 42.4)
   viTagNow('7', TITLES.meet);
 };
 
@@ -167,7 +180,7 @@ function HL_calendar(x, y, s, m) {
 }
 SCENES.scar = function () {
   const E = ET('scar'), tSua = VW('scar', 'sửa'), tNam = VW('scar', 'năm'), tSeo = VW('scar', 'sẹo'), tTam = VW('scar', 'tám');
-  skinSlice({ closed: 1, scar: 0, heroX: 490, partner: null });
+  skinSlice({ closed: 1, scar: 0, heroX: 490, partner: [598, 650, 60], partnerO: { mood: TT > VW('scar', 'tám') && TT < VW('scar', 'tám') + 1.4 ? 'wow' : 'calm', look: -0.4 } });
   // scar fibres: messy at first, straightened on "sửa cả năm"
   const st = EZ.io(seg(TT, tSua, tSua + 1.7));
   for (let i = 0; i < 5; i++) HL_fibre(i, EZ.io(seg(TT, E + 0.1 + i * 0.1, E + 0.8 + i * 0.1)), st);
