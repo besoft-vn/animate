@@ -13,9 +13,9 @@ Tiêu chí: có một **quá trình thật** với các bước rõ ràng, có m
 - [x] 2026-11-20 — Vì sao ta ngáp — và vì sao ngáp lây? → `pieces/ngap/` (cut-paper, 61s, giọng Tuan Khang / eleven_v3)
 - [x] 2026-11-21 — Màn hình cảm ứng biết ngón tay bạn ở đâu? → `pieces/man-hinh-cam-ung/` (isometric, 61s, giọng Tuan Khang / eleven_v3)
 - [x] 2026-11-22 — Sét hình thành như thế nào? → `pieces/set/` (sketchbook thay riso, 60,5s, giọng Tuan Khang / eleven_v3)
+- [x] 2026-11-23 — Vết thương tự lành ra sao? → `pieces/vet-thuong/` (cut-paper, 61,5s, giọng Tuan Khang / eleven_v3)
 
 ## Hàng chờ (gợi ý style)
-- [ ] Vết thương tự lành ra sao? (cut-paper)
 - [ ] Wi‑Fi truyền dữ liệu qua không khí thế nào? (math)
 - [ ] Vì sao nước biển mặn? (sketchbook)
 - [ ] Phanh xe máy dừng xe như thế nào? (crosshatch)
