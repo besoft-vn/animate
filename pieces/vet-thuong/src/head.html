@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vết thương tự lành ra sao?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Vết thương tự lành ra sao?" — 9:16, cut-paper, voiced (vi), 24fps, 120 BPM.
+//  Format F5 (fixed-hero journey): the hero is ONE SKIN CELL ("tế bào da", a peach paper cell with a face) at the LEFT
+//  edge of a cut. Hook: a scraped knee with a brown scab — the scab is NOT new skin. Then a cut-away SKIN SLICE
+//  (props.js skinSlice): the vessel squeezes, platelets plug the gap; fibrin threads net the blood, it dries to a scab;
+//  white cells eat germs (red, swollen, warm); fibroblasts weave collagen, new vessels grow in, the hole fills; the hero
+//  and its partner from the RIGHT edge crawl in UNDER the scab ... SLAM: they meet, new skin closes, the scab lifts.
+//  Moist vs dry; the scar (≈ 80 % strength, remodelled for a year); the end is the start, changed: the same knee, the
+//  scab falls off, pink new skin, the hero waves.
+//  KHUNG HÌNH GỌN: one subject per frame, flat paper, light grain, ≤ 12 small objects, no fields of dots.
+//  Colour (one colour = one meaning): see COL in props.js.
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). The payoff era "meet" starts on the
+//  SLAM: a hard cut inside the 1.4s pause after "crawl". Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const HAND = '"Pangolin", "Comic Neue", cursive';
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'plug', 'clot', 'clean', 'fill', 'crawl', 'meet', 'moist', 'scar', 'end'];
+const SLAM_ID = 'meet';
+const SLAM = snap8(VL('crawl').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- the bridges' contract: where the hero (heroCell, centre, radius r) MUST be at each boundary. [x, y, r].
+// Scenes keep it exactly there during [tc - 0.5, tc + 0.5]. Cameras: identity within 0.5s of a boundary.
+// SK.edgeL = [290, 650] is the hero's home in the skin slice (the left wound edge, in the top skin row).
+const BR = {
+  hookPlug:   { a: [290, 650, 60], b: [290, 650, 60] },   // knee cut-away (hook ends with the slice in view) -> skin slice
+  plugClot:   { a: [290, 650, 60], b: [290, 650, 60] },
+  clotClean:  { a: [290, 650, 60], b: [290, 650, 60] },
+  cleanFill:  { a: [290, 650, 60], b: [290, 650, 60] },
+  fillCrawl:  { a: [290, 650, 60], b: [290, 650, 60] },
+  // crawl -> meet: SLAM (hard cut). crawl ends with the hero at ~[455, 712, 50] (stretched, crawling right) just short of
+  // the partner (~[625, 712, 50]); meet is complete on its first frame: hero [500, 712, 50] touching partner [580, 712, 50].
+  meetMoist:  { a: [500, 712, 50], b: [540, 470, 60] },   // -> narrator spot top centre over the dry/moist panels
+  moistScar:  { a: [540, 470, 60], b: [490, 650, 60] },   // -> healed slice: the hero in the closed top skin row (SK.newX[1])
+  scarEnd:    { a: [490, 650, 60], b: [540, 640, 60] },   // -> on the knee's new pink skin patch (as in the hook, changed)
+};
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'vảy không phải da mới', plug: 'tiểu cầu bịt chỗ hở', clot: 'sợi huyết đan lưới -> vảy',
+  clean: 'bạch cầu dọn vi khuẩn', fill: 'cô-la-gen lấp chỗ trống', crawl: 'tế bào da bò dưới vảy...',
+  meet: 'gặp nhau: da liền!', moist: 'đủ ẩm lành nhanh hơn', scar: 'sẹo bền ~80%', end: 'vảy bong, da hồng mới',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1).filter((t) => t !== SLAM),
+  cues: { slam: SLAM, bloom: SLAM },
+  acts: [
+    { name: '1 Vảy không phải da', role: 'build',   t0: 0,              t1: ET('clot') },
+    { name: '2 Cơ thể tự vá',      role: 'journey', t0: ET('clot'),     t1: ET('crawl') },
+    { name: '3 Bò dưới vảy',       role: 'peak',    t0: ET('crawl'),    t1: snap8(VL('crawl').t1) },
+    { name: '4 Lặng',              role: 'silence', t0: snap8(VL('crawl').t1), t1: SLAM - 0.125 },
+    { name: '5 Gặp nhau!',         role: 'gift',    t0: SLAM,           t1: SLAM + 2.25 },
+    { name: '6 Da mới',            role: 'goodbye', t0: SLAM + 2.25,    t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;

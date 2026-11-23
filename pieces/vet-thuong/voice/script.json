@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.7,
+ "tail": 1,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Lớp vảy trên vết xước không phải da mới: da mới đang mọc ngay bên dưới nó.",
+   "after": 0.35,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "plug",
+   "text": "Vừa bị cắt, mạch máu co lại, tiểu cầu dính vào nhau bịt kín chỗ hở.",
+   "after": 0.35,
+   "file": "plug.mp3"
+  },
+  {
+   "id": "clot",
+   "text": "Sợi huyết đan thành lưới giữ máu lại, rồi khô dần thành lớp vảy.",
+   "after": 0.35,
+   "file": "clot.mp3"
+  },
+  {
+   "id": "clean",
+   "text": "Bạch cầu kéo đến ăn vi khuẩn, vì thế quanh vết thương đỏ, sưng và ấm.",
+   "after": 0.35,
+   "file": "clean.mp3"
+  },
+  {
+   "id": "fill",
+   "text": "Nguyên bào sợi dệt cô la gen, mạch máu mới mọc vào, lấp đầy chỗ trống.",
+   "after": 0.35,
+   "file": "fill.mp3"
+  },
+  {
+   "id": "crawl",
+   "text": "Trong lúc đó, tế bào da ở hai mép bò dần vào giữa, luồn ngay dưới lớp vảy...",
+   "after": 1.4,
+   "file": "crawl.mp3"
+  },
+  {
+   "id": "meet",
+   "text": "Rồi chúng gặp nhau: da mới liền lại, đẩy vảy bong ra.",
+   "after": 0.5,
+   "file": "meet.mp3"
+  },
+  {
+   "id": "moist",
+   "text": "Giữ vết thương sạch và đủ ẩm, tế bào bò dễ hơn, nên thường lành nhanh hơn để khô.",
+   "after": 0.35,
+   "file": "moist.mp3"
+  },
+  {
+   "id": "scar",
+   "text": "Bên dưới còn được sửa cả năm, nhưng sẹo chỉ bền chừng tám mươi phần trăm da cũ.",
+   "after": 0.35,
+   "file": "scar.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Vậy đấy: vảy bong đi, để lộ làn da hồng do chính cơ thể bạn tự dệt nên.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}

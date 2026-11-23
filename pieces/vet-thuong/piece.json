@@ -1,0 +1,13 @@
+{
+  "name": "vet-thuong",
+  "title": "Vết thương tự lành ra sao?",
+  "series": "Vạn vật vận hành như thế nào",
+  "date": "2026-11-23",
+  "format": { "width": 1080, "height": 1920, "fps": 24, "bpm": 120 },
+  "storyFormat": "F5 fixed-hero journey (the hero is a skin cell at the wound edge), morph-joined, one slam on the payoff (the two edges meet under the scab)",
+  "style": "cut-paper",
+  "scenes": ["src/props.js", "src/sc-knee.js", "src/sc-wound.js", "src/sc-heal.js"],
+  "voice": { "file": "voice/voice.wav", "music": -14 },
+  "captions": { "font": "Pangolin", "size": 62 },
+  "review": { "safe": { "top": 240, "bottom": 420, "right": 140 }, "refs": {}, "wpsMax": 5.0 }
+}
