@@ -48,10 +48,14 @@ SCENES.fill = function () {
   ptag('nguyên bào sợi', 245, 790, tNg, 50, { color: COL.colD, rot: -0.03 });
   if (A.x != null) simpleArrow(372, 826, A.x - A.r * 1.5 - 6, A.yy - 4, { part: seg(TT, tNg + 0.15, tNg + 0.45), col: COL.colD, w: 6, head: 20, key: 'hlarf' });
   const ty = lerp(SK.bot + 10, SK.fillTop, fl), yf = lerp(SK.bot - 30, ty + 30, 0.875), xf = skCutX(yf)[1] - 16;
-  ptag('cô-la-gen', 805, 905, tCo, 52, { color: COL.colD, rot: 0.03 });
+  ptag('cô-la-gen', 805, 905, tMach + 0.75, 52, { color: COL.colD, rot: 0.03 });
   simpleArrow(672, 925, xf + 8, yf + 2, { part: seg(TT, tMach + 0.8, tMach + 1.1), col: COL.colD, w: 6, head: 20, key: 'hlarc' });
   ptag('mạch máu mới', 240, 1092, tMach, 52, { color: COL.bloodD, rot: -0.03 });
-  simpleArrow(345, 1060, 466, 992, { part: seg(TT, tMach + 0.1, tMach + 0.4), col: COL.bloodD, w: 6, head: 20, key: 'hlarm' });
+  // the red arrow lands on the left capillary arch's leg, in the gap between the two fibroblasts
+  const cTop = Math.max(ty + 50, SK.fillTop + 60), B2 = FB[1];
+  const ay = clamp(A.yy != null && B2.yy != null ? (A.yy + B2.yy) / 2 : 950, cTop + 25, 985);
+  const ax = SK.botL + 6 + 36 * (1 - Math.cos(Math.asin(clamp((SK.vy - 10 - ay) / (SK.vy - 10 - cTop))))) - 8;
+  simpleArrow(345, 1058, ax, ay, { part: seg(TT, tMach + 1.1, tMach + 1.4), col: COL.bloodD, w: 6, head: 20, key: 'hlarm' });
   // the hero watches the hole fill: wow at the weavers, happy when it is full
   const mood = TT > tLap + 0.4 ? 'happy' : TT > E + 0.4 ? 'wow' : 'calm';
   heroCell(290, 650, 60, { mood, look: 0.5 + 0.35 * Math.sin(TT * 1.7) });
@@ -109,11 +113,6 @@ SCENES.crawl = function () {
 // the lid: the scab with its dried clot underneath (the same torn shape as the slice's scab), moved/rotated
 function HL_lid(dx, dy, rot) {
   ctx.save(); ctx.translate(540 + dx, SK.top + dy); ctx.rotate(rot); ctx.translate(-540, -SK.top);
-  const U = [];
-  for (let y = SK.top + 2; y <= 700; y += 14) U.push([skCutX(y)[0] - 2, y]);
-  U.push([460, 704], [540, 698], [620, 704]);
-  for (let y = 700; y >= SK.top + 2; y -= 14) U.push([skCutX(y)[1] + 2, y]);
-  cut(U, COL.blood, { key: 'hlunder', tear: 0.8, sb: 4, sy: 2, grain: false });
   const S = [[SK.cutL - 26, SK.top + 4], [SK.cutL - 6, SK.top - 30], [470, SK.top - 44], [540, SK.top - 40], [610, SK.top - 46], [SK.cutR + 8, SK.top - 28], [SK.cutR + 26, SK.top + 6], [SK.cutR - 20, SK.top + 40], [610, SK.top + 50], [540, SK.top + 46], [470, SK.top + 52], [SK.cutL + 20, SK.top + 40]];
   cut(S, COL.scab, { key: 'skscab', tear: 2.2, sb: 8, sy: 5, grain: 0.5, crayon: COL.scabD, crAl: 0.3, crPer: 40 });
   ctx.restore();
@@ -132,7 +131,9 @@ SCENES.meet = function () {
   // the new skin row: trailing cells + the two edge cells, touching; a hug on "liền lại"
   const hug = 7 * Math.sin(Math.PI * seg(TT, tLien, tLien + 0.8));
   const hop = TT < tLien - 0.2 ? -9 * Math.abs(Math.sin((TT - SLAM) * Math.PI * 2)) : 0;
-  const lid = () => HL_lid(40 * up + 760 * EZ.i2(fall), -62 * up + 1500 * EZ.i2(fall), 0.2 * up + 1.1 * fall);
+  // lifted and tilted (left edge up), then flicked off sideways to the RIGHT at surface level (a slight arc up), out
+  // of frame — it never goes below the skin line
+  const lid = () => HL_lid(30 * up + 860 * EZ.i2(fall), -50 * up - 30 * Math.sin(Math.PI * 0.5 * fall), 0.1 * up - 0.06 * fall);
   if (fall <= 0) lid();                       // still on: behind the cells (the cells are under it)
   for (const x of [364, 426]) skinCell(x, SK.epiY + push * 0.6, 32, { key: 'hlnL' + x, c: COL.skinNew });
   for (const x of [716, 654]) skinCell(x, SK.epiY + push * 0.6, 32, { key: 'hlnR' + x, c: COL.skinNew });
@@ -145,7 +146,7 @@ SCENES.meet = function () {
   // the big tag in the sky, there from the first frame; a bounce on "liền"
   const bump = Math.sin(Math.PI * seg(TT, tLien, tLien + 0.5)) * 0.12;
   if (fall > 0 && fall < 0.999) lid();       // falling: in front of everything
-  tag('liền rồi!', 540, 455, 88, { rot: -0.04 + 0.025 * Math.sin(TT * 2.2), s: 1 + bump });
+  tag('liền rồi!', 540, 438, 76, { rot: -0.04 + 0.025 * Math.sin(TT * 2.2), s: 1 + bump });
   // the lid: pushed up and tilted (~0.8 s), then it tips off to the right and FALLS down out of frame (gone by 42.4)
   viTagNow('7', TITLES.meet);
 };
