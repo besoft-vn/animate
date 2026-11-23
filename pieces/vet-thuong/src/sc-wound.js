@@ -207,7 +207,7 @@ function WD_stage() {
   // "sưng": orange swelling contours bulge out on both sides of the cut, with small outward arrows
   const sw = EZ.o2(seg(t, w.sung - 0.05, w.sung + 0.5));
   if (sw > 0.01) for (const d of [-1, 1]) {
-    const P = []; for (let k = 0; k <= 16; k++) { const u = k / 16, y = lerp(640, 1010, u), cx = skCutX(y, S.redness)[d < 0 ? 0 : 1]; P.push([cx + d * (34 + 62 * Math.sin(Math.PI * u) * (1 + 0.06 * Math.sin(t * 5))), y]); }
+    const P = []; for (let k = 0; k <= 16; k++) { const u = k / 16, y = lerp(735, 1010, u), cx = skCutX(y, S.redness)[d < 0 ? 0 : 1]; P.push([cx + d * (34 + 62 * Math.sin(Math.PI * u) * (1 + 0.06 * Math.sin(t * 5))), y]); }
     ink(subPath(P, sw), { w: 7, color: COL.heat, amt: 0.3, key: 'wdsw' + d });
     const ex = skCutX(825, S.redness)[d < 0 ? 0 : 1] + d * 112;
     simpleArrow(ex, 825, ex + d * 50, 825, { part: sw, w: 6, head: 16, col: COL.heat, key: 'wdswa' + d });

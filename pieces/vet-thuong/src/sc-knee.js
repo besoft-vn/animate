@@ -138,9 +138,9 @@ SCENES.hook = function () {
   // the question tag above the knee, crossed out (red-brown ink) on "không phải"; gone as the window grows
   const qs = pop(tVay) * (1 - EZ.i2(seg(TT, 5.3, 5.55)));
   if (qs > 0.01) {
-    const TX = 560, TY = 440;
+    const TX = 560, TY = 452;
     ctx.save(); ctx.translate(TX, TY); ctx.scale(qs, qs); ctx.translate(-TX, -TY);
-    tag('vảy = da mới?', TX, TY, 58, { rot: -0.03 });
+    tag('vảy = da mới?', TX, TY, 58, { rot: -0.03, tape: false });
     if (TT > tKhong) {
       const w = handW('vảy = da mới?', 58) + 52;
       ink([[TX - w / 2 - 4, TY - 38], [TX + w / 2 + 4, TY + 42]], { w: 11, color: COL.bloodD, amt: 0.5, key: 'knx1', frac: seg(TT, tKhong, tKhong + 0.25) });
@@ -276,7 +276,7 @@ SCENES.end = function () {
   // "da mới ✓" with an arrow INTO the pink patch
   const dm = pop(tTu);
   if (dm > 0.01) {
-    simpleArrow(770, 500, 690, 572, { col: PAL.ink, w: 6, head: 20, key: 'knenda', part: seg(TT, tTu, tTu + 0.3) });
+    simpleArrow(765, 498, 645, 566, { col: PAL.ink, w: 6, head: 20, key: 'knenda', part: seg(TT, tTu, tTu + 0.3) });
     tag('da mới    ', 800, 450, 56, { s: dm, rot: -0.04, fill: COL.skinL });
     if (TT > tTu + 0.25) ink([[860, 442], [876, 462], [906, 422]], { w: 8, color: PAL.ink, amt: 0.3, key: 'knendck', frac: seg(TT, tTu + 0.25, tTu + 0.5) });
   }
