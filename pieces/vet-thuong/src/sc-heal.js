@@ -47,11 +47,11 @@ SCENES.fill = function () {
   const tNg = E + 0.25, A = FB[0];
   ptag('nguyên bào sợi', 245, 790, tNg, 50, { color: COL.colD, rot: -0.03 });
   if (A.x != null) simpleArrow(372, 826, A.x - A.r * 1.5 - 6, A.yy - 4, { part: seg(TT, tNg + 0.15, tNg + 0.45), col: COL.colD, w: 6, head: 20, key: 'hlarf' });
-  const ty = lerp(SK.bot + 10, SK.fillTop, fl), yf = lerp(SK.bot - 30, ty + 30, 0.625), xf = skCutX(yf)[1] - 12;
+  const ty = lerp(SK.bot + 10, SK.fillTop, fl), yf = lerp(SK.bot - 30, ty + 30, 0.875), xf = skCutX(yf)[1] - 16;
   ptag('cô-la-gen', 805, 905, tCo, 52, { color: COL.colD, rot: 0.03 });
-  simpleArrow(672, 925, xf + 8, yf + 2, { part: seg(TT, tCo + 0.5, tCo + 0.8), col: COL.colD, w: 6, head: 20, key: 'hlarc' });
+  simpleArrow(672, 925, xf + 8, yf + 2, { part: seg(TT, tMach + 0.8, tMach + 1.1), col: COL.colD, w: 6, head: 20, key: 'hlarc' });
   ptag('mạch máu mới', 240, 1092, tMach, 52, { color: COL.bloodD, rot: -0.03 });
-  simpleArrow(345, 1060, 474, 975, { part: seg(TT, tMach + 0.1, tMach + 0.4), col: COL.bloodD, w: 6, head: 20, key: 'hlarm' });
+  simpleArrow(345, 1060, 466, 992, { part: seg(TT, tMach + 0.1, tMach + 0.4), col: COL.bloodD, w: 6, head: 20, key: 'hlarm' });
   // the hero watches the hole fill: wow at the weavers, happy when it is full
   const mood = TT > tLap + 0.4 ? 'happy' : TT > E + 0.4 ? 'wow' : 'calm';
   heroCell(290, 650, 60, { mood, look: 0.5 + 0.35 * Math.sin(TT * 1.7) });

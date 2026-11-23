@@ -138,9 +138,8 @@ SCENES.hook = function () {
   // the question tag above the knee, crossed out (red-brown ink) on "không phải"; gone as the window grows
   const qs = pop(tVay) * (1 - EZ.i2(seg(TT, 5.3, 5.55)));
   if (qs > 0.01) {
-    const TX = 560, TY = 418;
+    const TX = 560, TY = 440;
     ctx.save(); ctx.translate(TX, TY); ctx.scale(qs, qs); ctx.translate(-TX, -TY);
-    if (TT < tOpen + 0.2) simpleArrow(TX - 20, TY + 44, 545, 500, { col: PAL.ink, w: 6, head: 18, key: 'knqa' });
     tag('vảy = da mới?', TX, TY, 58, { rot: -0.03 });
     if (TT > tKhong) {
       const w = handW('vảy = da mới?', 58) + 52;
