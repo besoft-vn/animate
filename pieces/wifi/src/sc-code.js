@@ -5,7 +5,7 @@
 //                      -> "nghìn": the grid shrinks into a tinted square "32 × 32 = 1024 kiểu" (no 1024 dots) ->
 //                      "1024 = 2¹⁰" -> one point is picked (yellow track dot) and carries a row of 10 yellow bits.
 //   ofdm (30.5–35.75)  6 blue sub-waves stacked (slightly different frequencies, "⋮" between the 5th and 6th for the
-//                      hundreds), each with a small yellow bit group; all drift RIGHT together; a brace "hơn 200 /
+//                      hundreds), each labelled "10 bit" (yellow); all drift RIGHT together; a brace "hơn 200 /
 //                      sóng con" and a small line "Wi-Fi 6: 234 / kênh 20 MHz". "cùng lúc": all bit groups pulse at once.
 //   ack  (50.0–56.0)   small router left, phone right; packets (box + 3 yellow bits) fly router -> phone; each arrival
 //                      sends a teal "đã nhận ✓" block back LEFT. Packet 3 breaks (grey, cracked, ✗), no teal; the router
@@ -27,15 +27,15 @@ function CD_W() {
 }
 const CD_hero = (o = {}) => heroAt(...HOME, o);
 // a stroked check mark / cross (no font dependency)
-function CD_check(x, y, s, c, p = 1, w = 6) {
+function CD_check(x, y, s, c, p = 1, w = 6, al = 1) {
   if (p <= 0) return;
   const P = [[x - 0.5 * s, y], [x - 0.15 * s, y + 0.35 * s], [x + 0.55 * s, y - 0.4 * s]];
-  showCreation(P, p, { c, w });
+  showCreation(P, p, { c, w, al });
 }
-function CD_cross(x, y, s, c, p = 1, w = 6) {
+function CD_cross(x, y, s, c, p = 1, w = 6, al = 1) {
   if (p <= 0) return;
-  segLine(x - s / 2, y - s / 2, x + s / 2, y + s / 2, c, w, smoothM(p * 2));
-  segLine(x + s / 2, y - s / 2, x - s / 2, y + s / 2, c, w, smoothM(p * 2 - 1));
+  segLine(x - s / 2, y - s / 2, x + s / 2, y + s / 2, c, w, smoothM(p * 2), al);
+  segLine(x + s / 2, y - s / 2, x - s / 2, y + s / 2, c, w, smoothM(p * 2 - 1), al);
 }
 
 // =====================================================================  QAM
@@ -46,13 +46,18 @@ SCENES.qam = function () {
   // the plane slides left and scales once it becomes the square
   const us = EZ.io(seg(t, w.nghin + 0.05, w.nghin + 0.8));
   const ox = lerp(470, 300, us), oy = lerp(740, 720, us), u = lerp(68, 52, us);
-  const ax = axes2({ at: [ox, oy], u, x: [-4.2, 4.2], y: [-4.2, 4.2], ext: 0.25, step: 1, tick: 6, p: runS(w.q0, 0.7), al: 0.55, c: MC.grey, w: 3 });
+  // polar framing: the centre + a grey reference ray (angle 0); the vertical guide fades once the square comes
+  const axp = runS(w.q0, 0.7), R = 4.45 * u;
+  segLine(ox - R, oy, ox + R, oy, MC.grey, 3, smoothM(axp), 0.55);
+  if (axp > 0.98) mArrow(ox + R - 1, oy, ox + R + 14, oy, MC.grey, 3, 1, 0.55);
+  segLine(ox, oy + R, ox, oy - R, MC.grey, 3, smoothM(axp), 0.55 * (1 - us));
+  mDot(ox, oy, 7, MC.grey, axp);
   const to = (x, y) => [ox + x * u, oy - y * u];
   // the square (1024 shapes) fades up while the 16 points shrink into it
   const sq = EZ.io(seg(t, w.nghin + 0.1, w.nghin + 0.8));
   if (sq > 0) {
     const [l, tp] = to(-4, 4), [r, b] = to(4, -4);
-    showCreation([[l, tp], [r, tp], [r, b], [l, b]], sq, { c: COL.wave, w: 4, closed: true, fill: 0.2, al: 0.9 });
+    ctx.save(); ctx.globalAlpha = 0.2 * sq; ctx.fillStyle = COL.wave; ctx.fillRect(l, tp, r - l, b - tp); ctx.restore();
   }
   // the points: 4 (QAM-4) -> split into 16 (4×4) -> shrink into the square
   const split = EZ.io(seg(t, w.co - 0.05, w.co + 0.45));
@@ -74,17 +79,18 @@ SCENES.qam = function () {
   const pick = EZ.io(seg(t, w.kieu + 0.5, w.moi + 0.2));
   let spx = lerp(2, 3, split), spy = lerp(2, 1, split);
   const mv = EZ.io(seg(t, w.nghin + 0.1, w.nghin + 0.8));
-  spx = lerp(spx, 2.625, mv); spy = lerp(spy, 1.375, mv);
+  spx = lerp(spx, 3.125, mv); spy = lerp(spy, 1.875, mv);
   const [sx, sy] = to(spx, spy), app0 = EZ.o2(seg(t, w.q0 + 0.1, w.q0 + 0.45));
   const rp = runS(w.q0 + 0.35, 0.6), gp = runS(w.q0 + 0.6, 0.6);
   segLine(ox, oy, sx, sy, COL.amp, 6, rp);
   const ang = Math.atan2(-(sy - oy), sx - ox);
-  angleArc(ox, oy, 62, 0, -ang, COL.phase, gp, 6);
+  angleArc(ox, oy, lerp(62, 100, mv), 0, -ang, COL.phase, gp, 6);
   if (pick < 1) mDot(sx, sy, lerp(20, 14, mv) * app0, COL.text, 1 - pick);
   if (pick > 0) trackDot(sx, sy, COL.bit, { r: lerp(14, 16, pick) * (1 + 0.12 * Math.sin(t * 5)), al: pick });
-  // legend: the two meanings, in their colours
-  vt([{ s: 'độ cao', c: COL.amp }], 210, 445, 56, runS(w.q0 + 0.4, 0.8));
-  vt([{ s: 'độ lệch', c: COL.phase }], 720, 445, 56, runS(w.q0 + 0.65, 0.8));
+  // the two meanings, Written right beside their marks once the plane is clean (the square):
+  // "độ cao" above-left of the red radius, "độ lệch" inside the wedge, just past the green arc
+  vt([{ s: 'độ cao', c: COL.amp }], ox - 10, oy - 85, 54, runS(w.nghin + 0.55, 0.7));
+  vt([{ s: 'độ lệch', c: COL.phase }], ox + 200, oy - 22, 50, runS(w.nghin + 0.75, 0.7));
   // the count
   vt([{ s: '32 × 32 = ', c: COL.text }, { s: '1024', c: COL.wave }, { s: ' kiểu', c: COL.text }], 470, 1035, 60, runS(w.nghin + 0.3, 0.9));
   const ftx = writeTex([mn('1024', COL.wave), '=', mn('2', MC.white, { sup: '10', supC: COL.bit })], 470, 1140, 72, runS(w.kieu - 0.05, 0.8));
@@ -97,9 +103,9 @@ SCENES.qam = function () {
   ctx.translate(752, 640); ctx.scale(k, k); ctx.translate(-752, -640);
   bitRow(CD_BITS, 752, 660, 54, bp, { gap: 33 });
   ctx.restore();
-  flashAt(sx, sy, fl, MC.yellowP, 30, 4);
+  flashAt(sx, sy, fl, MC.yellowP, 24, 4);
   // brace under the bits: 10 of them
-  mBrace(595, 690, 910, 690, { side: -1, p: runS(w.moi + 0.25, 0.6), c: COL.bit, w: 3, h: 20, al: 0.9 });
+  mBrace(610, 690, 910, 690, { side: -1, p: runS(w.moi + 0.25, 0.6), c: COL.bit, w: 3, h: 20, al: 0.9 });
   // hero: watches the plane, "wow" at a thousand, a hop at "mười bit" (home again by q1 - 0.5)
   const mood = t < w.nghin ? 'calm' : t < w.kieu + 0.4 ? 'wow' : t < w.muoi ? 'calm' : 'happy';
   CD_hero({ look: t < w.kieu + 0.4 ? [ox, oy] : [sx, sy], mood, hop: seg(t, w.muoi, Math.min(w.muoi + 0.4, w.q1 - 0.55)) });
@@ -109,7 +115,6 @@ SCENES.qam = function () {
 // =====================================================================  OFDM
 const CD_ROWS = [480, 572, 664, 756, 848, 1010];
 const CD_LAM = [150, 132, 118, 104, 92, 80];
-const CD_OB = ['101', '011', '110', '001', '100', '111'];
 SCENES.ofdm = function () {
   const w = CD_W(), t = TT;
   const sp = lerp(70, 150, EZ.io(seg(t, w.chay - 0.2, w.chay + 0.5)));
@@ -125,7 +130,7 @@ SCENES.ofdm = function () {
     // the bit group this sub-wave carries (Written, then all pulse together at "cùng lúc")
     const k = indicateS(pulse, 0.18), cx = 150, cy = y;
     ctx.save(); ctx.translate(cx, cy); ctx.scale(k, k); ctx.translate(-cx, -cy);
-    bitRow(CD_OB[i], cx, y + 17, 50, runS(t0 + 0.35, 0.7), { gap: 30 });
+    vt([{ s: '10 bit', c: COL.bit }], cx, y + 17, 50, runS(t0 + 0.35, 0.7));
     ctx.restore();
   });
   // the hundreds in between: a vertical ellipsis
@@ -157,7 +162,7 @@ function CD_packet(x, y, bits, o = {}) {
     ctx.translate(x + sd * br * 14, y + Math.abs(sd) * br * 10);
     ctx.rotate(rot);
     const l = sd > 0 ? 0 : -wd / 2, r = sd < 0 ? 0 : wd / 2;
-    showCreation([[l, -h / 2], [r, -h / 2], [r, h / 2], [l, h / 2]], 1, { c, w: 4, closed: true, fill: br > 0 ? 0.06 : 0.1, fillC: br > 0 ? COL.devD : COL.bit });
+    showCreation([[l, -h / 2], [r, -h / 2], [r, h / 2], [l, h / 2]], 1, { c, w: 4, closed: true, fill: br > 0 ? 0.06 : 0.1, fillC: br > 0 ? COL.devD : COL.bit, al });
     ctx.restore();
   });
   ctx.restore();
@@ -166,10 +171,10 @@ function CD_packet(x, y, bits, o = {}) {
 function CD_ackBlock(x, y, al = 1) {
   if (al <= 0) return;
   ctx.save(); ctx.globalAlpha = al;
-  showCreation([[x - 40, y - 30], [x + 44, y - 30], [x + 44, y + 30], [x - 40, y + 30]], 1, { c: COL.ack, w: 4, closed: true, fill: 0.22 });
+  showCreation([[x - 40, y - 30], [x + 44, y - 30], [x + 44, y + 30], [x - 40, y + 30]], 1, { c: COL.ack, w: 4, closed: true, fill: 0.22, al });
   ctx.fillStyle = COL.ack; ctx.beginPath(); ctx.moveTo(x - 66, y); ctx.lineTo(x - 42, y - 18); ctx.lineTo(x - 42, y + 18); ctx.closePath(); ctx.fill();
   ctx.restore();
-  ctx.save(); ctx.globalAlpha = al; CD_check(x + 2, y, 40, COL.ack, 1, 6); ctx.restore();
+  CD_check(x + 2, y, 40, COL.ack, 1, 6, al);
 }
 // the flights: [depart, arrive, bits, slot, broken?]
 function CD_flights() {
@@ -178,7 +183,7 @@ function CD_flights() {
     { d: w.a0 + 0.1, a: w.a0 + 0.85, bits: '101', slot: 0 },
     { d: w.a0 + 0.95, a: w.a0 + 1.7, bits: '011', slot: 1 },
     { d: w.da + 0.15, a: w.hong - 0.05, bits: '110', slot: 2, broken: true },
-    { d: w.gui - 0.3, a: w.gui + 0.25, bits: '110', slot: 2, rd: 0.5 },
+    { d: w.gui - 0.5, a: w.gui - 0.05, bits: '110', slot: 2, rd: 0.45, r0: 0.1 },
   ];
 }
 SCENES.ack = function () {
@@ -206,13 +211,13 @@ SCENES.ack = function () {
     if (f.broken) {
       const xb = lerp(CD_PX0, CD_PX1 - 40, u);
       const br = EZ.o2(seg(t, f.a - 0.1, f.a + 0.25));
-      const al = 1 - EZ.io(seg(t, w.hong + 0.55, w.hong + 0.95)), drop = 170 * EZ.io(seg(t, w.hong + 0.35, w.hong + 0.85));
+      const al = 1 - EZ.io(seg(t, w.hong + 0.3, w.hong + 0.6)), drop = 170 * EZ.io(seg(t, w.hong + 0.2, w.hong + 0.65));
       CD_packet(xb, CD_LANE + br * 16 + drop, f.bits, { broken: br, al });
-      if (br > 0) CD_cross(xb, CD_LANE - 84 + drop, 56, MC.white, seg(t, f.a + 0.05, f.a + 0.4) * al, 7);
+      if (br > 0) CD_cross(xb, CD_LANE - 84 + drop, 56, MC.white, seg(t, f.a + 0.05, f.a + 0.4), 7, al);
       if (t < f.a + 0.6) look = [xb, CD_LANE];
       return;
     }
-    const x = lerp(CD_PX0, CD_PX1, u), into = EZ.i2(seg(t, f.a, f.a + 0.3));
+    const x = lerp(CD_PX0, CD_PX1, u), into = EZ.io(seg(t, f.a, f.a + 0.2));
     if (into < 1) {
       ctx.save(); const s = 1 - 0.6 * into; ctx.translate(x, CD_LANE); ctx.scale(s, s); ctx.translate(-x, -CD_LANE);
       CD_packet(x + 60 * into, CD_LANE, f.bits, { al: 1 - into, bp: runS(f.d - 0.15, 0.4) });
@@ -220,7 +225,7 @@ SCENES.ack = function () {
     }
     if (t < f.a + 0.2) look = [x, CD_LANE];
     // the reply: teal block flies back LEFT to the router
-    const r0 = f.a + 0.15, r1 = r0 + (f.rd ?? 0.65), ru = EZ.io(seg(t, r0, r1));
+    const r0 = f.a + (f.r0 ?? 0.15), r1 = r0 + (f.rd ?? 0.65), ru = EZ.io(seg(t, r0, r1));
     if (t >= r0) {
       const al = EZ.o2(seg(t, r0, r0 + 0.15)) * (1 - EZ.io(seg(t, r1, r1 + 0.3)));
       CD_ackBlock(lerp(600, 385, ru), CD_ALANE, al);
@@ -229,7 +234,7 @@ SCENES.ack = function () {
     }
   });
   // the router "re-sends": a small flash on it
-  flashAt(CD_RT[0], CD_RT[1] - 40, seg(t, w.gui - 0.25, w.gui + 0.2), MC.white, 40, 4);
+  flashAt(CD_RT[0], CD_RT[1] - 40, seg(t, w.gui - 0.55, w.gui - 0.1), MC.white, 40, 4);
   // the meaning of teal, Written once
   const lp = runS(w.dien - 0.1, 0.8);
   const lw = textW('đã nhận', 60);

@@ -189,7 +189,10 @@ SCENES.read = function () {
   // electron) and flows DOWN-right into its slot at the top of the screen; the photo band below builds as it lands
   RM_GROUPS.forEach((b, i) => {
     const t0 = tDich + i * 0.5, u = EZ.io(seg(TT, t0 + 0.1, t0 + 0.55));
-    const [sx, sy] = RM_SLOT(i), x = lerp(ax + 46, sx, u), y = lerp(ayb + 82, sy, u);
+    // a queue: each new group lands in the TOP slot and pushes the older ones down one slot (no group ever
+    // passes through another)
+    let k = 0; for (let j = i + 1; j < RM_GROUPS.length; j++) k += EZ.io(seg(TT, tDich + j * 0.5 + 0.1, tDich + j * 0.5 + 0.55));
+    const [sx, sy0] = RM_SLOT(0), sy = sy0 + 58 * k, x = lerp(ax + 46, sx, u), y = lerp(ayb + 82, sy, u);
     bitRow(b, x, y, 50, runS(t0, 0.45), { gap: 30 });
   });
   // done: flash on the photo
