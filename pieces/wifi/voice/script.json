@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.7,
+ "tail": 1,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Wi-Fi cùng một họ với ánh sáng, chỉ là loại sóng mà mắt ta không nhìn thấy.",
+   "after": 0.35,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "bits",
+   "text": "Bức ảnh bạn gửi trước hết được biến thành một dãy số không và số một.",
+   "after": 0.35,
+   "file": "bits.mp3"
+  },
+  {
+   "id": "wave",
+   "text": "Router làm electron trong ăng-ten rung hai tỷ bốn trăm triệu lần mỗi giây, tỏa ra sóng.",
+   "after": 0.35,
+   "file": "wave.mp3"
+  },
+  {
+   "id": "mod",
+   "text": "Nó khẽ đổi độ cao và độ lệch của sóng; mỗi kiểu sóng là một nhóm bit.",
+   "after": 0.35,
+   "file": "mod.mp3"
+  },
+  {
+   "id": "qam",
+   "text": "Wi-Fi sáu có một nghìn không trăm hai mươi bốn kiểu, mỗi kiểu chở mười bit.",
+   "after": 0.35,
+   "file": "qam.mp3"
+  },
+  {
+   "id": "ofdm",
+   "text": "Hơn hai trăm sóng con như thế chạy song song, cùng lúc chở rất nhiều bit.",
+   "after": 0.35,
+   "file": "ofdm.mp3"
+  },
+  {
+   "id": "fly",
+   "text": "Sóng lao đi với tốc độ ánh sáng, xuyên qua tường, chạm vào ăng-ten điện thoại...",
+   "after": 1.4,
+   "file": "fly.mp3"
+  },
+  {
+   "id": "read",
+   "text": "Electron trong đó rung theo, và điện thoại dịch ngược ra số không, số một!",
+   "after": 0.5,
+   "file": "read.mp3"
+  },
+  {
+   "id": "ack",
+   "text": "Mỗi gói đến nơi, điện thoại báo lại đã nhận; gói nào hỏng, router gửi lại.",
+   "after": 0.35,
+   "file": "ack.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Vậy đấy: bức ảnh của bạn vừa bay qua căn phòng, trên một làn sóng vô hình.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}

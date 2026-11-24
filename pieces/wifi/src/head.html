@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wi‑Fi truyền dữ liệu qua không khí thế nào?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #050506; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Wi‑Fi truyền dữ liệu qua không khí thế nào?" — 9:16, math (manim look), voiced (vi), 24fps, 120 BPM.
+//  Format F5 (fixed-hero journey): the hero is the little pi creature (piHero) who watches the photo's journey from a
+//  fixed spot low right (BR.home) and reacts. Hook: a phone + a router, blue Wi‑Fi arcs; the arcs slide onto a spectrum
+//  strip: radio ... the small visible rainbow: same family, we only see that sliver. bits: the gold photo -> yellow 0/1.
+//  wave: an electron jiggles in the antenna, a blue sine leaves it (2,4 GHz, λ ≈ 12,5 cm). mod: the sine changes height
+//  (red) and shift (green); each shape = a bit group. qam: the shapes as points on a plane: 4 -> 16 -> "1024 = 2^10 ->
+//  10 bit". ofdm: 6 stacked sub-waves (stand-ins for 234) carry bit groups side by side. fly: the wave crosses the room,
+//  through a wall, reaches the phone's antenna ... SLAM: the phone's electron jiggles, the shapes decode to 0/1 and the
+//  photo builds on the screen. ack: the phone answers "đã nhận" (teal); a broken packet is re-sent. end: the hook's room
+//  again, changed: the photo is on the phone and the arcs carry tiny bit groups.
+//  KHUNG HÌNH GỌN: one subject per frame, flat stage, ≤ 12 small objects, no fields of dots.
+//  Colour (one colour = one meaning): see COL in props.js.
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). The payoff era "read" starts on the
+//  SLAM: a hard cut inside the 1.4s pause after "fly". Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const HAND = 'Cambria, "Cambria Math", "Latin Modern Roman", "CMU Serif", "STIX Two Text", "Times New Roman", Georgia, serif';
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'bits', 'wave', 'mod', 'qam', 'ofdm', 'fly', 'read', 'ack', 'end'];
+const SLAM_ID = 'read';
+const SLAM = snap8(VL('fly').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- the bridges' contract: where the hero (heroAt / STYLE.hero: centre x, y, size r) MUST be at each boundary.
+// Scenes keep it exactly there during [tc - 0.5, tc + 0.5] (still, calm or happy mood allowed). Cameras: identity within
+// 0.5 s of a boundary. Between boundaries the hero may move, hop, look — but return in time.
+const HOME = [820, 1100, 90];
+const BR = {
+  hookBits: { a: HOME, b: HOME },
+  bitsWave: { a: HOME, b: HOME },
+  waveMod:  { a: HOME, b: HOME },
+  modQam:   { a: HOME, b: HOME },
+  qamOfdm:  { a: HOME, b: HOME },
+  ofdmFly:  { a: HOME, b: HOME },
+  // fly -> read: SLAM (hard cut, same camera zoom). fly ends with the wave touching the phone's antenna (sc-room decides
+  // the layout); read is complete on its first frame (same room, the phone's electron starts to jiggle).
+  readAck:  { a: HOME, b: HOME },
+  ackEnd:   { a: HOME, b: HOME },
+};
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'cùng họ ánh sáng', bits: 'ảnh → số 0 và 1', wave: 'sóng 2,4 GHz', mod: 'đổi độ cao, độ lệch',
+  qam: '1024 kiểu = 10 bit', ofdm: 'hơn 200 sóng con', fly: 'bay tới điện thoại...', read: 'đọc ra 0 và 1!',
+  ack: 'báo nhận, gửi lại', end: 'ảnh đã tới',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1).filter((t) => t !== SLAM),
+  cues: { slam: SLAM, bloom: SLAM },
+  acts: [
+    { name: '1 Cùng họ ánh sáng', role: 'build',   t0: 0,              t1: ET('wave') },
+    { name: '2 Chở bit trên sóng', role: 'journey', t0: ET('wave'),     t1: ET('fly') },
+    { name: '3 Bay tới',           role: 'peak',    t0: ET('fly'),      t1: snap8(VL('fly').t1) },
+    { name: '4 Lặng',              role: 'silence', t0: snap8(VL('fly').t1), t1: SLAM - 0.125 },
+    { name: '5 Đọc ra!',           role: 'gift',    t0: SLAM,           t1: SLAM + 2.25 },
+    { name: '6 Ảnh đã tới',        role: 'goodbye', t0: SLAM + 2.25,    t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;

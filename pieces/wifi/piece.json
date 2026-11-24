@@ -1,0 +1,13 @@
+{
+  "name": "wifi",
+  "title": "Wi‑Fi truyền dữ liệu qua không khí thế nào?",
+  "series": "Vạn vật vận hành như thế nào",
+  "date": "2026-11-24",
+  "format": { "width": 1080, "height": 1920, "fps": 24, "bpm": 120 },
+  "storyFormat": "F5 fixed-hero journey (the pi creature watches a photo travel as a radio wave), morph-joined, one slam on the payoff (the phone reads the wave back into 0 and 1)",
+  "style": "math",
+  "scenes": ["src/props.js", "src/sc-room.js", "src/sc-wave.js", "src/sc-code.js"],
+  "voice": { "file": "voice/voice.wav", "music": -14 },
+  "captions": { "font": "Pangolin", "size": 62 },
+  "review": { "safe": { "top": 240, "bottom": 420, "right": 140 }, "refs": {}, "wpsMax": 5.0 }
+}
