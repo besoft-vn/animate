@@ -53,14 +53,14 @@ function RM_arcs(x, y, t, o = {}) {
   if (al <= 0) return;
   for (let i = 0; i < n; i++) {
     const k0 = Math.floor((t * sp + i * gap) / span), r = r0 + mod(t * sp + i * gap, span), f = 1 - (r - r0) / span;
-    const k = Math.min(1, (r - r0) / 40) * f * al; if (k <= 0.02) continue;
+    const k = Math.min(1, (r - r0) / 40) * Math.min(1, f * 3) * al; if (k <= 0.02) continue;
     if (o.bits && r > 90) {
       const ga = Math.asin(Math.min(1, 34 / r));
-      showCreation(arcPts(x, y, r, -A, -ga, 18), 1, { c: COL.wave, w: 10, al: k });
-      showCreation(arcPts(x, y, r, ga, A, 18), 1, { c: COL.wave, w: 10, al: k });
+      showCreation(arcPts(x, y, r, -A, -ga, 18), 1, { c: COL.wave, w: 12, al: k });
+      showCreation(arcPts(x, y, r, ga, A, 18), 1, { c: COL.wave, w: 12, al: k });
       const B = ['01', '10', '11', '00', '10', '01'][mod(k0 * 3 + i, 6)];
       mText([{ s: B, c: COL.bit }], x + r, y + 17, 50, { align: 'center', alpha: Math.min(1, k * 1.6) });
-    } else showCreation(arcPts(x, y, r, -A, A, 24), 1, { c: COL.wave, w: 10, al: k });
+    } else showCreation(arcPts(x, y, r, -A, A, 24), 1, { c: COL.wave, w: 12, al: k });
   }
 }
 
@@ -77,8 +77,16 @@ function RM_wave(x0, x1, y, t, o) {
     const tap = o.front != null ? clamp((o.front - x) / 40) : 1, tl = clamp((x - x0) / 30);
     P.push([x, y - RM_waveVal(x, t, o) * tap * (o.tail === false ? 1 : tl)]);
   }
+  RM_fill(P, y, o.al ?? 1);
   showCreation(P, 1, { c: COL.wave, w: o.w ?? 8, al: o.al ?? 1 });
 }
+function RM_fill(P, base, al = 1) {
+  ctx.save(); ctx.globalAlpha = 0.22 * al; ctx.fillStyle = COL.wave; ctx.beginPath(); ctx.moveTo(P[0][0], typeof base === 'function' ? base(P[0][0]) : base);
+  P.forEach(([x, y]) => ctx.lineTo(x, y)); for (let i = P.length - 1; i >= 0; i--) ctx.lineTo(P[i][0], typeof base === 'function' ? base(P[i][0]) : base);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+// the receiver lights up each time a wave front arrives (period = arc gap / speed)
+const RM_pulse = (t, period) => 0.5 + 0.5 * Math.cos(TAU * t / period);
 
 // ---- a phone antenna: a grey rod standing on the phone's top-left, with a tip ball. Returns [x, yTop, yBot].
 function RM_rod(ph, s, p = 1, glow = 0) {
@@ -100,7 +108,7 @@ SCENES.hook = function () {
   // the arcs fade a little (not out) on "không nhìn thấy": still there, just not for our eyes
   RM_arcs(tx, ty, TT, { r1: 360, speed: 160, al: clamp(TT / 0.4) * (1 - 0.35 * seg(TT, tKhong, tKhong + 0.6)) });
   // a soft blue glow at the phone: the arcs reach it
-  glowAt(ph.l + 20, RM_P.y - 60, 110, COL.wave, 0.18 + 0.08 * Math.sin(TT * 5.3));
+  glowAt(RM_P.x, RM_P.y - 40, 190, COL.wave, clamp(TT / 0.6) * (0.08 + 0.3 * RM_pulse(TT - 0.33, 320 / 3 / 160)));
   // "Wi‑Fi" is written over the arcs, then glides down onto the strip's Wi‑Fi tick
   const g = EZ.io(seg(TT, tAnh + 0.4, tAnh + 1.3));
   vt('Wi‑Fi', lerp(480, RM_SP.wifi - 40, g), lerp(770, RM_SP.y + RM_SP.h + 76, g), 56 - 4 * g, runS(tWifi, 0.7), { col: COL.wave });
@@ -132,18 +140,20 @@ SCENES.fly = function () {
   const [sx, sy] = rt.tips[1], wy = (ayt + ayb) / 2 - 8;
   // the wave: leaves the router tip, bends to the antenna's height, runs RIGHT; weaker after the wall
   const front = Math.min(RM_flyFront(TT), ax);
-  const amp = (u, x) => lerp(46, 30, smoothM((x - (F.wx - F.ww / 2)) / F.ww));
+  const amp = (u, x) => lerp(58, 36, smoothM((x - (F.wx - F.ww / 2)) / F.ww));
   const yOf = (x) => lerp(sy, wy, smoothM((x - sx) / 60));
   if (TT > tLao - 0.1 && front > sx + 4) {
     const P = [], o = { v: 225, lam: 150, amp };
     for (let x = sx; x <= front; x += 3) P.push([x, yOf(x) - RM_waveVal(x, TT, o) * clamp((front - x) / 40) * clamp((x - sx) / 30)]);
-    showCreation(P, 1, { c: COL.wave, w: 8 });
+    RM_fill(P, yOf); showCreation(P, 1, { c: COL.wave, w: 8 });
   }
+  // the router's antenna rings at the wave's own rhythm while it sends
+  if (TT > tLao - 0.1) glowAt(sx, sy, 120, COL.wave, 0.12 + 0.3 * RM_pulse(TT, 150 / 225));
   // direction: a blue arrow under the wave, router -> phone
   mArrow(300, 590, 420, 590, COL.wave, 5, runS(tLao, 0.6));
   // labels
   vt('tường', F.wx, F.wy1 + 64, 52, runS(tXuyen, 0.7), { col: COL.dev });
-  vt('ăng-ten', ax + 96, ayt + 8, 52, runS(tAng - 0.1, 0.7), { col: COL.dev });
+  vt('ăng-ten', ax + 112, ayt - 6, 52, runS(tAng - 0.1, 0.7), { col: COL.dev });
   vt('≈ 300 000 km/s', 330, 1160, 58, runS(tToc, 0.9));
   if (hit > 0) flashAt(ax, wy, seg(TT, tCham, tCham + 0.45), COL.wave, 34);
   // the hero: follows the wave front, wow; a little hop when it touches
@@ -157,7 +167,7 @@ SCENES.fly = function () {
 // =====================================================================
 const RM_D = { px: 580, py: 810, ps: 1.2, lam: 150, v: 225, L: 225 };
 const RM_GROUPS = ['0110', '1011', '0010', '1101'];
-const RM_AMPS = [46, 26, 38, 30];
+const RM_AMPS = [62, 34, 50, 40];
 function RM_readAmp(u) {   // symbol amplitudes in the wave's frame, blended over 50 px
   const L = RM_D.L, i = Math.floor(u / L), f = u / L - i, a = RM_AMPS[mod(i, 4)], b = RM_AMPS[mod(i + 1, 4)];
   return lerp(a, b, smoothM((f - 0.85) / 0.15));
@@ -170,8 +180,9 @@ SCENES.read = function () {
   const o = { v: D.v, lam: D.lam, amp: RM_readAmp };
   RM_wave(60, ax, wy, TT, o);
   // the electron rides the wave's value right at the antenna (scaled to the rod)
-  const ey = wy - 0.62 * RM_waveVal(ax, TT, o);
-  electron(ax, ey, 22);
+  const ey = wy - 0.5 * RM_waveVal(ax, TT, o);
+  glowAt(ax, ey, 110, COL.elec, 0.45);
+  electron(ax, ey, 24);
   vt('electron', ax + 170, wy + 10, 54, runS(tE - 0.1, 0.8), { col: COL.elec });
   // the decoded bit groups: one per wave shape, written left of the phone, then pointed at the screen
   RM_GROUPS.forEach((b, i) => bitRow(b, 230, 660 + i * 110, 64, runS(tDich + i * 0.5, 0.6), { gap: 38 }));
@@ -210,6 +221,7 @@ SCENES.end = function () {
   });
   const [tx, ty] = RM_TIP();
   RM_arcs(tx, ty, TT, { bits: true, r1: 350, speed: 155 });
+  glowAt(RM_P.x, RM_P.y - 40, 190, COL.wave, 0.08 + 0.3 * RM_pulse(TT - 0.33, 310 / 3 / 155));
   // the spectrum comes back on "sóng vô hình": Wi‑Fi sits far from the narrow visible slit
   RM_spectrum(runS(tSong, 0.9), { dim: seg(TT, tVo + 0.6, tVo + 1.1) });
   RM_spLabels(0, runS(tVo + 0.3, 0.8), runS(tSong + 0.3, 0.8), runS(tVo + 0.7, 0.6));

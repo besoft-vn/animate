@@ -76,9 +76,9 @@ SCENES.bits = function () {
 
 // =====================================================================  wave
 const WV_W = { ax: 130, y: 760, A: 120, x0: 160, x1: 920, lam: 200, f: 0.75 };   // slow motion: 0.75 jiggles per second
-const WV_ramp = (tau) => EZ.io(clamp(tau / 0.5));
+const WV_ramp = (tau) => EZ.io(clamp(tau / 0.35));
 function WV_waveState(t) {
-  const C = WV_C(), tr = C.elec + 0.5, w = TAU * WV_W.f, v = WV_W.lam * WV_W.f;
+  const C = WV_C(), tr = C.elec + 0.3, w = TAU * WV_W.f, v = WV_W.lam * WV_W.f;
   const ey = WV_W.y - WV_W.A * WV_ramp(t - tr) * Math.sin(w * (t - tr)) * (t > tr ? 1 : 0);
   return { tr, w, v, ey };
 }
@@ -104,7 +104,7 @@ SCENES.wave = function () {
   // a faint baseline guide
   segLine(Wv.x0, Wv.y, Wv.x1, Wv.y, COL.guide, 2, runS(C.rung - 0.2, 0.8), 0.7);
   // "quay chậm" note under the router
-  vt('(quay chậm)', 70, 1075, 50, runS(C.elec + 0.55, 0.8), { col: COL.textD, align: 'left' });
+  vt('(quay chậm)', 70, 1075, 50, runS(C.elec + 0.8, 0.8), { col: COL.textD, align: 'left' });
   // readouts on "hai tỷ…"
   writeText([{ s: 'f', c: COL.wave, it: true }, { s: ' = ', c: COL.text }, { s: '2,4 GHz', c: COL.wave }], 90, 445, 70, runS(C.rung, 0.8), { align: 'left' });
   writeText([{ s: '= ', c: COL.text }, { s: '2 400 000 000', c: COL.wave }, { s: ' lần / giây', c: COL.text }], 120, 528, 54, runS(C.hai + 0.35, 1.1), { align: 'left', lag: 1.0 });
