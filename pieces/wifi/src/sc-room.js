@@ -193,7 +193,7 @@ SCENES.read = function () {
   // the hero: happy, looks at the screen; two little hops on "số một!" (back home well before 49.5)
   const h = seg(TT, tMot + 0.1, tMot + 0.6), h2 = seg(TT, tMot + 0.75, tMot + 1.25);
   heroAt(...HOME, { look: [D.px, 760], mood: 'happy', hop: TT < EE('read') - 0.6 ? Math.max(h < 1 ? h : 0, h2 < 1 ? h2 : 0) : 0 });
-  viTag('8', TITLES.read);
+  viTagNow('8', TITLES.read);
 };
 const RM_bandT = (i) => VW('read', 'dịch') + i * 0.5 + 0.35;
 function RM_screen(l, t, w, h) {

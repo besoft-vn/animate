@@ -134,8 +134,8 @@ SCENES.ofdm = function () {
   // the brace + label
   const bp = runS(w.song - 0.05, 0.6);
   mBrace(712, 450, 712, 1040, { side: 1, h: 26, p: bp, c: MC.white, w: 3.5 });
-  vt('hơn 200', 838, 730, 58, runS(w.song + 0.2, 0.8));
-  vt('sóng con', 838, 800, 58, runS(w.song + 0.4, 0.8));
+  vt('hơn 200', 820, 730, 54, runS(w.song + 0.2, 0.8));
+  vt('sóng con', 820, 800, 54, runS(w.song + 0.4, 0.8));
   vt([{ s: 'Wi-Fi 6: ', c: COL.textD }, { s: '234', c: COL.text }, { s: ' / kênh 20 MHz', c: COL.textD }], 400, 1150, 50, runS(w.chay - 0.1, 0.9));
   const mood = t < w.cung ? 'calm' : t < w.o1 - 0.6 ? 'happy' : 'calm';
   CD_hero({ look: [440, 700 + 200 * Math.sin(t * 1.3)], mood });

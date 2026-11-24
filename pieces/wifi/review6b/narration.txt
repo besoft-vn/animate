@@ -1,0 +1,10 @@
+0.7–6.9s: Wi-Fi cùng một họ với ánh sáng, chỉ là loại sóng mà mắt ta không nhìn thấy.
+7.2–13.1s: Bức ảnh bạn gửi trước hết được biến thành một dãy số không và số một.
+13.5–19.5s: Router làm electron trong ăng-ten rung hai tỷ bốn trăm triệu lần mỗi giây, tỏa ra sóng.
+19.9–25.5s: Nó khẽ đổi độ cao và độ lệch của sóng; mỗi kiểu sóng là một nhóm bit.
+25.8–30.2s: Wi-Fi sáu có một nghìn không trăm hai mươi bốn kiểu, mỗi kiểu chở mười bit.
+30.5–35.4s: Hơn hai trăm sóng con như thế chạy song song, cùng lúc chở rất nhiều bit.
+35.7–41.0s: Sóng lao đi với tốc độ ánh sáng, xuyên qua tường, chạm vào ăng-ten điện thoại...
+42.4–49.6s: Electron trong đó rung theo, và điện thoại dịch ngược ra số không, số một!
+50.1–55.6s: Mỗi gói đến nơi, điện thoại báo lại đã nhận; gói nào hỏng, router gửi lại.
+55.9–62.4s: Vậy đấy: bức ảnh của bạn vừa bay qua căn phòng, trên một làn sóng vô hình.

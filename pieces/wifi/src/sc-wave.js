@@ -67,7 +67,7 @@ SCENES.bits = function () {
   }
   // the finished string is read out in order: a thin yellow frame steps along the 16 digits
   const ts = WV_flyT(15) + 1.0, sk = Math.floor(seg(t, ts, EE('bits') - 0.35) * 16 - 1e-6);
-  if (t > ts && t < EE('bits') - 0.35) { const r = Math.floor(sk / 8), c = sk % 8; WV_rect(WV_digX(c), WV_DIG.y[r] - WV_DIG.size * 0.32, 54, 84, COL.bit, 3, 0.75 * clamp((t - ts) / 0.2) * clamp((EE('bits') - 0.35 - t) / 0.2), 0.12); }
+  if (t > ts && t < EE('bits') - 0.35) { const r = Math.floor(sk / 8), c = sk % 8, ka = clamp((t - ts) / 0.2) * clamp((EE('bits') - 0.35 - t) / 0.2); WV_rect(WV_digX(c), WV_DIG.y[r] - WV_DIG.size * 0.32, 54, 84, COL.bit, 3, 0.85 * ka, 0.35); WV_rect(l + cw * (c + 0.5), tp + ch * (r + 0.5), cw - 8, ch - 8, COL.bit, 4, 0.9 * ka, 0.3); }
   if (t > WV_flyT(15) + 0.6) lookAt = [WV_PH.x, 990];
   const mood = t > C.bien + 0.4 && t < C.mot + 0.9 ? 'wow' : t > C.mot + 0.9 ? 'happy' : 'calm';
   WV_hero('bits', lookAt, mood, thereBack(seg(t, C.mot + 0.6, C.mot + 1.1)));
