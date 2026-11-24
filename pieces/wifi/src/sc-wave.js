@@ -9,7 +9,7 @@
 //                     wave at the antenna always equals the electron's offset · "hai tỷ…": f = 2,4 GHz and
 //                     = 2 400 000 000 lần / giây · brace "λ ≈ 12,5 cm" · "tỏa ra sóng": a blue arrow to the right.
 //   mod  (19.75–25.75) a drifting carrier split into 4 parts by faint dividers · "độ cao": part 2 gets lower
-//                     (red envelope + red brace "độ cao") · "độ lệch": part 3 slides (grey ghost, green arrow, green
+//                     (red envelope + red double arrow "độ cao") · "độ lệch": part 3 slides (grey ghost, green arrow, green
 //                     brace "độ lệch") · part 4 does both · the bit groups 00 01 11 10 under the parts (one SHAPE =
 //                     one GROUP; never "big = 1") · "nhóm bit": a yellow box closes round each group.
 // =====================================================================
@@ -104,7 +104,7 @@ SCENES.wave = function () {
   // a faint baseline guide
   segLine(Wv.x0, Wv.y, Wv.x1, Wv.y, COL.guide, 2, runS(C.rung - 0.2, 0.8), 0.7);
   // "quay chậm" note under the router
-  vt('(quay chậm)', 70, 1075, 50, runS(C.elec + 0.8, 0.8), { col: COL.textD, align: 'left' });
+  vt('(quay chậm)', 70, 1075, 54, runS(C.elec + 0.8, 0.8), { col: COL.textD, align: 'left' });
   // readouts on "hai tỷ…"
   writeText([{ s: 'f', c: COL.wave, it: true }, { s: ' = ', c: COL.text }, { s: '2,4 GHz', c: COL.wave }], 90, 445, 70, runS(C.rung, 0.8), { align: 'left' });
   writeText([{ s: '= ', c: COL.text }, { s: '2 400 000 000', c: COL.wave }, { s: ' lần / giây', c: COL.text }], 120, 528, 54, runS(C.hai + 0.35, 1.1), { align: 'left', lag: 1.0 });
@@ -124,7 +124,7 @@ SCENES.wave = function () {
 };
 
 // =====================================================================  mod
-const WV_M = { y: 720, xs: [100, 300, 500, 700, 900], lam: 160, hi: 90, lo: 45, ph: -0.75 * Math.PI, sp: 25 };
+const WV_M = { y: 720, xs: [100, 300, 500, 700, 900], lam: 160, hi: 90, lo: 50, ph: -0.75 * Math.PI, sp: 25 };
 const WV_GROUPS = ['00', '01', '11', '10'];
 function WV_modState(t) {
   const C = WV_C(), M = WV_M;
@@ -162,8 +162,16 @@ SCENES.mod = function () {
     segLine(M.xs[1] + 12, M.y + a, M.xs[2] - 12, M.y + a, COL.amp, 3, rA, 0.9);
     ctx.restore();
   }
-  mBrace(M.xs[1] + 14, 606, M.xs[2] - 14, 606, { c: COL.amp, p: runS(C.cao + 0.2, 0.6), h: 22, w: 4 });
-  vt('độ cao', 400, 560, 54, runS(C.cao + 0.3, 0.8), { col: COL.amp });
+  // a vertical red double arrow: baseline -> crest level of the lowered part (its height), label beside it
+  const vp = runS(C.cao + 0.2, 0.5);
+  if (vp > 0) {
+    const ax = M.xs[1] + 18, a = S.segs[1].amp, yt = M.y - a, ym = M.y - a / 2, h = (a / 2) * vp;
+    segLine(ax, ym - h + 6, ax, ym + h - 6, COL.amp, 4);
+    ctx.save(); ctx.fillStyle = COL.amp; ctx.globalAlpha = vp;
+    for (const [yy, d] of [[ym - h, -1], [ym + h, 1]]) { ctx.beginPath(); ctx.moveTo(ax, yy); ctx.lineTo(ax - 9, yy - d * 14); ctx.lineTo(ax + 9, yy - d * 14); ctx.closePath(); ctx.fill(); }
+    ctx.restore();
+  }
+  vt('độ cao', M.xs[1] + 92, 618, 54, runS(C.cao + 0.3, 0.8), { col: COL.amp });
   // "độ lệch" (green): an arrow from the ghost's trough to the slid trough, brace + label
   const xg = M.xs[2] + 12 + mod(S.drift + 0.75 * M.lam - (M.xs[2] + 12), M.lam), shift = -M.ph / TAU * M.lam;    // ghost trough, slide (px)
   const arA = runS(C.lech + 0.3, 0.5) * clamp((xg - (M.xs[2] + 12)) / 12) * clamp((M.xs[3] - 12 - (xg + shift)) / 12);
@@ -173,7 +181,7 @@ SCENES.mod = function () {
     mArrow(xg, M.y + M.hi + 22, xg + shift, M.y + M.hi + 22, COL.phase, 4, runS(C.lech + 0.35, 0.4), arA);
   }
   mBrace(M.xs[2] + 14, 606, M.xs[3] - 14, 606, { c: COL.phase, p: runS(C.lech + 0.15, 0.6), h: 22, w: 4 });
-  vt('độ lệch', 600, 560, 54, runS(C.lech + 0.25, 0.8), { col: COL.phase });
+  vt('độ lệch', 612, 552, 54, runS(C.lech + 0.25, 0.8), { col: COL.phase });
   // one shape = one bit GROUP, under each part; on "nhóm bit" a yellow box closes round each group
   for (let i = 0; i < 4; i++) {
     const cx = (M.xs[i] + M.xs[i + 1]) / 2, tw = C.song + 0.35 + i * 0.2;

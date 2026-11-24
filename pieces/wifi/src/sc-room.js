@@ -36,10 +36,11 @@ function RM_spectrum(p, o = {}) {
   segLine(S.wifi, S.y + S.h, S.wifi, S.y + S.h + 22, COL.wave, 5, seg(p, 0.6, 0.8));
 }
 // the labels of the strip (each with its own Write progress)
-function RM_spLabels(pRadio, pEye, pWifi, box = 0) {
+function RM_spLabels(pRadio, pEye, pWifi, box = 0, o = {}) {
   const S = RM_SP;
   if (pRadio > 0) vt('sóng vô tuyến', (S.x0 + S.radio) / 2, S.y - 26, 52, pRadio, { col: COL.wave });
   if (pEye > 0) vt('mắt thấy', (S.v0 + S.v1) / 2 - 4, S.y + S.h + 76, 52, pEye);
+  if (o.freq > 0) { vt('tần số', 565, S.y - 26, 50, o.freq, { col: COL.textD }); mArrow(645, S.y - 42, 715, S.y - 42, COL.textD, 4, seg(o.freq, 0.5, 1)); }
   if (pWifi > 0) vt('Wi‑Fi', S.wifi - 40, S.y + S.h + 76, 52, pWifi, { col: COL.wave });
   if (box > 0) {   // the narrow slit, boxed: "only this sliver is visible"
     const pad = 10, P = [[S.v0 - pad, S.y - pad], [S.v1 + pad, S.y - pad], [S.v1 + pad, S.y + S.h + pad], [S.v0 - pad, S.y + S.h + pad]];
@@ -115,7 +116,7 @@ SCENES.hook = function () {
   // the spectrum strip on "ánh sáng"
   const sp = runS(tAnh, 1.0), dim = seg(TT, tKhong, tKhong + 0.5);
   RM_spectrum(sp, { dim });
-  RM_spLabels(runS(tAnh + 0.7, 0.9), runS(tChi, 0.9), 0, runS(tKhong, 0.6));
+  RM_spLabels(runS(tAnh + 0.7, 0.9), runS(tChi, 0.9), 0, runS(tKhong, 0.6), { freq: runS(tChi + 0.6, 0.8) });
   // the hero: looks at the arcs, then at the strip, then at the slit; wow from "ánh sáng"
   const look = TT < tAnh ? [ph.l, RM_P.y - 80] : TT < tKhong ? [RM_SP.wifi, RM_SP.y] : [(RM_SP.v0 + RM_SP.v1) / 2, RM_SP.y];
   heroAt(...HOME, { look, mood: TT > tAnh + 0.2 && TT < EE('hook') - 0.5 ? 'wow' : 'calm' });
@@ -184,21 +185,26 @@ SCENES.read = function () {
   glowAt(ax, ey, 110, COL.elec, 0.45);
   electron(ax, ey, 24);
   vt('electron', ax + 170, wy + 10, 54, runS(tE - 0.1, 0.8), { col: COL.elec });
-  // the decoded bit groups: one per wave shape, written left of the phone, then pointed at the screen
-  RM_GROUPS.forEach((b, i) => bitRow(b, 230, 660 + i * 110, 64, runS(tDich + i * 0.5, 0.6), { gap: 38 }));
-  mArrow(340, 800, 410, 800, COL.devD, 5, runS(tDich + 0.2, 0.5));
+  // the decoded bit groups: one per wave shape, each is born at the antenna's foot (inside the phone, under the
+  // electron) and flows DOWN-right into its slot at the top of the screen; the photo band below builds as it lands
+  RM_GROUPS.forEach((b, i) => {
+    const t0 = tDich + i * 0.5, u = EZ.io(seg(TT, t0 + 0.1, t0 + 0.55));
+    const [sx, sy] = RM_SLOT(i), x = lerp(ax + 46, sx, u), y = lerp(ayb + 82, sy, u);
+    bitRow(b, x, y, 50, runS(t0, 0.45), { gap: 30 });
+  });
   // done: flash on the photo
   const done = RM_bandT(3) + 0.55;
-  if (TT > done) flashAt(D.px, 740, seg(TT, done, done + 0.5), COL.photo, 60);
+  if (TT > done) flashAt(D.px, 930, seg(TT, done, done + 0.5), COL.photo, 60);
   // the hero: happy, looks at the screen; two little hops on "số một!" (back home well before 49.5)
   const h = seg(TT, tMot + 0.1, tMot + 0.6), h2 = seg(TT, tMot + 0.75, tMot + 1.25);
-  heroAt(...HOME, { look: [D.px, 760], mood: 'happy', hop: TT < EE('read') - 0.6 ? Math.max(h < 1 ? h : 0, h2 < 1 ? h2 : 0) : 0 });
+  heroAt(...HOME, { look: [D.px, 800], mood: 'happy', hop: TT < EE('read') - 0.6 ? Math.max(h < 1 ? h : 0, h2 < 1 ? h2 : 0) : 0 });
   viTagNow('8', TITLES.read);
 };
-const RM_bandT = (i) => VW('read', 'dịch') + i * 0.5 + 0.35;
+const RM_bandT = (i) => VW('read', 'dịch') + i * 0.5 + 0.55;
+const RM_SLOT = (i) => [RM_D.px, 640 + 58 * i];   // a column of 4 rows at the top of the screen
 function RM_screen(l, t, w, h) {
   // the photo builds band by band (4 bands = 4 bit groups); a faint dashed frame waits for it
-  const pw = 220, phh = 170, cx = l + w / 2, cy = t + 160, pl = cx - pw / 2, pt = cy - phh / 2;
+  const pw = 220, phh = 170, cx = l + w / 2, cy = t + 350, pl = cx - pw / 2, pt = cy - phh / 2;
   ctx.save(); ctx.setLineDash([10, 10]); ctx.globalAlpha = 0.5; ctx.strokeStyle = COL.devD; ctx.lineWidth = 3; ctx.strokeRect(pl, pt, pw, phh); ctx.restore();
   let k = 0; for (let i = 0; i < 4; i++) k += 0.25 * smoothM(seg(TT, RM_bandT(i), RM_bandT(i) + 0.4));
   if (k > 0.001) {
@@ -224,7 +230,7 @@ SCENES.end = function () {
   glowAt(RM_P.x, RM_P.y - 40, 190, COL.wave, 0.08 + 0.3 * RM_pulse(TT - 0.33, 310 / 3 / 155));
   // the spectrum comes back on "sóng vô hình": Wi‑Fi sits far from the narrow visible slit
   RM_spectrum(runS(tSong, 0.9), { dim: seg(TT, tVo + 0.6, tVo + 1.1) });
-  RM_spLabels(0, runS(tVo + 0.3, 0.8), runS(tSong + 0.3, 0.8), runS(tVo + 0.7, 0.6));
+  RM_spLabels(0, runS(tVo + 0.3, 0.8), runS(tSong + 0.3, 0.8), runS(tVo + 0.7, 0.6), { freq: runS(tSong + 0.6, 0.8) });
   // the hero: happy; hops on "bay qua căn phòng" (clear of the bridge at 56)
   const h = seg(TT, tBay, tBay + 0.55);
   heroAt(...HOME, { look: TT < tSong ? [ph.l + 40, RM_P.y] : [RM_SP.wifi, RM_SP.y], mood: TT > E + 0.5 ? 'happy' : 'calm', hop: h < 1 ? h : 0 });
