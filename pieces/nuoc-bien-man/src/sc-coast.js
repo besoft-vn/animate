@@ -138,7 +138,7 @@ SCENES.rain = function () {
     });
   }
   // the CO2 bubbles: pop in around, drift into the drop and merge (shrink + fade)
-  const BS = [[540, 470], [560, 680], [890, 610]];
+  const BS = [[540, 470], [560, 680], [860, 610]];
   BS.forEach((p, i) => {
     const t0 = th + 0.05 + i * 0.18; if (TT < t0) return;
     const m = EZ.io(seg(TT, t0 + 0.3, tk + 0.55 + i * 0.1)), sh = seg(m, 0.6, 1);

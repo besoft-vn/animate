@@ -1,0 +1,10 @@
+0.90-5.70s  [hook]  Nước sông ngọt lịm, vậy mà chính sông đã chở muối ra biển.
+6.20-11.80s  [rain]  Mọi chuyện bắt đầu từ mưa: nước mưa hòa chút khí cacbonic nên hơi chua.
+12.30-16.83s  [rock]  Mưa hơi chua gặm mòn đá từng chút, hòa tan các khoáng chất trong đá.
+17.33-21.89s  [river]  Sông suối cuốn chúng ra biển, loãng đến mức ta không nếm thấy.
+22.39-26.38s  [vents]  Dưới đáy biển, núi lửa và miệng phun nóng cũng góp thêm khoáng chất.
+26.88-31.72s  [evap]  Nắng làm nước biển bốc hơi, nhưng muối không bay theo, nó ở lại.
+32.22-37.90s  [time]  Mây lại mưa, sông lại chở muối ra, cứ thế suốt hàng trăm triệu năm.
+39.50-44.36s  [payoff]  Nếu rút hết muối ra rải lên đất liền, nó dày hơn một trăm sáu mươi mét!
+44.96-50.16s  [balance]  Nhưng muối cũng lắng xuống đáy, nên độ mặn giữ quanh ba phẩy năm phần trăm.
+50.66-56.17s  [end]  Lần tới nếm vị mặn của biển, hãy nhớ: một phần trong đó từng là đá núi.

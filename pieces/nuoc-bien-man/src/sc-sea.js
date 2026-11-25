@@ -151,8 +151,8 @@ SCENES.payoff = function () {
     ctx.save(); ctx.translate(315, 885); ctx.scale(hop, hop); label('> 160 m', 0, 28, 82, { key: 's_160' }); ctx.restore();
     gpencil([[485, 885], [600, 885]], { w: 4, key: 's_chipa' });
     gpencil([[600, 885], [580, 873]], { w: 4, key: 's_chipa1' }); gpencil([[600, 885], [580, 897]], { w: 4, key: 's_chipa2' });
-    label('≈ tòa nhà', 800, 498, 56, { key: 's_tn' });
-    label('40 tầng', 800, 566, 56, { key: 's_40', col: SK.graph });
+    label('≈ tòa nhà', 770, 498, 56, { key: 's_tn' });
+    label('40 tầng', 770, 566, 56, { key: 's_40', col: SK.graph });
   });
   // the hero on top of the slab: looks down at the salt, at the building, wow on "dày hơn … mét"; breathing
   const env = seg(TT, E + 0.2, E + 0.6) * (1 - seg(TT, still - 0.5, still));
@@ -211,7 +211,7 @@ SCENES.balance = function () {
     const land = Math.sin(Math.PI * seg(TT, t0 + 1.3, t0 + 1.6));
     saltGrain(xx, yy, 21, { key: 's_sg' + i, rot: lerp(0.3 * Math.sin(TT * 1.5 + i), 0.05 * (i - 1), u) + 0.12 * land });
   });
-  s_label('lắng xuống đáy', 770, 1050, 54, tLang, off, { d: 0.4 });
+  s_label('lắng xuống đáy', 700, 1050, 54, tLang, off, { d: 0.4 });
   if (TT > tLang + 0.3 && TT < off) alphaDo(1 - seg(TT, off - 0.3, off), () => arrowPencil([[600, 1040], [600, 1092]], ev(tLang + 0.4, 0.3), { key: 's_lga', w: 4 }));
   // the gauge card (from "nên"): the needle swings, then holds steady at the middle mark = 3,5 %
   const g = s_GAUGE, gk = EZ.o2(ev(tNen - 0.3, 0.45)), gf = 1 - seg(TT, off - 0.3, off);

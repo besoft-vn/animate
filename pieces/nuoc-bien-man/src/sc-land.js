@@ -112,7 +112,7 @@ SCENES.rock = function () {
   });
   // labels: "phong hóa" (with a graphite arrow to a pit), "khoáng chất" (plum) under the trickle
   const fA = 1 - seg(TT, still - 0.75, still - 0.45);
-  l_lab('phong hóa', 790, 575, 62, tg, still - 0.45, { key: 'l_lph' });
+  l_lab('phong hóa', 730, 575, 62, tg, still - 0.45, { key: 'l_lph' });
   alphaDo(fA * clamp(ev(tg + 0.35, 0.4) * 1.2), () => {
     gline([[800, 600], [770, 660], [712, 745]], { w: 3.5, col: SK.graph, key: 'l_aph', part: EZ.o2(ev(tg + 0.35, 0.4)), second: false, amp: 0.6 });
     const k = ev(tg + 0.7, 0.15);
@@ -270,7 +270,7 @@ SCENES.vents = function () {
     saltGrain(gx, gy, 21, { part: ev(t0, 0.3), key: 'l_vg' + i, rot: rot + 0.1 * Math.sin(TT * 1.7 + i) });
   });
   // labels
-  l_lab('núi lửa', 840, 815, 62, tn, still - 0.45, { key: 'l_lnl' });
+  l_lab('núi lửa', 780, 815, 62, tn, still - 0.45, { key: 'l_lnl' });
   l_lab('miệng phun nóng', 400, 1232, 58, tm, still - 0.45, { key: 'l_lmp', col: COL.hot });
   // the hero: exact just under the surface until e0+0.5, sinks DOWN with a gentle sway, exact at [540,820] from `still`
   const [ax, ay] = BR.riverVents.b, [bx, by] = BR.ventsEvap.a, s0 = e0 + 0.5, s1 = still - 0.55;
