@@ -112,9 +112,9 @@ SCENES.rock = function () {
   });
   // labels: "phong hóa" (with a graphite arrow to a pit), "khoáng chất" (plum) under the trickle
   const fA = 1 - seg(TT, still - 0.75, still - 0.45);
-  l_lab('phong hóa', 730, 575, 62, tg, still - 0.45, { key: 'l_lph' });
+  l_lab('phong hóa', 770, 520, 58, tg, still - 0.45, { key: 'l_lph' });
   alphaDo(fA * clamp(ev(tg + 0.35, 0.4) * 1.2), () => {
-    gline([[800, 600], [770, 660], [712, 745]], { w: 3.5, col: SK.graph, key: 'l_aph', part: EZ.o2(ev(tg + 0.35, 0.4)), second: false, amp: 0.6 });
+    gline([[800, 545], [775, 640], [712, 745]], { w: 3.5, col: SK.graph, key: 'l_aph', part: EZ.o2(ev(tg + 0.35, 0.4)), second: false, amp: 0.6 });
     const k = ev(tg + 0.7, 0.15);
     if (k > 0) for (const s of [-1, 1]) { const an = Math.atan2(85, -58); gline([[712, 745], [712 - Math.cos(an + s * 0.5) * 24 * k, 745 - Math.sin(an + s * 0.5) * 24 * k]], { w: 3.5, col: SK.graph, key: 'l_aph' + s, second: false, amp: 0.4 }); }
   });
@@ -270,7 +270,8 @@ SCENES.vents = function () {
     saltGrain(gx, gy, 21, { part: ev(t0, 0.3), key: 'l_vg' + i, rot: rot + 0.1 * Math.sin(TT * 1.7 + i) });
   });
   // labels
-  l_lab('núi lửa', 780, 815, 62, tn, still - 0.45, { key: 'l_lnl' });
+  l_lab('núi lửa', 560, 965, 60, tn, still - 0.45, { key: 'l_lnl' });   // 6b: beside the cone, with a pointer
+  if (TT > tn + 0.3 && TT < still - 0.45) alphaDo(1 - seg(TT, still - 0.75, still - 0.45), () => arrowPencil([[650, 975], [730, 1000]], ev(tn + 0.3, 0.3), { key: 'l_lnla', w: 4 }));
   l_lab('miệng phun nóng', 400, 1232, 58, tm, still - 0.45, { key: 'l_lmp', col: COL.hot });
   // the hero: exact just under the surface until e0+0.5, sinks DOWN with a gentle sway, exact at [540,820] from `still`
   const [ax, ay] = BR.riverVents.b, [bx, by] = BR.ventsEvap.a, s0 = e0 + 0.5, s1 = still - 0.55;

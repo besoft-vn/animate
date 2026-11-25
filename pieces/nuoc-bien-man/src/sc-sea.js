@@ -28,9 +28,11 @@ function s_ring(x, y, k, key) {
 //  vapour strokes going UP); on "muối" the badge pulls off, falls back into the sea and sinks a little ("muối ở lại").
 //  The hero reaches the rain cloud [770,470] with no badge.
 // ---------------------------------------------------------------------
-const s_EV_P = [BR.ventsEvap.b, [540, 880], [700, 600], BR.evapTime.a];
-const s_EV_T0 = 27.9, s_EV_T1 = 31.45;
-const s_evHero = (t) => s_bz(EZ.io(seg(t, s_EV_T0, s_EV_T1)), ...s_EV_P);
+// 6b fix: first drift OUT into the open sea (away from the river mouth), drop the salt while still IN the water, then rise
+const s_EV_SEA = [680, 1072];
+const s_EV_P = [s_EV_SEA, [690, 860], [760, 620], BR.evapTime.a];
+const s_EV_T0 = 28.55, s_EV_T1 = 31.45;
+const s_evHero = (t) => t < s_EV_T0 ? (() => { const k = EZ.io(seg(t, ET('evap') + 0.5, 27.9)); return [lerp(BR.ventsEvap.b[0], s_EV_SEA[0], k), lerp(BR.ventsEvap.b[1], s_EV_SEA[1], k)]; })() : s_bz(EZ.io(seg(t, s_EV_T0, s_EV_T1)), ...s_EV_P);
 SCENES.evap = function () {
   sketchPage({ grid: 'plain' });
   const E = ET('evap'), tBoc = VW('evap', 'bốc'), tMuoi = VW('evap', 'muối'), tKhong = VW('evap', 'không'), tO = VW('evap', 'ở');
@@ -39,7 +41,7 @@ SCENES.evap = function () {
   coast({ sun: { hot }, cloud: { dark: 0.35 + 0.1 * Math.sin(TT * 1.2) } });
   // sunlight on the sea: two long yellow rays from the sun down to the water near the hero, pulsing
   const ra = 0.75 * (1 - seg(TT, tKhong, tKhong + 0.8));
-  if (ra > 0.01) [[470, 1060], [640, 1060]].forEach(([x, y], i) => {
+  if (ra > 0.01) [[600, 1060], [760, 1060]].forEach(([x, y], i) => {
     const pu = 0.55 + 0.45 * Math.sin(TT * 3 + i * 1.7);
     gline([[SUN.x + 70, SUN.y + 50 + i * 20], [x, y]], { w: 7, col: COL.sunD, a: ra * pu, key: 's_ray' + i, part: ev(E - 0.2, 0.5), second: false, amp: 1 });
   });
@@ -47,7 +49,7 @@ SCENES.evap = function () {
   const va = seg(TT, tBoc - 0.1, tBoc + 0.3) * (1 - seg(TT, 30.6, 31.2));
   if (va > 0.01) for (let i = 0; i < 4; i++) {
     const u = ((TT - tBoc) / 1.7 + i / 4) % 1; if (u < 0) continue;
-    const x = 470 + i * 70, y = 1070 - 380 * u;
+    const x = 590 + i * 60, y = 1070 - 380 * u;
     gline(s_wave(x, y, 120, i * 1.3 + TT * 2), { w: 6, col: i % 2 ? COL.water : COL.sunD, a: va * Math.sin(Math.PI * u), key: 's_vp' + i, second: false, amp: 0.8 });
   }
   // the hero: exact on the sea at the bridge, bobs on the waves, then rises to the cloud
@@ -60,25 +62,25 @@ SCENES.evap = function () {
   const la = 0.5 * Math.sin(Math.PI * seg(TT, tBoc - 0.1, s_EV_T1));
   if (la > 0.01) scribbleFill(loopPts(hx, hy, HR * 1.45, HR * 1.6, 0), COL.waterL, { key: 's_halo', gap: 16, w: 5, base: 0.25, a: la });
   // the badge: tugged on "muối", torn off; falls back into the sea, plops, sinks a little and stays
-  const tD = tMuoi + 0.1;
-  const tug = seg(TT, tMuoi - 0.35, tD) * (TT < tD ? 1 : 0);
+  const tD = 28.15;   // 6b: the salt lets go while the hero is still in the water, before it rises
+  const tug = seg(TT, tD - 0.3, tD) * (TT < tD ? 1 : 0);
   const look = TT < tBoc ? [-0.8, -0.7] : TT < tMuoi - 0.3 ? [0.2, -1] : TT < tO + 0.4 ? [0.4, 1] : [0.3, -0.9];
   const mood = TT < tBoc ? 'happy' : TT < tMuoi - 0.3 ? 'calm' : TT < tO + 0.4 ? 'wow' : 'happy';
   heroGiot(hx + 3 * tug * Math.sin(TT * 40), hy, HR, { key: 'hero', look, mood, salt: TT < tD ? 1 : 0, sx: 1 - st, sy: 1 + st });
   if (TT >= tD) {
     const [bx0, by0] = s_evHero(tD), x0 = bx0 + HR * 0.62, y0 = by0 + 8 * 0 + HR * 0.55;
-    const fall = seg(TT, tD, tD + 0.55), sink = EZ.o2(seg(TT, tD + 0.55, tD + 1.9));
-    const y = fall < 1 ? lerp(y0, SEA_Y + 10, EZ.i2(fall)) : SEA_Y + 10 + 60 * sink + 4 * Math.sin(TT * 2.2) * sink;
+    const fall = seg(TT, tD, tD + 0.55);
+    const y = lerp(y0, SEA_Y + 70, EZ.o2(seg(TT, tD, tD + 1.6))) + 4 * Math.sin(TT * 2.2) * seg(TT, tD + 1.2, tD + 1.8);   // sinks straight down
     const r = lerp(HR * 0.36, 24, EZ.o2(seg(TT, tD, tD + 0.6)));
-    saltGrain(x0, y, r, { key: 's_badge', rot: -0.15 + 0.5 * EZ.o2(fall) + 0.08 * Math.sin(TT * 1.8) * sink });
-    s_ring(x0, SEA_Y + 4, seg(TT, tD + 0.5, tD + 1.4), 's_plop');
+    saltGrain(x0, y, r, { key: 's_badge', rot: -0.15 + 0.5 * EZ.o2(fall) + 0.08 * Math.sin(TT * 1.8) });
+    
     // "muối ở lại": plum label + pencil arrow to the grain (gone 0.5 s before the bridge)
-    s_label('muối ở lại', 790, 1215, 58, tKhong, off, { col: COL.salt, d: 0.35 });
-    if (TT > tKhong + 0.2 && TT < off) alphaDo(1 - seg(TT, off - 0.3, off), () => arrowPencil([[680, 1190], [x0 + 34, SEA_Y + 72]], ev(tKhong + 0.25, 0.3), { key: 's_mar', w: 4 }));
+    s_label('muối ở lại', 430, 1215, 58, tKhong, off, { col: COL.salt, d: 0.35 });
+    if (TT > tKhong + 0.2 && TT < off) alphaDo(1 - seg(TT, off - 0.3, off), () => arrowPencil([[575, 1195], [x0 - 30, SEA_Y + 72]], ev(tKhong + 0.25, 0.3), { key: 's_mar', w: 4 }));
   }
   // "bốc hơi" (left of the vapour) + a small up arrow
-  s_label('bốc hơi', 300, 880, 60, tBoc, off, { d: 0.35 });
-  if (TT > tBoc + 0.2 && TT < off) alphaDo(1 - seg(TT, off - 0.3, off), () => arrowPencil([[300, 820], [300, 700]], ev(tBoc + 0.3, 0.3), { key: 's_bha', w: 4, col: COL.sunD }));
+  s_label('bốc hơi', 430, 900, 60, tBoc, off, { d: 0.35 });
+  if (TT > tBoc + 0.2 && TT < off) alphaDo(1 - seg(TT, off - 0.3, off), () => arrowPencil([[560, 1000], [560, 840]], ev(tBoc + 0.3, 0.3), { key: 's_bha', w: 4, col: COL.sunD }));
   viTag('bốc hơi');
   pageCaption(['Nước bay hơi,', 'muối ở lại'], [[1, 'muối ở lại']], { size: 62, at: 0.3 });
 };
@@ -195,14 +197,19 @@ SCENES.balance = function () {
   gpencil([[470, s_SED + 14], [1040, s_SED + 12]], { w: 3, key: 's_sdl', a: 0.6 });
   gpencil([[452, s_SED], [1060, s_SED]], { w: 4, key: 's_sdo' });
   // IN: the river arrow (top-left) with 2 plum grains riding it into the sea
-  const A0 = [70, 450], A1 = [285, 605];
+  // 6b fix: the input comes from a RIVER MOUTH on the left bank, level at the surface (not from the sky)
+  const BANK = [[-20, s_SY + 4], [-20, s_SY - 70], [90, s_SY - 62], [190, s_SY + 4]];
+  gfill(BANK, SK.wood, { a: 0.9, key: 's_bkf' }); gline([BANK[1], BANK[2], BANK[3]], { w: 5, key: 's_bko' });
+  gline([[-20, s_SY - 34], [80, s_SY - 22], [175, s_SY - 2]], { w: 22, col: COL.water, key: 's_bkr', second: false, amp: 0.4 });
+  gline([[-20, s_SY - 34], [80, s_SY - 22], [175, s_SY - 2]], { w: 13, col: COL.waterL, key: 's_bkr2', second: false, amp: 0.4 });
+  const A0 = [150, s_SY + 55], A1 = [400, s_SY + 55];
   bigArrow(A0[0], A0[1], A1[0], A1[1], { col: COL.waterL, w: 46, head: 76, key: 's_riv', part: lerp(0.85, 1, ev(E - 0.5, 0.5)) });
   const ga = 1 - seg(TT, off - 0.3, off);
   for (let i = 0; i < 2; i++) {
     const u = ((TT - E) * 0.42 + i * 0.5) % 1, k = Math.sin(Math.PI * u) ** 0.4;
     saltGrain(lerp(A0[0] + 25, A1[0] - 50, u), lerp(A0[1] + 18, A1[1] - 36, u), 19, { key: 's_rg' + i, a: ga * k, rot: 0.3 * Math.sin(TT * 2 + i) });
   }
-  s_label('từ sông', 170, 690, 54, E + 0.3, off, { col: COL.water });
+  s_label('từ sông', 270, s_SY + 150, 54, E + 0.3, off, { col: COL.water });
   // OUT: 3 grains hang in the water, then sink to the sediment on "lắng xuống đáy" and stay there
   [[470, 720], [545, 800], [615, 705]].forEach(([x, y], i) => {
     const t0 = tLang - 0.05 + i * 0.22, u = EZ.io(seg(TT, t0, t0 + 1.3));

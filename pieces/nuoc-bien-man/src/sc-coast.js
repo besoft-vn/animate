@@ -207,7 +207,7 @@ SCENES.time = function () {
   // the counter "100… 200… triệu năm" (inside the loop)
   const [a0] = label('100…', 280, 830, 66, { reveal: ev(th, 0.3), key: 'c_c1' });
   label('200…', 450, 830, 66, { reveal: ev(VW('time', 'trăm'), 0.3), key: 'c_c2' });
-  const [b0, b1] = label('triệu năm', 370, 912, 74, { reveal: ev(tt, 0.4), key: 'c_c3' });
+  const [b0, b1] = label('triệu năm', 370, 912, 74, { reveal: ev(th + 0.2, 0.4), key: 'c_c3' });
   underline(b0, b1, 934, { col: SK.red, w: 6, key: 'c_cu', part: ev(tt + 0.4, 0.3) });
   viTag('vòng lặp');
   pageCaption(['Cứ thế lặp lại', 'hàng trăm triệu năm'], [[1, 'triệu năm']], { size: 62, at: 0.25 });
