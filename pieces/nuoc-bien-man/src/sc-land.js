@@ -112,7 +112,7 @@ SCENES.rock = function () {
   });
   // labels: "phong hóa" (with a graphite arrow to a pit), "khoáng chất" (plum) under the trickle
   const fA = 1 - seg(TT, still - 0.75, still - 0.45);
-  l_lab('phong hóa', 770, 520, 58, tg, still - 0.45, { key: 'l_lph' });
+  l_lab('phong hóa', 770, 520, 58, tg + 0.15, still - 0.45, { key: 'l_lph', d: 0.06 });
   alphaDo(fA * clamp(ev(tg + 0.35, 0.4) * 1.2), () => {
     gline([[800, 545], [775, 640], [712, 745]], { w: 3.5, col: SK.graph, key: 'l_aph', part: EZ.o2(ev(tg + 0.35, 0.4)), second: false, amp: 0.6 });
     const k = ev(tg + 0.7, 0.15);

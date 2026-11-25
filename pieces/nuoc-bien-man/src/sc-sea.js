@@ -209,7 +209,7 @@ SCENES.balance = function () {
     const u = ((TT - E) * 0.42 + i * 0.5) % 1, k = Math.sin(Math.PI * u) ** 0.4;
     saltGrain(lerp(A0[0] + 25, A1[0] - 50, u), lerp(A0[1] + 18, A1[1] - 36, u), 19, { key: 's_rg' + i, a: ga * k, rot: 0.3 * Math.sin(TT * 2 + i) });
   }
-  s_label('từ sông', 270, s_SY + 150, 54, E + 0.3, off, { col: COL.water });
+  s_label('từ sông', 155, s_SY - 95, 54, E + 0.3, off, { col: COL.water });
   // OUT: 3 grains hang in the water, then sink to the sediment on "lắng xuống đáy" and stay there
   [[470, 720], [545, 800], [615, 705]].forEach(([x, y], i) => {
     const t0 = tLang - 0.05 + i * 0.22, u = EZ.io(seg(TT, t0, t0 + 1.3));
