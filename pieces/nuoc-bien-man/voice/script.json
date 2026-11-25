@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Nước sông ngọt lịm, vậy mà chính sông đã chở muối ra biển.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "rain",
+   "text": "Mọi chuyện bắt đầu từ mưa: nước mưa hòa chút khí cacbonic nên hơi chua.",
+   "after": 0.5,
+   "file": "rain.mp3"
+  },
+  {
+   "id": "rock",
+   "text": "Mưa hơi chua gặm mòn đá từng chút, hòa tan các khoáng chất trong đá.",
+   "after": 0.5,
+   "file": "rock.mp3"
+  },
+  {
+   "id": "river",
+   "text": "Sông suối cuốn chúng ra biển, loãng đến mức ta không nếm thấy.",
+   "after": 0.5,
+   "file": "river.mp3"
+  },
+  {
+   "id": "vents",
+   "text": "Dưới đáy biển, núi lửa và miệng phun nóng cũng góp thêm khoáng chất.",
+   "after": 0.5,
+   "file": "vents.mp3"
+  },
+  {
+   "id": "evap",
+   "text": "Nắng làm nước biển bốc hơi, nhưng muối không bay theo, nó ở lại.",
+   "after": 0.5,
+   "file": "evap.mp3"
+  },
+  {
+   "id": "time",
+   "text": "Mây lại mưa, sông lại chở muối ra, cứ thế suốt hàng trăm triệu năm.",
+   "after": 1.6,
+   "file": "time.mp3"
+  },
+  {
+   "id": "payoff",
+   "text": "Nếu rút hết muối ra rải lên đất liền, nó dày hơn một trăm sáu mươi mét!",
+   "after": 0.6,
+   "file": "payoff.mp3"
+  },
+  {
+   "id": "balance",
+   "text": "Nhưng muối cũng lắng xuống đáy, nên độ mặn giữ quanh ba phẩy năm phần trăm.",
+   "after": 0.5,
+   "file": "balance.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Lần tới nếm vị mặn của biển, hãy nhớ: một phần trong đó từng là đá núi.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}

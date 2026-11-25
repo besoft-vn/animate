@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vì sao nước biển mặn?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Vì sao nước biển mặn?" — 9:16, sketchbook, voiced (vi), 24fps, 120 BPM.
+//  Format F5 (fixed-hero journey): the hero "Giọt" (terracotta doodle) rides the water cycle: from the beach up into the
+//  rain cloud, falls as a raindrop (+ CO2 -> "hơi chua") on the mountain, nibbles a rock and picks up a SALT badge (plum
+//  grain), rides the river to the sea, sinks to a hot vent, rises as vapour and LEAVES its salt in the sea; the loop
+//  repeats for hundreds of millions of years -> pause -> SLAM: all the sea's salt spread on land = a layer > 160 m.
+//  Then the balance (salt settles to the floor, ~3.5 %) and the same beach at the end, tasting the sea.
+//  KHUNG HÌNH GỌN: one subject per frame, bare paper; ≤ 10 salt grains per frame, each big (r ≥ 18), no dots.
+//  Colour: TERRACOTTA = hero only · BLUE = water · PLUM = SALT / dissolved minerals · GREEN = CO2 / acid only ·
+//  YELLOW = sunlight / evaporation only · RED-ORANGE = volcanic / vent heat only · graphite = rock, arrows, ticks.
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). The payoff era starts on the SLAM: a hard
+//  cut inside the 1.6s pause after "time". Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+// Vietnamese-capable handwriting: Pangolin (installed by channel/setup.sh), then system fallbacks with Vietnamese glyphs
+const HAND = '"Pangolin", "Segoe Print", "Comic Sans MS", "DejaVu Sans", sans-serif';
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'rain', 'rock', 'river', 'vents', 'evap', 'time', 'payoff', 'balance', 'end'];
+const SLAM_ID = 'payoff';
+const SLAM = snap8(VL('time').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- colours (beyond the kit's SK palette)
+const COL = {
+  water: '#3f7fc4', waterL: '#a9cdee',         // WATER (rain, river, sea)
+  salt: '#7b4a8e', saltL: '#d3bddc',           // SALT / dissolved minerals
+  acid: '#4f9d5d', acidL: '#cfe6c8',           // CO2 / "hơi chua" only
+  sun: '#f7d64a', sunD: '#d9b21e',             // sunlight / evaporation only
+  hot: '#e2683c', hotL: '#f6c3a6',             // volcanic / vent heat only
+  rock: '#d9d2c4', rockD: '#a79f92', sand: '#ecc995',
+};
+// ---- THE COAST (props.js draws it): the sea surface at SEA_Y (sea below, full width), the beach on the left
+// (x < BEACH_X1), the mountain on the right (MOUNT), the rain cloud over it, the river SRC_PT -> MOUTH, the sun top-left.
+const SEA_Y = 1080, BEACH_X1 = 390;
+const MOUNT = { peak: [770, 560], pts: [[470, 1084], [560, 900], [640, 760], [720, 615], [770, 560], [830, 600], [920, 715], [1010, 820], [1120, 900]] };
+const RAIN_CLOUD = { x: 770, y: 450 };
+const SUN = { x: 210, y: 540, r: 62 };
+const SRC_PT = [740, 700], MOUTH = [430, 1086];
+const RIVER = [SRC_PT, [690, 775], [722, 850], [640, 918], [560, 975], [482, 1036], MOUTH];
+// ---- the bridges' contract: where the hero (heroGiot radius HR) MUST be at each boundary.
+// Scenes keep it exactly there during [tc - 0.5, tc + 0.5]. Cameras: identity within 0.5s of a boundary.
+const HR = 54;
+const HERO_BEACH = [230, 968];                          // standing on the sand, left of the river mouth (feet ≈ y 1045)
+const PAYOFF_HERO = [380, 540];                         // on top of the 160 m salt layer (payoff), from its first frame
+const BR = {
+  hookRain:     { a: HERO_BEACH,  b: HERO_BEACH },      // on the beach
+  rainRock:     { a: [740, 650],  b: [540, 600] },      // landed at the spring on the mountain -> on top of the close-up boulder
+  rockRiver:    { a: [540, 980],  b: [740, 650] },      // at the boulder's foot in the trickle (salt badge ON) -> at the spring
+  riverVents:   { a: [470, 1080], b: [470, 520] },      // floating at the river mouth -> just under the surface (underwater)
+  ventsEvap:    { a: [540, 820],  b: [560, 1070] },     // mid-water above the vent -> floating on the sea (coast), badge ON
+  evapTime:     { a: [770, 470],  b: [770, 470] },      // back in the rain cloud, NO badge (the salt stayed in the sea)
+  // time -> payoff: SLAM (hard cut, no bridge); payoff is complete on its first frame (hero at PAYOFF_HERO)
+  payoffBalance:{ a: PAYOFF_HERO, b: PAYOFF_HERO },
+  balanceEnd:   { a: HERO_BEACH,  b: HERO_BEACH },      // back on the beach
+};
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};                                               // each scene file registers SCENES.<id> = function () {...}
+const TITLES = {
+  hook: 'sông ngọt chở muối ra biển', rain: 'mưa hơi chua', rock: 'mưa gặm mòn đá', river: 'sông chở khoáng ra biển',
+  vents: 'miệng phun dưới đáy biển', evap: 'nước bay hơi, muối ở lại', time: 'hàng trăm triệu năm',
+  payoff: 'muối phủ đất liền dày 160 m', balance: 'muối lắng xuống, độ mặn 3,5%', end: 'vị mặn từng là đá núi',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1).filter((t) => t !== SLAM),
+  cues: { slam: SLAM, bloom: SLAM },
+  acts: [
+    { name: '1 Mưa, đá',      role: 'build',   t0: 0,            t1: ET('river') },
+    { name: '2 Ra biển',      role: 'journey', t0: ET('river'),  t1: ET('time') },
+    { name: '3 Vòng lặp',     role: 'peak',    t0: ET('time'),   t1: snap8(VL('time').t1) },
+    { name: '4 Lặng',         role: 'silence', t0: snap8(VL('time').t1), t1: SLAM - 0.125 },
+    { name: '5 160 mét!',     role: 'gift',    t0: SLAM,         t1: SLAM + 2.25 },
+    { name: '6 Cân bằng',     role: 'goodbye', t0: SLAM + 2.25,  t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;
