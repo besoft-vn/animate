@@ -255,7 +255,7 @@ SCENES.caliper = function () {
   paint(rrectPts(HY_BX0 + 12, Pb - 34, HY_BW - 24, 34, 6), { fill: COL.pad, key: 'cppad', w: 3.5, tex: [{ k: 'cross', a: 0.8, gap: 6, al: 0.35, c: '#2e2118' }] });
   // the disc's edge just above the pad: the pad is pushed up against it
   paint(rrectPts(462, 538, 360, 40, 8), { fill: COL.steel, key: 'cpdisc', w: 4, tex: [{ k: 'hatch', a: 0.8, gap: 5, al: 0.4 }] });
-  handText('đĩa', 836, 576, 60, C.ink, { key: 'cplbd' });
+  handText('đĩa', 790, 576, 60, C.ink, { key: 'cplbd' });
 
   // ---- "pít-tông to": circle the big piston, width brackets under both bores
   const fTo = ev(tTo - 0.05, 0.6);
