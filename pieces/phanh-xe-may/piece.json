@@ -1,0 +1,13 @@
+{
+  "name": "phanh-xe-may",
+  "title": "Phanh xe máy dừng xe như thế nào?",
+  "series": "Vạn vật vận hành như thế nào",
+  "date": "2026-11-26",
+  "format": { "width": 1080, "height": 1920, "fps": 24, "bpm": 120 },
+  "storyFormat": "F2 chronology (lever -> fluid -> caliper -> pads -> disc heat -> tyre grip), object-morph joined, one slam on the payoff (stopping from 50 km/h = a fall from almost 10 m)",
+  "style": "crosshatch",
+  "scenes": ["src/props.js", "src/sc-street.js", "src/sc-hydro.js", "src/sc-disc.js"],
+  "voice": { "file": "voice/voice.wav", "music": -14 },
+  "captions": { "font": "Pangolin", "size": 62 },
+  "review": { "safe": { "top": 240, "bottom": 420, "right": 140 }, "refs": {}, "wpsMax": 5.0 }
+}

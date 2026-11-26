@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Phanh không xóa tốc độ của xe: nó biến tốc độ thành hơi nóng.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "lever",
+   "text": "Bóp tay phanh, bạn đẩy một pít-tông nhỏ ép vào dầu phanh.",
+   "after": 0.5,
+   "file": "lever.mp3"
+  },
+  {
+   "id": "fluid",
+   "text": "Dầu gần như không nén được, nên lực ép chạy theo ống xuống bánh trước.",
+   "after": 0.5,
+   "file": "fluid.mp3"
+  },
+  {
+   "id": "caliper",
+   "text": "Ở cùm phanh, pít-tông to hơn nhiều, nên lực được nhân lên vài lần.",
+   "after": 0.5,
+   "file": "caliper.mp3"
+  },
+  {
+   "id": "clamp",
+   "text": "Hai má phanh kẹp chặt lấy đĩa phanh đang quay.",
+   "after": 0.5,
+   "file": "clamp.mp3"
+  },
+  {
+   "id": "heat",
+   "text": "Ma sát hãm đĩa lại, động năng của xe biến thành nhiệt, đĩa nóng lên.",
+   "after": 0.5,
+   "file": "heat.mp3"
+  },
+  {
+   "id": "tyre",
+   "text": "Bánh quay chậm dần, và chính lốp bám vào mặt đường mới kéo cả xe dừng lại.",
+   "after": 1.6,
+   "file": "tyre.mp3"
+  },
+  {
+   "id": "payoff",
+   "text": "Dừng xe từ năm mươi cây số giờ tốn năng lượng bằng một cú rơi cao gần mười mét!",
+   "after": 0.6,
+   "file": "payoff.mp3"
+  },
+  {
+   "id": "front",
+   "text": "Khi phanh, sức nặng dồn về trước, nên bánh trước gánh khoảng bảy phần mười lực hãm.",
+   "after": 0.5,
+   "file": "front.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Lần tới dừng đèn đỏ, hãy nhớ: tốc độ của bạn vừa hóa thành hơi ấm trên đĩa phanh.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}
