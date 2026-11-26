@@ -83,7 +83,7 @@ SCENES.hook = function () {
   const aSp = 1 - EZ.io(seg(TT, 2.9, 3.4));
   if (aSp > 0) label('tốc độ', 70, 720, null, null, { size: 58, frac: ev(0.15, 0.5), al: aSp, key: 'hksp' });
   const aH = 1 - ev(4.55, 0.2);
-  if (aH > 0) ST_label('→ nhiệt', 800, 520, FW[0] + 62, FW[1] - DISC_R - 34, { frac: ev(tNo - 0.05, 0.4), al: aH, key: 'hkht', size: 60, right: true });
+  if (aH > 0) ST_label('→ nhiệt', 700, 520, FW[0] + 62, FW[1] - DISC_R - 34, { frac: ev(tNo - 0.05, 0.4), al: aH, key: 'hkht', size: 60, right: true });
   // a small glow ring pulse on the disc on "nóng"
   const g = Math.sin(Math.PI * seg(TT, tHot - 0.1, tHot + 0.5));
   if (g > 0) ink(ellipsePts(FW[0], FW[1], DISC_R + 10 + 8 * g, DISC_R + 10 + 8 * g, 0, 32), { closed: true, w: 6, color: `rgba(217,119,87,${0.6 * g})`, key: 'hkglo' });
@@ -227,6 +227,6 @@ SCENES.end = function () {
   scooter({ heat, pitch: 0.003 * Math.sin(TT * 2.1), key: 'ensc' });
   const g = Math.sin(Math.PI * seg(TT, tHoi - 0.1, tAm + 0.9));
   if (g > 0) ink(ellipsePts(FW[0], FW[1], DISC_R + 10 + 8 * g, DISC_R + 10 + 8 * g, 0, 32), { closed: true, w: 6, color: `rgba(217,119,87,${0.6 * g})`, key: 'englo' });
-  if (TT >= tToc - 0.1) ST_label('tốc độ → hơi ấm', 600, 450, FW[0] + 62, FW[1] - DISC_R - 34, { size: 58, frac: ev(tToc - 0.1, 1.0), key: 'enlb', right: true });
+  if (TT >= tToc - 0.1) ST_label('tốc độ → hơi ấm', 470, 440, FW[0] + 62, FW[1] - DISC_R - 34, { size: 58, frac: ev(tToc - 0.1, 1.0), key: 'enlb', right: true });
   inkTag('đèn đỏ');
 };
