@@ -242,9 +242,7 @@ SCENES.payoff = function () {
   ink([[DS_GFX + 24, DS_ROOF + 4], [fx - 6, DS_ROOF + 36], [fx, DS_ROOF + 90], [fx, fy1 - 20]], { w: 5 + 1.5 * Math.sin(u * 4), key: 'dsfall', raw: true });
   ctx.restore();
   ink([[fx - 20, fy1 - 34], [fx, fy1], [fx + 20, fy1 - 34]], { w: 5, key: 'dsfallh', amt: 0.6 });
-  // the ghost on the roof edge (faint) + a fainter ghost falling in a loop along the path (fades out before the end)
-  const per = 1.7, ph = mod(u, per) / per, loopA = 1 - seg(TT, tMuoi - 0.4, tMuoi);
-  DS_ghost(EZ.i2(ph) * (DS_GND - DS_ROOF), 0.2 * Math.sin(Math.PI * ph) * loopA, 40);
+  // the scooter on the roof edge, right above the dashed fall path
   DS_ghost(0, 1);
   // the "gần 10 m" card on the façade (written already on frame 1)
   const mlab = 'gần 10 m', mw = handW(mlab, 56) + 30;
