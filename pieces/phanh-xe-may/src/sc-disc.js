@@ -10,7 +10,7 @@
 //           Ends with the front wheel exactly at [820,1100,70] (scale 70/92).
 // =====================================================================
 const DS_X = 540, DS_Y = 860, DS_R = 300;
-const DS_CA = -Math.PI / 4;                                        // the caliper's angle on the disc (upper right)
+const DS_CA = -2.25;                                               // the caliper's angle on the disc (upper LEFT, behind the fork, as in scooter())
 
 // ---- the disc's turning speed (rad/s): steady in clamp, slows on "hãm" in heat but keeps turning clockwise
 function DS_omega(t) {
@@ -62,7 +62,7 @@ function DS_caliper(heat = 0, press = 0) {
 }
 
 // ---- the inset: a cross-section of the disc's edge, the pads closing from both sides (gap 1 open -> 0 clamped)
-const DS_IN = { x: 60, y: 418, w: 390, h: 245 };
+const DS_IN = { x: 548, y: 418, w: 390, h: 245 };
 function DS_inset(gap, arrowF, heat = 0) {
   const { x, y, w, h } = DS_IN, mx = x + w / 2;
   paint(rrectPts(x + 8, y + 10, w, h, 16), { fill: 'rgba(58,36,23,0.25)', line: false, key: 'dsinsh', tex: [{ k: 'hatch', a: 0.8, gap: 4, al: 0.5 }] });
@@ -96,8 +96,8 @@ function DS_magLines(cal, al = 1) {
   ctx.save(); ctx.setLineDash([14, 12]);
   const { x, y, w, h } = DS_IN;
   const P = xform([[-95, -66], [95, 66]], cal.cx, cal.cy, cal.rot);
-  ink([[x + w, y + 30], [cal.cx - 40, cal.cy - 70]], { w: 2.4, color: 'rgba(58,36,23,0.6)', key: 'dsmg1', alpha: al, amt: 0.8 });
-  ink([[x + w, y + h - 20], [cal.cx - 80, cal.cy + 10]], { w: 2.4, color: 'rgba(58,36,23,0.6)', key: 'dsmg2', alpha: al, amt: 0.8 });
+  ink([[x, y + 30], [cal.cx + 30, cal.cy - 72]], { w: 2.4, color: 'rgba(58,36,23,0.6)', key: 'dsmg1', alpha: al, amt: 0.8 });
+  ink([[x, y + h - 20], [cal.cx + 74, cal.cy + 6]], { w: 2.4, color: 'rgba(58,36,23,0.6)', key: 'dsmg2', alpha: al, amt: 0.8 });
   ctx.restore();
 }
 function DS_shadow() {
@@ -118,7 +118,7 @@ SCENES.clamp = function () {
   // motion marks: two curved clockwise arrows (ink) riding just outside the disc, lower left
   const inA = ev(ET('clamp') + 0.55, 0.4);
   for (let i = 0; i < 2; i++) {
-    const a0 = Math.PI * (0.62 + i * 0.32) + mod(ang * 0.15, 0.25), a1 = a0 + 0.42;
+    const a0 = Math.PI * (-0.05 + i * 0.5) + mod(ang * 0.15, 0.25), a1 = a0 + 0.42;
     const P = arcPts(DS_X, DS_Y, DS_R + 40, a0, a1, 14), tip = P[P.length - 1], tg = a1 + Math.PI / 2;
     ink(P, { w: 5, key: 'dsrot' + i, alpha: inA, amt: 1 });
     ink([[tip[0] - Math.cos(tg - 0.5) * 22, tip[1] - Math.sin(tg - 0.5) * 22], tip, [tip[0] - Math.cos(tg + 0.5) * 22, tip[1] - Math.sin(tg + 0.5) * 22]], { w: 5, key: 'dsroth' + i, alpha: inA, amt: 0.6 });
@@ -127,12 +127,12 @@ SCENES.clamp = function () {
   const inS = EZ.o3(seg(TT, ET('clamp') + 0.55, ET('clamp') + 0.95));
   if (inS > 0.01) {
     DS_magLines(cal, inS);
-    ctx.save(); ctx.translate(DS_IN.x + DS_IN.w, DS_IN.y + DS_IN.h); ctx.scale(inS, inS); ctx.translate(-(DS_IN.x + DS_IN.w), -(DS_IN.y + DS_IN.h));
+    ctx.save(); ctx.translate(DS_IN.x, DS_IN.y + DS_IN.h); ctx.scale(inS, inS); ctx.translate(-DS_IN.x, -(DS_IN.y + DS_IN.h));
     DS_inset(1 - close, EZ.o2(seg(TT, tKep - 0.05, tKep + 0.35)));
     ctx.restore();
   }
-  DS_label('má phanh', 480, 512, 396, 532, { frac: ev(Math.max(tMa, ET('clamp') + 0.8), 0.5), lx: 476, ly: 500, key: 'dslma' });
-  DS_label('đĩa phanh', 610, 1238, 700, 1120, { frac: ev(tDia - 0.05, 0.5), lx: 690, ly: 1190, key: 'dsldia' });
+  DS_label('má phanh', 70, 500, cal.cx - 6, cal.cy - 40, { size: 66, frac: ev(Math.max(tMa, ET('clamp') + 0.8), 0.5), lx: 200, ly: 514, key: 'dslma' });
+  DS_label('đĩa phanh', 600, 1238, 700, 1120, { size: 66, frac: ev(Math.min(tDia - 0.05, 21.0), 0.5), lx: 700, ly: 1180, key: 'dsldia' });
   inkTag('má phanh kẹp đĩa');
 };
 
@@ -162,7 +162,7 @@ SCENES.heat = function () {
   // the clockwise motion marks, shortening as the disc slows
   const sp = DS_omega(TT) / 3;
   for (let i = 0; i < 2; i++) {
-    const a0 = Math.PI * (0.62 + i * 0.32) + mod(ang * 0.15, 0.25), a1 = a0 + 0.12 + 0.3 * sp;
+    const a0 = Math.PI * (-0.05 + i * 0.5) + mod(ang * 0.15, 0.25), a1 = a0 + 0.12 + 0.3 * sp;
     const P = arcPts(DS_X, DS_Y, DS_R + 40, a0, a1, 14), tip = P[P.length - 1], tg = a1 + Math.PI / 2;
     ink(P, { w: 5, key: 'dsrot' + i, amt: 1 });
     ink([[tip[0] - Math.cos(tg - 0.5) * 22, tip[1] - Math.sin(tg - 0.5) * 22], tip, [tip[0] - Math.cos(tg + 0.5) * 22, tip[1] - Math.sin(tg + 0.5) * 22]], { w: 5, key: 'dsroth' + i, amt: 0.6 });
@@ -172,23 +172,23 @@ SCENES.heat = function () {
   if (inA > 0.01) DS_fadeW(inA, () => { DS_magLines(cal); DS_inset(0, 1); });
   // heat wisps rising from the pad zone (above the caliper)
   const hw = heat * (0.8 + 0.2 * Math.sin(TT * 2.4));
-  if (hw > 0.05) heatWisps(cal.cx + 28, cal.cy - 92, { n: 3, amt: hw, spread: 46, key: 'dshw', w: 7 });
+  if (hw > 0.05) heatWisps(cal.cx - 30, cal.cy - 92, { n: 3, amt: hw, spread: 46, key: 'dshw', w: 7 });
   // labels
   const lab = 'động năng → nhiệt';
   const fr = 0.6 * EZ.o2(seg(TT, tDong, tDong + 0.6)) + 0.4 * EZ.o2(seg(TT, tBien, tNhiet + 0.2));
-  DS_label(lab, 70, 500, null, null, { size: 60, frac: fr, key: 'dsldn' });
-  DS_label('đĩa phanh', 610, 1238, 700, 1120, { lx: 690, ly: 1190, key: 'dsldia', al: 1 - ev(tDong - 0.4, 0.4) });
+  DS_label(lab, 425, 506, null, null, { size: 60, frac: fr, key: 'dsldn' });
+  DS_label('đĩa phanh', 600, 1238, 700, 1120, { size: 66, lx: 700, ly: 1180, key: 'dsldia', al: 1 - ev(tDong - 0.4, 0.4) });
   // the thermometer: appears on "nhiệt", rises on "đĩa nóng lên" (no number)
   const thA = ev(tNhiet - 0.1, 0.35);
-  if (thA > 0) DS_thermo(895, 1080, 0.12 + 0.2 * heat + 0.6 * EZ.io(seg(TT, tDia, tNong + 0.6)), thA);
+  if (thA > 0) DS_thermo(150, 1100, 0.12 + 0.2 * heat + 0.6 * EZ.io(seg(TT, tDia, tNong + 0.6)), thA);
   inkTag('ma sát → nhiệt');
 };
 
 // =====================================================================
 //  8 PAYOFF — "Dừng xe từ năm mươi cây số giờ tốn năng lượng bằng một cú rơi cao gần mười mét!"   (SLAM: complete on frame 1)
 // =====================================================================
-const DS_GND = 1170, DS_BX0 = 150, DS_BX1 = 360, DS_ROOF = 490;
-const DS_GS = 0.2;                                                  // the ghost scooter's scale
+const DS_GND = 1170, DS_BX0 = 130, DS_BX1 = 330, DS_ROOF = 640;
+const DS_GS = 0.24, DS_GFX = 318;                                   // the rooftop scooter's scale + its front-wheel x (at the roof edge)
 function DS_building(pulse) {
   // shadow + facade (graphite hatch), 3 storeys, 2 windows each, a door
   paint(box(DS_BX0 + 14, DS_ROOF + 14, DS_BX1 - DS_BX0, DS_GND - DS_ROOF - 14), { fill: 'rgba(58,36,23,0.22)', line: false, key: 'dsbsh', tex: [{ k: 'hatch', a: 0.8, gap: 4, al: 0.4 }] });
@@ -205,15 +205,15 @@ function DS_building(pulse) {
   }
   paint(box(DS_BX1 - 80, DS_GND - 120, 52, 120), { fill: '#b98e62', key: 'dsdoor', w: 3, tex: [{ k: 'hatch', a: 0.8, gap: 5, al: 0.4 }] });
   // the measuring bracket on the left: roof -> ground, end ticks, arrowheads; pulses gently
-  const bx = 105, wv = 3.5 + 1.5 * pulse;
+  const bx = 88, wv = 3.5 + 1.5 * pulse;
   ink([[bx, DS_ROOF + 6], [bx, DS_GND - 6]], { w: wv, key: 'dsbrk' });
   for (const yy of [DS_ROOF, DS_GND]) ink([[bx - 22, yy], [bx + 22, yy]], { w: wv, key: 'dsbrt' + yy });
   for (const [yy, s] of [[DS_ROOF + 4, 1], [DS_GND - 4, -1]]) ink([[bx - 14, yy + s * 24], [bx, yy], [bx + 14, yy + s * 24]], { w: wv, key: 'dsbrh' + yy, amt: 0.6 });
 }
-function DS_ghost(dy, al) {
+function DS_ghost(dy, al, dx = 0) {
   DS_fadeW(al, () => {
-    ctx.save(); ctx.translate(350 - FW[0] * DS_GS, DS_ROOF - GROUND_Y * DS_GS + dy); ctx.scale(DS_GS, DS_GS);
-    scooter({ rider: false, key: 'dsgh' });
+    ctx.save(); ctx.translate(DS_GFX + dx - FW[0] * DS_GS, DS_ROOF - GROUND_Y * DS_GS + dy); ctx.scale(DS_GS, DS_GS);
+    scooter({ key: 'dsgh' });
     ctx.restore();
   });
 }
@@ -237,20 +237,20 @@ SCENES.payoff = function () {
   const pulse = Math.max(0.5 + 0.5 * Math.sin(u * 3), EZ.o2(1 - seg(TT, tRoi, tRoi + 0.8)) * (TT > tRoi ? 1 : 0));
   DS_building(pulse);
   // the dashed fall path (ink: a path, not a force), beside the building, pulsing with a running dash
-  const fx = 418, fy0 = DS_ROOF + 20, fy1 = DS_GND - 14;
+  const fx = 366, fy1 = DS_GND - 14;
   ctx.save(); ctx.setLineDash([22, 16]); ctx.lineDashOffset = -u * 60;
-  ink([[fx, fy0], [fx, fy1 - 20]], { w: 5 + 1.5 * Math.sin(u * 4), key: 'dsfall', raw: true });
+  ink([[DS_GFX + 24, DS_ROOF + 4], [fx - 6, DS_ROOF + 36], [fx, DS_ROOF + 90], [fx, fy1 - 20]], { w: 5 + 1.5 * Math.sin(u * 4), key: 'dsfall', raw: true });
   ctx.restore();
   ink([[fx - 20, fy1 - 34], [fx, fy1], [fx + 20, fy1 - 34]], { w: 5, key: 'dsfallh', amt: 0.6 });
   // the ghost on the roof edge (faint) + a fainter ghost falling in a loop along the path (fades out before the end)
-  DS_ghost(0, 0.42);
   const per = 1.7, ph = mod(u, per) / per, loopA = 1 - seg(TT, tMuoi - 0.4, tMuoi);
-  DS_ghost(EZ.i2(ph) * (DS_GND - DS_ROOF), 0.22 * Math.sin(Math.PI * ph) * loopA);
+  DS_ghost(EZ.i2(ph) * (DS_GND - DS_ROOF), 0.2 * Math.sin(Math.PI * ph) * loopA, 40);
+  DS_ghost(0, 1);
   // the "gần 10 m" card on the façade (written already on frame 1)
   const mlab = 'gần 10 m', mw = handW(mlab, 56) + 30;
-  paint(rrectPts(255 - mw / 2, 790, mw, 84, 12), { fill: '#fbf5e6', key: 'dsmc', w: 3.5, tex: [{ k: 'pencil', c: '#e8d6b0', al: 0.45, per: 90 }] });
-  handText(mlab, 255 - mw / 2 + 15, 850, 56, C.ink, { key: 'dsmt' });
-  ink([[105, 832], [255 - mw / 2, 832]], { w: 2.6, key: 'dsml', color: 'rgba(58,36,23,0.7)' });
+  paint(rrectPts(230 - mw / 2, 790, mw, 84, 12), { fill: '#fbf5e6', key: 'dsmc', w: 3.5, tex: [{ k: 'pencil', c: '#e8d6b0', al: 0.45, per: 90 }] });
+  handText(mlab, 230 - mw / 2 + 15, 850, 56, C.ink, { key: 'dsmt' });
+  ink([[88, 832], [230 - mw / 2, 832]], { w: 2.6, key: 'dsml', color: 'rgba(58,36,23,0.7)' });
   // the big "=" with a soft glow (swells on "bằng")
   const tBang = VW('payoff', 'bằng'), gl = 0.35 + 0.25 * Math.sin(u * 2.5) + 0.4 * Math.sin(Math.PI * seg(TT, tBang - 0.1, tBang + 0.9));
   const ex = 528, ey = 610;
