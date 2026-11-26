@@ -229,7 +229,7 @@ SCENES.caliper = function () {
   const tPit = VW('caliper', 'pít-tông'), tTo = VW('caliper', 'to'), tNen = VW('caliper', 'nên'), tLuc = VW('caliper', 'lực'), tNhan = VW('caliper', 'nhân');
   // the push: small piston 90 px DOWN, big piston 90 * 60/200 = 27 px UP (same volume)
   const k = EZ.io(seg(TT, tNen, tNen + 0.9)) * 0.85 + 0.15 * EZ.io(seg(TT, tNhan - 0.05, tNhan + 0.4));
-  const Ps = 660 + 90 * k, Pb = 690 - 90 * k * HY_SW / HY_BW;
+  const Ps = 660 + 90 * k, Pb = 659 - 90 * k * HY_SW / HY_BW;   // pad top: 625 -> 598 = the disc's underside
   const prs = clamp(k * 1.6);
 
   // ---- the steel block with the two bores and the channel (cut-away)
@@ -254,8 +254,8 @@ SCENES.caliper = function () {
   paint(HY_rect(HY_BX0 + 2, Pb + 68, HY_BW - 4, 12), { fill: '#2e2a27', key: 'cpbseal', w: 2 });
   paint(rrectPts(HY_BX0 + 12, Pb - 34, HY_BW - 24, 34, 6), { fill: COL.pad, key: 'cppad', w: 3.5, tex: [{ k: 'cross', a: 0.8, gap: 6, al: 0.35, c: '#2e2118' }] });
   // the disc's edge just above the pad: the pad is pushed up against it
-  paint(rrectPts(462, 538, 360, 40, 8), { fill: COL.steel, key: 'cpdisc', w: 4, tex: [{ k: 'hatch', a: 0.8, gap: 5, al: 0.4 }] });
-  handText('đĩa', 790, 576, 60, C.ink, { key: 'cplbd' });
+  paint(rrectPts(502, 559, 298, 39, 8), { fill: COL.steel, key: 'cpdisc', w: 4, tex: [{ k: 'hatch', a: 0.8, gap: 5, al: 0.4 }] });
+  handText('đĩa', 406, 588, 56, C.ink, { key: 'cplbd' });
 
   // ---- "pít-tông to": circle the big piston, width brackets under both bores
   const fTo = ev(tTo - 0.05, 0.6);
@@ -269,7 +269,7 @@ SCENES.caliper = function () {
   // ---- forces (red): a thin push INTO the small piston, a much thicker push OUT of the big one (toward the disc)
   HY_arrow(HY_SX0 + HY_SW / 2, Ps - 190, HY_SX0 + HY_SW / 2, Ps - 74, { w: 9, head: 28, frac: ev(tNen, 0.35), key: 'cpfs' });
   const tw = 40 + 12 * Math.sin(Math.PI * seg(TT, tNhan, tNhan + 0.9));
-  HY_arrow(HY_BX0 + HY_BW / 2, Pb + 46, HY_BX0 + HY_BW / 2, 552, { w: tw, head: 84, frac: EZ.o2(ev(tNen + 0.3, 0.6)), key: 'cpfb' });
-  { const s = 'lực × vài lần', w = handW(s, 66); handText(s, clamp(HY_BX0 + HY_BW / 2 - w / 2, 60, 930 - w), 510, 66, C.ink, { key: 'cplbf', frac: ev(tNen + 0.4, 0.6) }); }
+  HY_arrow(HY_BX0 + HY_BW / 2, Pb + 270, HY_BX0 + HY_BW / 2, Pb + 64, { w: tw, head: 84, frac: EZ.o2(ev(tNen + 0.3, 0.6)), key: 'cpfb' });
+  { const s = 'lực × vài lần', w = handW(s, 66); handText(s, clamp(HY_BX0 + HY_BW / 2 - w / 2, 60, 900 - w), 488, 66, C.ink, { key: 'cplbf', frac: ev(tNen + 0.4, 0.6) }); }
   inkTag('cùm phanh');
 };

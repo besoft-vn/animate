@@ -179,9 +179,13 @@ SCENES.front = function () {
   if (fW > 0 && out > 0) {
     const wx = lerp(450, 650, EZ.io(seg(TT, tDon, tDon + 0.7)));
     // the centre of mass (an ink dot under the torso) and the weight hanging DOWN from it; both slide forward on "dồn"
-    if (out > 0.5) paint(ellipsePts(wx, 800, 16 * popS(tSuc - 0.1), 16 * popS(tSuc - 0.1), 0, 18), { fill: C.ink, key: 'frcm', w: 3 });
+    const cmR = 18 * popS(tSuc - 0.1);
+    if (out > 0.5 && cmR > 1) { paint(ellipsePts(wx, 800, cmR + 7, cmR + 7, 0, 20), { fill: C.paper, line: false, key: 'frcmb' }); paint(ellipsePts(wx, 800, cmR, cmR, 0, 18), { fill: C.ink, key: 'frcm', w: 3 }); }
     forceArrow(wx, 818, wx, 1010, { w: 18, head: 44, frac: fW, key: 'frwt', al: out });
-    label('sức nặng', wx - 30 - handW('sức nặng', 62), 925, null, null, { size: 62, frac: ev(tSuc, 0.4), al: out * (1 - ev(tTr + 0.3, 0.3)), key: 'frwl' });
+    // "sức nặng" in the clear gap between the wheels, just under the arrow's tip, on a paper patch
+    const wl = handW('sức nặng', 62), lx = clamp(wx - wl / 2, 400, 668 - wl), aW = out * (1 - ev(45.15, 0.25)), fw = ev(tSuc, 0.4);
+    if (aW > 0.5 && fw > 0) paint(rrectPts(lx - 16, 1066, wl + 32, 78, 16), { fill: C.paper, line: false, key: 'frwlbg', tex: [{ k: 'pencil', c: '#fffaf0', al: 0.4, per: 200 }] });
+    label('sức nặng', lx, 1122, null, null, { size: 62, frac: fw, al: aW, key: 'frwl' });
   }
   // braking forces on the ground, both pointing LEFT (backward): front ≈ 7 parts (long, thick), rear ≈ 3 (short, thin)
   const fG = ev(tTr, 0.5), bump = 1 + 0.18 * Math.sin(Math.PI * seg(TT, tBay, tBay + 0.8));
@@ -192,8 +196,8 @@ SCENES.front = function () {
   }
   const fL = ev(tBanh, 0.5);
   if (fL > 0 && out > 0) {
-    ST_label('≈ 7/10', 560, GROUND_Y + 100, null, null, { size: 76 * (1 + 0.4 * (bump - 1)), frac: fL, al: out, key: 'frl7' });
-    ST_label('≈ 3/10', 70, GROUND_Y + 100, null, null, { size: 66, frac: fL, al: out, key: 'frl3' });
+    ST_label('≈ 7/10', 560, GROUND_Y + 100, null, null, { size: 82 * (1 + 0.35 * (bump - 1)), frac: fL, al: out, key: 'frl7' });
+    ST_label('≈ 3/10', 70, GROUND_Y + 100, null, null, { size: 72, frac: fL, al: out, key: 'frl3' });
   }
   inkTag('dồn về trước');
 };
@@ -235,6 +239,6 @@ SCENES.end = function () {
   scooter({ heat, pitch: 0.003 * Math.sin(TT * 2.1), key: 'ensc' });
   const g = Math.sin(Math.PI * seg(TT, tHoi - 0.1, tAm + 0.9));
   if (g > 0) ink(ellipsePts(FW[0], FW[1], DISC_R + 10 + 8 * g, DISC_R + 10 + 8 * g, 0, 32), { closed: true, w: 6, color: `rgba(217,119,87,${0.6 * g})`, key: 'englo' });
-  if (TT >= tToc - 0.1) ST_label('tốc độ → hơi ấm', 390, 440, FW[0] + 62, FW[1] - DISC_R - 34, { size: 58, frac: ev(tToc - 0.1, 1.0), key: 'enlb', right: true });
+  if (TT >= tToc - 0.1) ST_label('tốc độ → hơi ấm', 390, 440, FW[0] + 20, FW[1] - 20, { size: 58, frac: ev(tToc - 0.1, 1.0), key: 'enlb', right: true });
   inkTag('đèn đỏ');
 };
