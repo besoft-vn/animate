@@ -81,7 +81,13 @@ SCENES.hook = function () {
   scooter({ spin: m.x / FW[2], speed: m.v / ST_HV0, squeeze: sq, pitch: dive + rebound, heat, key: 'hksc' });
   // "tốc độ" over the speed lines, gone as they fade; "→ nhiệt" at the warming disc
   const aSp = 1 - EZ.io(seg(TT, 2.9, 3.4));
-  if (aSp > 0) label('tốc độ', 70, 720, null, null, { size: 58, frac: ev(0.15, 0.5), al: aSp, key: 'hksp' });
+  if (aSp > 0) {   // a paper patch behind it (the backdrop is busy there) + a short ink arrow down to the speed lines
+    const fs = ev(0.15, 0.5), lw = handW('tốc độ', 64);
+    if (aSp > 0.5 && fs > 0) paint(rrectPts(52, 632, lw + 36, 84, 18), { fill: C.paper, line: false, key: 'hkspbg', tex: [{ k: 'pencil', c: '#fffaf0', al: 0.4, per: 200 }] });
+    label('tốc độ', 70, 695, null, null, { size: 64, frac: fs, al: aSp, key: 'hksp' });
+    const fa = ev(0.5, 0.3);
+    if (fa > 0) { ink([[110, 712], [96, 748]], { w: 4, key: 'hkspa', frac: fa, alpha: aSp }); if (fa >= 1) ink([[82, 734], [96, 750], [112, 736]], { w: 4, key: 'hkspah', alpha: aSp }); }
+  }
   const aH = 1 - ev(4.55, 0.2);
   if (aH > 0) ST_label('→ nhiệt', 700, 520, FW[0] + 62, FW[1] - DISC_R - 34, { frac: ev(tNo - 0.05, 0.4), al: aH, key: 'hkht', size: 60, right: true });
   // a small glow ring pulse on the disc on "nóng"
@@ -142,7 +148,7 @@ SCENES.tyre = function () {
   // on "bám": the grip force ON THE GROUND, at the contact patch, pointing LEFT (backward); thicker on "kéo"
   const fA = ev(tBam, 0.5), thick = EZ.o2(ev(tKeo, 0.6));
   if (fA > 0) forceArrow(cx + 40, ST_TG + 14, cx - 290 - 30 * thick, ST_TG + 14, { w: 14 + 14 * thick, head: 40 + 16 * thick, frac: fA, key: 'tyfa' });
-  if (TT >= tMat - 0.1) label('lực bám mặt đường', 110, ST_TG + 112, null, null, { size: 58, frac: ev(tMat - 0.1, 0.6), key: 'tylb' });
+  if (TT >= tMat - 0.1) label('lực bám mặt đường', 100, ST_TG + 116, null, null, { size: 70, frac: ev(tMat - 0.1, 0.6), key: 'tylb' });
   inkTag('lốp bám đường');
 };
 
@@ -171,9 +177,11 @@ SCENES.front = function () {
   // the weight: a red arrow pointing DOWN, sliding from the middle toward the front wheel on "dồn về trước"
   const fW = ev(tSuc, 0.4);
   if (fW > 0 && out > 0) {
-    const wx = lerp(470, 650, EZ.io(seg(TT, tDon, tDon + 0.7)));
-    forceArrow(wx, 560, wx, 790, { w: 18, head: 44, frac: fW, key: 'frwt', al: out });
-    label('sức nặng', wx + 30, 620, null, null, { size: 52, frac: ev(tSuc, 0.4), al: out * (1 - ev(tTr + 0.3, 0.3)), key: 'frwl' });
+    const wx = lerp(450, 650, EZ.io(seg(TT, tDon, tDon + 0.7)));
+    // the centre of mass (an ink dot under the torso) and the weight hanging DOWN from it; both slide forward on "dồn"
+    if (out > 0.5) paint(ellipsePts(wx, 800, 16 * popS(tSuc - 0.1), 16 * popS(tSuc - 0.1), 0, 18), { fill: C.ink, key: 'frcm', w: 3 });
+    forceArrow(wx, 818, wx, 1010, { w: 18, head: 44, frac: fW, key: 'frwt', al: out });
+    label('sức nặng', wx - 30 - handW('sức nặng', 62), 925, null, null, { size: 62, frac: ev(tSuc, 0.4), al: out * (1 - ev(tTr + 0.3, 0.3)), key: 'frwl' });
   }
   // braking forces on the ground, both pointing LEFT (backward): front ≈ 7 parts (long, thick), rear ≈ 3 (short, thin)
   const fG = ev(tTr, 0.5), bump = 1 + 0.18 * Math.sin(Math.PI * seg(TT, tBay, tBay + 0.8));
@@ -184,36 +192,36 @@ SCENES.front = function () {
   }
   const fL = ev(tBanh, 0.5);
   if (fL > 0 && out > 0) {
-    ST_label('≈ 7/10', 560, GROUND_Y + 96, null, null, { size: 62 * (1 + 0.5 * (bump - 1)), frac: fL, al: out, key: 'frl7' });
-    ST_label('≈ 3/10', 80, GROUND_Y + 96, null, null, { size: 54, frac: fL, al: out, key: 'frl3' });
+    ST_label('≈ 7/10', 560, GROUND_Y + 100, null, null, { size: 76 * (1 + 0.4 * (bump - 1)), frac: fL, al: out, key: 'frl7' });
+    ST_label('≈ 3/10', 70, GROUND_Y + 100, null, null, { size: 66, frac: fL, al: out, key: 'frl3' });
   }
   inkTag('dồn về trước');
 };
 
 // =====================================================================
 //  10 END — "Lần tới dừng đèn đỏ, hãy nhớ: tốc độ của bạn vừa hóa thành hơi ấm trên đĩa phanh."
-//  The hook's street, the bike stopped at a traffic light (left) that goes RED on "đèn đỏ"; the front disc stays warm,
-//  wisps rise; "tốc độ → hơi ấm" points at the disc. Near 55 s the light turns green.
+//  The hook's street, the bike stopped at a traffic light (ahead, right) that goes RED on "đèn đỏ"; the front disc stays warm,
+//  wisps rise; "tốc độ → hơi ấm" points at the disc. After the narration (~54.7 s) it turns green.
 // =====================================================================
 function ST_light(t, key = 'stl') {
-  const px = 122, top = 420, fPole = ev(ET('end') + 0.35, 0.45);
+  const px = 905, top = 420, fPole = ev(ET('end') + 0.35, 0.45);
   if (fPole <= 0) return;
-  ink([[px, GROUND_Y], [px, top + 230]], { w: 16, color: C.ink, key: key + 'p0', frac: fPole });
-  ink([[px, GROUND_Y], [px, top + 230]], { w: 9, color: COL.steelD, key: key + 'p', frac: fPole });
+  ink([[px, GROUND_Y], [px, top + 200]], { w: 16, color: C.ink, key: key + 'p0', frac: fPole });
+  ink([[px, GROUND_Y], [px, top + 200]], { w: 9, color: COL.steelD, key: key + 'p', frac: fPole });
   const s = popS(ET('end') + 0.7);
   if (s <= 0.01) return;
-  const tRed = VW('end', 'đèn'), tGreen = 55.0;
+  const tRed = VW('end', 'đèn'), tGreen = 54.7;
   const red = ev(tRed - 0.05, 0.2) * (1 - ev(tGreen, 0.25)), amber = 1 - ev(tRed - 0.05, 0.2), green = ev(tGreen, 0.25);
-  ctx.save(); ctx.translate(px, top + 115); ctx.scale(s, s); ctx.translate(-px, -(top + 115));
-  paint(rrectPts(px - 48, top, 96, 236, 20), { fill: '#4a423b', key: key + 'h', w: 4, tex: [{ k: 'hatch', a: 0.8, gap: 6, al: 0.3, c: '#000' }] });
+  ctx.save(); ctx.translate(px, top + 103); ctx.scale(s, s); ctx.translate(-px, -(top + 103));
+  paint(rrectPts(px - 36, top, 72, 206, 16), { fill: '#4a423b', key: key + 'h', w: 4, tex: [{ k: 'hatch', a: 0.8, gap: 6, al: 0.3, c: '#000' }] });
   const lamp = (y, on, col, k) => {
-    if (on > 0.02) ink(ellipsePts(px, y, 38, 38, 0, 24), { closed: true, w: 14, color: col.replace('A', String(0.35 * on)), key: key + 'g' + k });
-    paint(ellipsePts(px, y, 28, 28, 0, 22), { fill: on > 0.5 ? col.replace('A', '1') : '#6b625a', key: key + 'l' + k, w: 3, amt: 0.5 });
+    if (on > 0.02) ink(ellipsePts(px, y, 30, 30, 0, 24), { closed: true, w: 12, color: col.replace('A', String(0.35 * on)), key: key + 'g' + k });
+    paint(ellipsePts(px, y, 22, 22, 0, 22), { fill: on > 0.5 ? col.replace('A', '1') : '#6b625a', key: key + 'l' + k, w: 3, amt: 0.5 });
   };
   const pulse = 1 - 0.15 * (0.5 + 0.5 * Math.sin(TT * 3));
-  lamp(top + 44, red * pulse, 'rgba(226,64,48,A)', 'r');
-  lamp(top + 118, amber, 'rgba(240,190,70,A)', 'a');
-  lamp(top + 192, green, 'rgba(95,180,90,A)', 'g');
+  lamp(top + 38, red * pulse, 'rgba(226,64,48,A)', 'r');
+  lamp(top + 103, amber, 'rgba(240,190,70,A)', 'a');
+  lamp(top + 168, green, 'rgba(95,180,90,A)', 'g');
   ctx.restore();
 }
 SCENES.end = function () {
@@ -227,6 +235,6 @@ SCENES.end = function () {
   scooter({ heat, pitch: 0.003 * Math.sin(TT * 2.1), key: 'ensc' });
   const g = Math.sin(Math.PI * seg(TT, tHoi - 0.1, tAm + 0.9));
   if (g > 0) ink(ellipsePts(FW[0], FW[1], DISC_R + 10 + 8 * g, DISC_R + 10 + 8 * g, 0, 32), { closed: true, w: 6, color: `rgba(217,119,87,${0.6 * g})`, key: 'englo' });
-  if (TT >= tToc - 0.1) ST_label('tốc độ → hơi ấm', 470, 440, FW[0] + 62, FW[1] - DISC_R - 34, { size: 58, frac: ev(tToc - 0.1, 1.0), key: 'enlb', right: true });
+  if (TT >= tToc - 0.1) ST_label('tốc độ → hơi ấm', 390, 440, FW[0] + 62, FW[1] - DISC_R - 34, { size: 58, frac: ev(tToc - 0.1, 1.0), key: 'enlb', right: true });
   inkTag('đèn đỏ');
 };
