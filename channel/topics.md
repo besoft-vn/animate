@@ -16,9 +16,9 @@ Tiêu chí: có một **quá trình thật** với các bước rõ ràng, có m
 - [x] 2026-11-23 — Vết thương tự lành ra sao? → `pieces/vet-thuong/` (cut-paper, 61,5s, giọng Tuan Khang / eleven_v3)
 - [x] 2026-11-24 — Wi‑Fi truyền dữ liệu qua không khí thế nào? → `pieces/wifi/` (math, 63,5s, giọng Tuan Khang / eleven_v3)
 - [x] 2026-11-25 — Vì sao nước biển mặn? → `pieces/nuoc-bien-man/` (sketchbook, 58s, giọng Tuan Khang / eleven_v3)
+- [x] 2026-11-26 — Phanh xe máy dừng xe như thế nào? → `pieces/phanh-xe-may/` (crosshatch, 56,25s, giọng Tuan Khang / eleven_v3)
 
 ## Hàng chờ (gợi ý style)
-- [ ] Phanh xe máy dừng xe như thế nào? (crosshatch)
 - [ ] Cầu vồng xuất hiện ra sao? (riso)
 - [ ] Vì sao lá cây đổi màu vào mùa thu? (cut-paper)
 - [ ] Mã QR chứa thông tin như thế nào? (pixel)
