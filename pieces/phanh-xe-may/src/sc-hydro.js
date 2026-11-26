@@ -82,7 +82,7 @@ SCENES.lever = function () {
   // outlet: a banjo bolt under the right end, the hose leaving down-right
   paint(HY_rect(652, 1046, 18, 32), { fill: oil, line: false, key: 'lvout' });
   paint(rrectPts(636, 1072, 52, 40, 9), { fill: COL.steelD, key: 'lvbanjo', w: 3 });
-  const hose = [[662, 1108], [690, 1160], [770, 1185], [880, 1190]];
+  const hose = [[662, 1108], [700, 1138], [790, 1146], [900, 1146]];
   ink(hose, { w: 34, color: C.ink, key: 'lvhoseo' });
   ink(hose, { w: 26, color: '#4a4440', key: 'lvhose' });
   ink(hose, { w: 10, color: oil, key: 'lvhosef' });
@@ -92,10 +92,15 @@ SCENES.lever = function () {
   paint(HY_rect(front - 10, 992, 10, 56), { fill: '#2e2a27', key: 'lvseal', w: 2 });
 
   // ---- the lever + its crank arm: one rigid piece turning about the pivot
-  HY_rod([G.arm, HY_PIV, G.tip], 20, COL.steel, 'lvlev', { amt: 0.7 });
-  paint(ellipsePts(G.tip[0], G.tip[1], 15, 15, 0, 14), { fill: COL.steel, key: 'lvtip', w: 3.5 });
-  paint(ellipsePts(HY_PIV[0], HY_PIV[1], 16, 16, 0, 14), { fill: COL.steelD, key: 'lvpiv', w: 3.5 });
-  paint(ellipsePts(G.arm[0], G.arm[1], 10, 10, 0, 12), { fill: COL.steelD, key: 'lvpin', w: 3 });
+  // an L-shaped bellcrank: lever (along u) + arm (along v) + a gusset in the corner, filled and outlined as one part
+  {
+    const u = [Math.cos(G.a), Math.sin(G.a)], v = [-u[1], u[0]], h = 14, g = 58;
+    const L = (p, q) => [HY_PIV[0] + u[0] * p + v[0] * q, HY_PIV[1] + u[1] * p + v[1] * q];
+    const shape = [L(-32, -h), L(HY_LEN, -h), ...arcPts(0, 0, h, -Math.PI / 2, Math.PI / 2, 6).map(([p, q]) => L(HY_LEN + p, q)).slice(1, -1),
+      L(HY_LEN, h), L(h + g, h), L(h, h + g), L(h, HY_ARM), ...arcPts(0, 0, h, 0, Math.PI, 6).map(([p, q]) => L(-p, HY_ARM + q)).slice(1, -1), L(-h, HY_ARM), L(-h, h), L(-32, h)];
+    paint(resample(shape, true, 14), { fill: COL.steel, key: 'lvlev', w: 4, amt: 0.8, tex: [{ k: 'hatch', a: 0.8, gap: 6, al: 0.3 }] });
+  }
+  paint(ellipsePts(HY_PIV[0], HY_PIV[1], 13, 13, 0, 14), { fill: COL.steelD, key: 'lvpiv', w: 3.5 });
 
   // ---- the hand: sleeve from the top-left, the back of the hand over the grip, four fingers round the lever
   HY_rod([[-20, 470], [250, 575], [455, 660]], 104, HY_SLEEVE, 'lvsleeve', { amt: 1.2 });
@@ -116,9 +121,13 @@ SCENES.lever = function () {
   if (TT >= tEp) HY_arrow(G.arm[0] + 14, HY_MCY, front + 28, HY_MCY, { w: 12 + 4 * Math.sin(Math.PI * seg(TT, tEp, tEp + 0.6)), head: 32, frac: ev(tEp, 0.3), key: 'lvfe' });
 
   // ---- labels
-  label('tay phanh', 600, 600, G.tip[0] + 4, G.tip[1] - 14, { size: 56, frac: ev(tTay + 0.15, 0.5), key: 'lvlbt', lx: 222, ly: 12 });
-  label('pít-tông nhỏ', 70, 1160, back + 30, 1050, { size: 56, frac: ev(tPit, 0.5), key: 'lvlbp', lx: 170, ly: -48 });
-  label('dầu phanh', 395, 1190, 590, 1050, { size: 56, frac: ev(tNho + 0.05, 0.5), key: 'lvlbd', lx: 150, ly: -50 });
+  { // "tay phanh": the leader runs down beside the bar end and ends ON the lever bar, just left of the red arrow
+    const fT = ev(tTay + 0.15, 0.5), tw = handW('tay phanh', 64), x0 = Math.min(930 - tw, 600), lx = 742, ly = G.yAt(lx);
+    handText('tay phanh', x0, 600, 64, C.ink, { key: 'lvlbt', frac: fT });
+    ink([[x0 + tw - 14, 618], [838, 700], [834, 790], [lx, ly - 4]], { w: 2.6, color: 'rgba(58,36,23,0.8)', key: 'lvlbtl', frac: fT, amt: 1 });
+  }
+  label('pít-tông nhỏ', 70, 1165, back + 30, 1050, { size: 64, frac: ev(tPit, 0.5), key: 'lvlbp', lx: 180, ly: -54 });
+  label('dầu phanh', 440, 1215, 600, 1050, { size: 64, frac: ev(tNho + 0.05, 0.5), key: 'lvlbd', lx: 150, ly: -56 });
   inkTag('bóp tay phanh');
 };
 
@@ -206,8 +215,8 @@ SCENES.fluid = function () {
 
   // ---- labels
   const [lx, ly] = HY_at(R + 2 * R * 4);
-  label('không nén được', 70, 880, lx - R - 4, ly + 8, { size: 58, frac: ev(tK + 0.1, 0.6), key: 'fllbk', lx: handW('không nén được', 58) + 12, ly: -18 });
-  label('bánh trước', 90, 1190, wx - 196, wy + 6, { size: 58, frac: ev(tC + 0.05, 0.5), key: 'fllbb', lx: handW('bánh trước', 58) + 12, ly: -18 });
+  label('không nén được', 66, 990, lx - R - 4, ly + 8, { size: 68, frac: ev(tK + 0.1, 0.6), key: 'fllbk', lx: handW('không nén được', 68) + 12, ly: -22 });
+  label('bánh trước', 90, 1190, wx - 196, wy + 6, { size: 68, frac: ev(tC + 0.05, 0.5), key: 'fllbb', lx: handW('bánh trước', 68) + 12, ly: -22 });
   inkTag('dầu truyền lực');
 };
 
@@ -244,6 +253,9 @@ SCENES.caliper = function () {
   paint(rrectPts(HY_BX0 + 2, Pb, HY_BW - 4, 80, 10), { fill: COL.steelL, key: 'cpbig', w: 4, tex: [{ k: 'hatch', a: -0.7, gap: 6, al: 0.3, dens: (x, y) => clamp((x - HY_BX0) / HY_BW + 0.2) }] });
   paint(HY_rect(HY_BX0 + 2, Pb + 68, HY_BW - 4, 12), { fill: '#2e2a27', key: 'cpbseal', w: 2 });
   paint(rrectPts(HY_BX0 + 12, Pb - 34, HY_BW - 24, 34, 6), { fill: COL.pad, key: 'cppad', w: 3.5, tex: [{ k: 'cross', a: 0.8, gap: 6, al: 0.35, c: '#2e2118' }] });
+  // the disc's edge just above the pad: the pad is pushed up against it
+  paint(rrectPts(462, 538, 360, 40, 8), { fill: COL.steel, key: 'cpdisc', w: 4, tex: [{ k: 'hatch', a: 0.8, gap: 5, al: 0.4 }] });
+  handText('đĩa', 836, 576, 60, C.ink, { key: 'cplbd' });
 
   // ---- "pít-tông to": circle the big piston, width brackets under both bores
   const fTo = ev(tTo - 0.05, 0.6);
@@ -251,13 +263,13 @@ SCENES.caliper = function () {
   const brk = (x0, x1, f, key) => ink([[x0, 1146], [x0, 1164], [x1, 1164], [x1, 1146]], { w: 4.5, key, frac: f, amt: 0.8 });
   brk(HY_SX0, HY_SX0 + HY_SW, ev(tPit, 0.4), 'cpbrs');
   brk(HY_BX0, HY_BX0 + HY_BW, ev(tTo - 0.05, 0.5), 'cpbrb');
-  { const s = 'nhỏ', w = handW(s, 56); handText(s, HY_SX0 + HY_SW / 2 - w / 2, 1228, 56, C.ink, { key: 'cplbs', frac: ev(tPit + 0.2, 0.4) }); }
-  { const s = 'pít-tông to', w = handW(s, 58); handText(s, HY_BX0 + HY_BW / 2 - w / 2, 1230, 58, C.ink, { key: 'cplbb', frac: ev(tTo, 0.6) }); }
+  { const s = 'nhỏ', w = handW(s, 64); handText(s, HY_SX0 + HY_SW / 2 - w / 2, 1232, 64, C.ink, { key: 'cplbs', frac: ev(tPit + 0.2, 0.4) }); }
+  { const s = 'pít-tông to', w = handW(s, 66); handText(s, HY_BX0 + HY_BW / 2 - w / 2, 1234, 66, C.ink, { key: 'cplbb', frac: ev(tTo, 0.6) }); }
 
   // ---- forces (red): a thin push INTO the small piston, a much thicker push OUT of the big one (toward the disc)
   HY_arrow(HY_SX0 + HY_SW / 2, Ps - 190, HY_SX0 + HY_SW / 2, Ps - 74, { w: 9, head: 28, frac: ev(tNen, 0.35), key: 'cpfs' });
   const tw = 40 + 12 * Math.sin(Math.PI * seg(TT, tNhan, tNhan + 0.9));
-  HY_arrow(HY_BX0 + HY_BW / 2, Pb - 40, HY_BX0 + HY_BW / 2, Pb - 200, { w: tw, head: 96, frac: EZ.o2(ev(tNen + 0.3, 0.6)), key: 'cpfb' });
-  { const f = ev(tNen + 0.4, 0.7); handText('lực', 708, 500, 58, C.ink, { key: 'cplbf1', frac: f * 2.4 }); handText('× vài lần', 708, 562, 54, C.ink, { key: 'cplbf2', frac: f * 1.6 - 0.6 }); }
+  HY_arrow(HY_BX0 + HY_BW / 2, Pb + 46, HY_BX0 + HY_BW / 2, 552, { w: tw, head: 84, frac: EZ.o2(ev(tNen + 0.3, 0.6)), key: 'cpfb' });
+  { const s = 'lực × vài lần', w = handW(s, 66); handText(s, clamp(HY_BX0 + HY_BW / 2 - w / 2, 60, 930 - w), 510, 66, C.ink, { key: 'cplbf', frac: ev(tNen + 0.4, 0.6) }); }
   inkTag('cùm phanh');
 };
