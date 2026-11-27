@@ -1,0 +1,74 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Bạn không bao giờ đến được chân cầu vồng, vì nó chẳng nằm ở chỗ nào cả.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "setup",
+   "text": "Cầu vồng cần nắng chiếu từ sau lưng bạn, và một màn mưa ở phía trước.",
+   "after": 0.5,
+   "file": "setup.mp3"
+  },
+  {
+   "id": "white",
+   "text": "Ánh nắng trông màu trắng, nhưng thật ra là hỗn hợp của mọi màu.",
+   "after": 0.5,
+   "file": "white.mp3"
+  },
+  {
+   "id": "enter",
+   "text": "Vào giọt mưa, ánh sáng bị bẻ cong: màu tím cong nhiều, màu đỏ cong ít.",
+   "after": 0.5,
+   "file": "enter.mp3"
+  },
+  {
+   "id": "reflect",
+   "text": "Nó dội vào mặt sau giọt nước rồi ló ra, các màu đã tách hẳn nhau.",
+   "after": 0.5,
+   "file": "reflect.mp3"
+  },
+  {
+   "id": "angle",
+   "text": "Ánh đỏ quay lại lệch tia nắng khoảng bốn mươi hai độ, ánh tím bốn mươi độ.",
+   "after": 0.5,
+   "file": "angle.mp3"
+  },
+  {
+   "id": "one",
+   "text": "Nên mỗi giọt chỉ gửi tới mắt bạn một màu: giọt cao màu đỏ, giọt thấp màu tím.",
+   "after": 0.5,
+   "file": "one.mp3"
+  },
+  {
+   "id": "circle",
+   "text": "Mọi giọt nằm đúng góc ấy quanh bóng đầu bạn cùng sáng lên, thành một vòng.",
+   "after": 1.6,
+   "file": "circle.mp3"
+  },
+  {
+   "id": "payoff",
+   "text": "Cầu vồng thật ra là một vòng tròn trọn vẹn, mặt đất chỉ che mất phần dưới!",
+   "after": 0.6,
+   "file": "payoff.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Và vì mỗi người đứng một chỗ, chiếc cầu vồng bạn thấy là của riêng bạn.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}

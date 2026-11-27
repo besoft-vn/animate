@@ -1,0 +1,38 @@
+{
+  "name": "cau-vong",
+  "title": "Cầu vồng xuất hiện ra sao?",
+  "series": "Vạn vật vận hành như thế nào",
+  "date": "2026-11-27",
+  "format": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 24,
+    "bpm": 120
+  },
+  "storyFormat": "F5 fixed-hero journey (the hero chases a rainbow's foot, then we follow the light into one raindrop and back to the eye; every drop at 42° around the head's shadow lights up -> a ring), morph-joined, one slam on the payoff (seen from above, the rainbow is a full circle)",
+  "style": "sketchbook",
+  "scenes": [
+    "src/props.js",
+    "src/sc-world.js",
+    "src/sc-drop.js",
+    "src/sc-ring.js",
+    "src/sc-stubs.js"
+  ],
+  "voice": {
+    "file": "voice/voice.wav",
+    "music": -14
+  },
+  "captions": {
+    "font": "Pangolin",
+    "size": 62
+  },
+  "review": {
+    "safe": {
+      "top": 240,
+      "bottom": 420,
+      "right": 140
+    },
+    "refs": {},
+    "wpsMax": 5.0
+  }
+}

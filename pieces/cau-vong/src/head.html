@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cầu vồng xuất hiện ra sao?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1714; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Cầu vồng xuất hiện ra sao?" — 9:16, sketchbook, voiced (vi), 24fps, 120 BPM.
+//  Format F5 (fixed-hero journey): the hero (terracotta doodle) walks toward a rainbow's foot that keeps moving away
+//  (hook) -> side view: sun low BEHIND the hero, rain IN FRONT -> the white sunbeam holds every colour -> close-up of
+//  ONE raindrop: refraction in (violet bends most, red least), reflection off the back, out again: red at ~42°,
+//  violet at ~40° to the sunlight -> each drop sends the eye ONE colour (high drop red, low drop violet) -> every drop
+//  at that angle around the shadow of your head lights up: a ring -> pause -> SLAM: seen from above (a plane), the
+//  rainbow is a FULL CIRCLE around the plane's shadow; the ground only hides the lower part -> end: two people, two
+//  rainbows, each centred on its own head's shadow: "yours alone".
+//  KHUNG HÌNH GỌN: one subject per frame, bare paper; ≤ 10 drops per frame, each r ≥ 18; no dots/specks.
+//  Colour: TERRACOTTA = hero only · SPECTRUM (SPEC) = colours of light only · PALE YELLOW = white sunlight / sun ·
+//  GREY-BLUE = water (drops, rain) · graphite = ground, cloud, angles, guides. RAINBOW: RED OUTSIDE, VIOLET INSIDE.
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). The payoff era starts on the SLAM: a hard
+//  cut inside the 1.6s pause after "circle". Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+const HAND = '"Pangolin", "Segoe Print", "Comic Sans MS", "DejaVu Sans", sans-serif';
+const CX = 500;
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'setup', 'white', 'enter', 'reflect', 'angle', 'one', 'circle', 'payoff', 'end'];
+const SLAM_ID = 'payoff';
+const SLAM = snap8(VL('circle').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- colours (beyond the kit's SK palette and props' SPEC)
+const COL = {
+  sun: '#f7d64a', sunD: '#d9b21e', beam: '#fbefb0',   // white sunlight (sun disc, white beam)
+  drop: '#5f86a6', dropL: '#cfe0ec',                  // water: raindrops, rain curtain (grey-blue, never a SPEC blue)
+};
+// ---- WORLD GEOMETRY (fixed; every scene agrees)
+// BACK VIEW (hook, circle, end): we stand behind the hero; the sun is behind US (off-screen). Horizon at BK_HORIZON.
+// The hero's head shadow (the antisolar point) is ANTI; the rainbow is an arc of radius BOW_R centred on ANTI, band
+// width BOW_W, visible only above the horizon. The hero's shadow runs from its feet AWAY from us (up the screen).
+const BK_HORIZON = 980;
+const ANTI = [540, 1040], BOW_R = 400, BOW_W = 90;
+// SIDE VIEW (setup, white, one): ground at SD_GROUND; the sun sits LOW on the left (SUN_SIDE = [x, y, r], at eye
+// height: sunlight runs horizontally LEFT -> RIGHT); the rain cloud on the right (CLOUD_SIDE) with its rain curtain
+// x RAIN_X0..RAIN_X1. The hero stands at SIDE_HERO facing RIGHT (look [1, -0.3]); its eye ≈ SIDE_EYE.
+const SD_GROUND = 1180;
+const SUN_SIDE = [100, 1075, 55];
+const CLOUD_SIDE = [800, 470];
+const RAIN_X0 = 640, RAIN_X1 = 960;
+// DROP CLOSE-UP (enter, reflect, angle): ONE big raindrop centre DROP_C, radius DROP_R; sunlight enters along y =
+// DROP_C[1] - 0.86 * DROP_R from the left; dropTrace(DROP_C[0], DROP_C[1], DROP_R, n) gives the path; the red ray
+// leaves the bottom going DOWN-LEFT toward the hero (the eye) at DROP_EYE.
+const DROP_C = [700, 640], DROP_R = 230;
+// ---- the bridges' contract: where the hero (radius HR) MUST be at each boundary.
+// Scenes keep it exactly there during [tc - 0.5, tc + 0.5]. Cameras: identity within 0.5s of a boundary.
+const HR = 54;
+const BACK_HERO = [540, 1150];      // back view, seen from behind (heroBack), feet ≈ y 1227
+const SIDE_HERO = [330, 1103];      // side view, front doodle (heroGiot) facing right, feet on SD_GROUND
+const SIDE_EYE = [345, 1090];
+const DROP_EYE = [450, 1125];       // drop close-up: the viewer at bottom-left receives the red ray
+const PAYOFF_HERO = [260, 470];     // payoff: the hero in a small doodle plane, top-left (its shadow = the circle's centre)
+const BR = {
+  hookSetup:   { a: BACK_HERO,  b: SIDE_HERO },
+  setupWhite:  { a: SIDE_HERO,  b: SIDE_HERO },
+  whiteEnter:  { a: SIDE_HERO,  b: DROP_EYE },
+  enterReflect:{ a: DROP_EYE,   b: DROP_EYE },
+  reflectAngle:{ a: DROP_EYE,   b: DROP_EYE },
+  angleOne:    { a: DROP_EYE,   b: SIDE_HERO },
+  oneCircle:   { a: SIDE_HERO,  b: BACK_HERO },
+  // circle -> payoff: SLAM (hard cut, no bridge); payoff is complete on its first frame (hero at PAYOFF_HERO)
+  payoffEnd:   { a: PAYOFF_HERO, b: BACK_HERO },
+};
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};
+const TITLES = {
+  hook: 'không tới được chân cầu vồng', setup: 'nắng sau lưng, mưa trước mặt', white: 'nắng trắng = mọi màu',
+  enter: 'khúc xạ: tím cong nhiều', reflect: 'dội mặt sau, các màu tách', angle: 'đỏ 42°, tím 40°',
+  one: 'mỗi giọt một màu', circle: 'quanh bóng đầu: một vòng', payoff: 'cầu vồng là vòng tròn', end: 'cầu vồng của riêng bạn',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1).filter((t) => t !== SLAM),
+  cues: { slam: SLAM, bloom: SLAM },
+  acts: [
+    { name: '1 Chân cầu vồng', role: 'build',   t0: 0,             t1: ET('enter') },
+    { name: '2 Trong giọt mưa', role: 'journey', t0: ET('enter'),  t1: ET('circle') },
+    { name: '3 Một vòng',      role: 'peak',    t0: ET('circle'),  t1: snap8(VL('circle').t1) },
+    { name: '4 Lặng',          role: 'silence', t0: snap8(VL('circle').t1), t1: SLAM - 0.125 },
+    { name: '5 Vòng tròn!',    role: 'gift',    t0: SLAM,          t1: SLAM + 2.25 },
+    { name: '6 Của riêng bạn', role: 'goodbye', t0: SLAM + 2.25,   t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;
