@@ -23,7 +23,7 @@ function w_bow(cx, cy, o = {}) {
 // the head's shadow at (x, y - 110): sun behind the camera, shadow pointing away from us
 function w_shadow(x, y, key, a = 1) {
   const hy = y - 110, fy = y + HR * 1.42;
-  smudge(x, (hy + fy) / 2, 40, (fy - hy) / 2 + 10, 0.32 * a);
+  smudge(x, (hy + fy) / 2, 46, (fy - hy) / 2 + 10, 0.45 * a);
   smudge(x, hy, 44, 30, 0.42 * a);
   alphaDo(a, () => gpencil(loopPts(x, hy, 40, 22, 0.08), { w: 3, key: key + 'hs', a: 0.55 }));
 }
@@ -46,7 +46,7 @@ function w_friend(x, y, r, o = {}) {
   ctx.scale(o.sx ?? 1, o.sy ?? 1);
   const body = loopPts(0, 0, r, r, 0, 0, 40);
   gfill(body, SK.sheet, { off: [r * 0.06, r * 0.05], key: key + 'f' });
-  litHatch(body, { ang: -0.85, gap: Math.max(6, r * 0.1), col: SK.graphL, w: 2, a: 0.8, key: key + 'h' });
+  litHatch(body, { ang: -0.85, gap: Math.max(6, r * 0.1), col: SK.graph, w: 2.2, a: 0.85, key: key + 'h' });
   gline(loopPts(0, 0, r, r, 0.08), { w: lw, key: key + 'o' });
   gpencil([[-r * 0.2, -r * 0.95], [-r * 0.05, -r * 1.25], [r * 0.08, -r * 0.98], [r * 0.25, -r * 1.2]], { w: 4, key: key + 'tuft' });   // a tuft of hair
   gpencil([[-r * 0.35, r * 0.5], [0, r * 0.62], [r * 0.35, r * 0.5]], { w: 3, key: key + 'bk', a: 0.6 });
@@ -59,7 +59,7 @@ function w_friend(x, y, r, o = {}) {
 //  stepping) and the WHOLE bow slides with it (centred on its head's shadow); the pot is left with no rainbow; a "?".
 //  The hero steps back to BACK_HERO by 5.4 (the bow comes back with it), the pot has been rubbed out.
 // ---------------------------------------------------------------------
-const w_HK_D = [150, -62];                       // how far the hero walks (toward the foot: up and right)
+const w_HK_D = [100, -62];                       // how far the hero walks (toward the foot: up and right)
 const w_HK_POT = [892, BK_HORIZON];
 function w_hookOff(t) {
   const go = EZ.io(seg(t, 0.8, 3.3)), back = EZ.io(seg(t, 3.95, 5.4)), k = go * (1 - back);
@@ -76,9 +76,9 @@ SCENES.hook = function () {
   // the pot at the bow's first foot (left behind; rubbed out before the hero is home)
   const potA = 1 - seg(TT, 4.6, 5.0);
   w_pot(...w_HK_POT, potA);
-  w_label('kho báu?', 790, 1075, 54, 0.15, 5.0, { col: SK.graph });
+  w_label('kho báu?', 890, 1062, 52, 0.15, 5.0, { col: SK.graph, align: 'right' });
   // a small pencil arrow from the walking hero toward the pot while it walks there
-  if (TT > 0.9 && TT < 3.6) alphaDo(1 - seg(TT, 3.3, 3.6), () => arrowPencil([[640, 1010], [760, 975], [850, 965]], ev(1.0, 0.6), { key: 'w_hkarw', w: 4 }));
+  if (TT > 0.9 && TT < 3.6) alphaDo(1 - seg(TT, 3.3, 3.6), () => arrowPencil([[610, 935], [720, 905], [835, 930]], ev(1.0, 0.6), { key: 'w_hkarw', w: 4 }));
   // the hero: its shadow (to the head's shadow), then the hero from behind, stepping while it walks
   w_shadow(hx, hy, 'w_hksh');
   const ph = (TT - 0.8) * TAU * 1.8, step = walking ? Math.sin(ph) : 0, bob = walking ? Math.abs(Math.sin(ph)) * 6 : 0;
@@ -102,7 +102,7 @@ function w_side(o) {
   if (ra > 0.01) {
     alphaDo(ra * (o.rainA ?? 1), () => {
       rainCloud(CLOUD_SIDE[0], CLOUD_SIDE[1] - 40 * (1 - EZ.o2(ra)), { key: 'w_cl', dark: 0.35 });
-      rainCurtain(RAIN_X0, RAIN_X1, 540, SD_GROUND, { key: 'w_rn', n: 6 });
+      rainCurtain(RAIN_X0, RAIN_X1, 540, SD_GROUND, { key: 'w_rn', n: 7 });
     });
   }
   // the sunbeam (behind the sun's disc and the hero): flows LEFT -> RIGHT
@@ -149,7 +149,7 @@ SCENES.setup = function () {
 //  The side view, lighter; the beam reaches into the rain. A magnifier loop over the beam (callout from a small
 //  circle on the beam): inside, the white beam flows; on "hỗn hợp của mọi màu" it opens into the six SPEC strands.
 // ---------------------------------------------------------------------
-const w_LENS = [500, 700, 150], w_SPOT = [500, w_BEAM_Y, 40];
+const w_LENS = [470, 770, 140], w_SPOT = [500, w_BEAM_Y, 40];
 SCENES.white = function () {
   sketchPage({ grid: 'plain' });
   const E = ET('white'), X = EE('white'), tTrang = VW('white', 'trắng'), tHon = VW('white', 'hỗn'), tMoi = VW('white', 'mọi');
@@ -174,7 +174,7 @@ SCENES.white = function () {
     gline(loopPts(lx, ly, lr, lr, 0.06), { w: 7, key: 'w_lens', part: lk });
     gline([[lx + lr * 0.72, ly - lr * 0.72], [lx + lr * 1.0, ly - lr * 1.0]], { w: 12, key: 'w_lensh', part: seg(lk, 0.7, 1), second: false });   // handle stub
   });
-  w_label('trắng = mọi màu trộn lại', 470, 500, 54, tHon, X - 0.5);
+  w_label('trắng = mọi màu trộn lại', 66, 548, 50, tHon, X - 0.5, { align: 'left' });
   viTag('nắng trắng');
   pageCaption(['Nắng trắng =', 'mọi màu trộn lại'], [[1, 'mọi màu']], { size: 62 });
 };
@@ -218,7 +218,7 @@ SCENES.end = function () {
   }
   // labels: "của riêng bạn" by the hero's bow; a small "của bạn ấy" by the friend's (fainter)
   w_label('của riêng bạn', 700, 560, 62, tRieng - 0.2, null);
-  w_label('bạn ấy', 170, 720, 50, tCho + 0.4, null, { col: SK.graph });
+  w_label('bạn ấy', 335, 905, 50, tCho + 0.4, null, { col: SK.graph });
   viTag('của riêng bạn');
   pageCaption(['Mỗi người một', 'cầu vồng riêng'], [[1, 'riêng']], { size: 62 });
 };
