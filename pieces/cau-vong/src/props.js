@@ -229,3 +229,35 @@ function bigArrow(x0, y0, x1, y1, o = {}) {
   scribbleFill(P, o.col || SK.graphL, { key: key + 's', gap: 12, w: 4, base: 0.45, a: o.a ?? 0.9 });
   gline(P, { w: 4.5, key: key + 'o', a: o.a ?? 1 });
 }
+// ---- the hero in PROFILE, facing RIGHT (side views: the sun is behind it on the left, the rain in front on the right).
+// Body as heroBack (crown asterisk shifted back), both eyes on the right half, a small mouth near the right edge,
+// feet pointing right. o: { key, mood ('calm'|'happy'|'wow'), up (0..1 eyes look up), legs, sx, sy, step }
+function heroSide(x, y, r = HR, o = {}) {
+  const key = o.key ?? 'heroS', lw = Math.max(3, r * 0.065), mood = o.mood ?? 'calm', up = clamp(o.up ?? 0.3);
+  SPARK_AT = toScreen(x, y);
+  ctx.save(); ctx.translate(x, y);
+  if (o.legs !== false) for (const s of [-1, 1]) {
+    const st = o.step ?? 0, hip = [s * r * 0.3, r * 0.85], foot = [s * r * 0.3 + s * st * r * 0.2, r * 1.42];
+    gline([hip, foot], { w: lw, key: key + 'leg' + s, amp: 0.8, second: false, step: 8 });
+    gline([foot, [foot[0] + r * 0.26, foot[1] + 2]], { w: lw * 1.25, key: key + 'ft' + s, amp: 0.5, second: false, step: 6 });
+  }
+  ctx.scale(o.sx ?? 1, o.sy ?? 1);
+  const body = loopPts(0, 0, r, r, 0, 0, 40);
+  gfill(body, SK.terra, { off: [r * 0.06, r * 0.05], key: key + 'f' });
+  litHatch(body, { ang: -0.85, gap: Math.max(5, r * 0.08), col: SK.terraD, w: Math.max(1.6, r * 0.03), a: 0.85, key: key + 'h' });
+  gline(loopPts(0, 0, r, r, 0.08), { w: lw, key: key + 'o' });
+  for (let i = 0; i < 8; i++) {
+    const an = i / 8 * TAU + 0.2, r0 = r * 0.04, r1 = r * 0.17, cx = -r * 0.25, cy = -r * 0.55;
+    gline([[cx + Math.cos(an) * r0, cy + Math.sin(an) * r0], [cx + Math.cos(an) * r1, cy + Math.sin(an) * r1]], { w: r * 0.06, col: SK.cream, key: key + 'a' + i, amp: 0.4, second: false, step: 6 });
+  }
+  const ey = r * (0.02 - 0.12 * up);
+  [[r * 0.4, 0.075], [r * 0.7, 0.06]].forEach(([ex, s], i) => {
+    if (mood === 'happy') gline([[ex - r * s, ey + r * 0.03], [ex, ey - r * 0.05], [ex + r * s, ey + r * 0.03]], { w: lw * 0.9, key: key + 'hp' + i, amp: 0.3, second: false, step: 6 });
+    else { ctx.fillStyle = SK.ink; ctx.beginPath(); ctx.ellipse(ex + r * 0.02, ey, r * s, r * (mood === 'wow' ? 0.14 : 0.11), 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = SK.cream; ctx.beginPath(); ctx.arc(ex, ey - r * 0.04, r * 0.025, 0, TAU); ctx.fill(); }
+  });
+  const my = r * 0.36;
+  if (mood === 'wow') { ctx.fillStyle = SK.ink; ctx.beginPath(); ctx.ellipse(r * 0.66, my, r * 0.06, r * 0.08, 0, 0, TAU); ctx.fill(); }
+  else gline([[r * 0.48, my], [r * 0.62, my + r * 0.05], [r * 0.76, my - r * 0.02]], { w: lw * 0.85, key: key + 'm', amp: 0.3, second: false, step: 6 });
+  ctx.restore();
+}

@@ -31,7 +31,7 @@ function d_hero(t) {
   const bob = w * 4 * Math.sin(TAU * (t - T.E) / 1.6);
   const wow = (t > T.tach && t < T.tach + 0.7) || (t > T.bon + 0.1 && t < T.bon + 0.9);
   const lookUp = t > T.bon - 0.3 && t < T.Z - 1 ? 0.75 : 1;         // eyes follow the red ray down to the face
-  heroGiot(DROP_EYE[0], DROP_EYE[1] + bob, HR, { look: [1, -lookUp], legs: true, mood: wow ? 'wow' : 'calm', key: 'd_hero' });
+  heroSide(DROP_EYE[0], DROP_EYE[1] + bob, HR, { up: lookUp, legs: true, mood: wow ? 'wow' : 'calm', key: 'd_hero' });
 }
 // THE DROP CLOSE-UP (all three eras)
 function d_drop() {
@@ -83,7 +83,7 @@ function d_drop() {
   }
   d_label('tách màu', 720, 1085, 56, T.cac, T.A - 0.55);
   // the "exaggerated" note: from the moment the fan shows until just before the last bridge
-  d_label('(vẽ phóng đại)', 755, 390, 50, T.tim + 0.2, T.Z - 0.55, { col: SK.graph, a: 0.9 });
+  d_label('(vẽ phóng đại)', 740, 390, 56, T.tim + 0.2, T.Z - 0.55, { col: SK.ink, a: 0.9 });
   // angle: the sunlight's line continued (horizontal, going LEFT from the exit point) + the two arcs
   const angOff = T.Z - 0.55;
   const R2 = d_TR[0].P2, V2 = d_TR[5].P2;
@@ -91,8 +91,8 @@ function d_drop() {
     const f = 1 - seg(t, angOff - 0.25, angOff);
     guideLine(R2, [R2[0] - 400, R2[1]], { key: 'd_gl', a: f, part: EZ.io(seg(t, T.lech - 0.2, T.lech + 0.6)) });
     const aR = Math.atan2(d_TR[0].d3[1], d_TR[0].d3[0]), aV = Math.atan2(d_TR[5].d3[1], d_TR[5].d3[0]);
-    angleArc(R2[0], R2[1], 150, Math.PI, aR, { key: 'd_arR', a: f, part: EZ.io(seg(t, T.bon - 0.3, T.bon + 0.3)) });
-    angleArc(V2[0], V2[1], 255, Math.PI, aV, { key: 'd_arV', a: f, part: EZ.io(seg(t, T.aTim, T.aTim + 0.6)) });
+    angleArc(R2[0], R2[1], 150, Math.PI, aR, { key: 'd_arR', col: SPEC_RED, a: f, part: EZ.io(seg(t, T.bon - 0.3, T.bon + 0.3)) });
+    angleArc(V2[0], V2[1], 255, Math.PI, aV, { key: 'd_arV', col: SPEC_VIOLET, a: f, part: EZ.io(seg(t, T.aTim, T.aTim + 0.6)) });
   }
   d_label('42°', 668, 1010, 60, T.bon - 0.05, angOff, { col: SPEC_RED });
   d_label('40°', 405, 965, 60, T.aTim + 0.35, angOff, { col: SPEC_VIOLET });

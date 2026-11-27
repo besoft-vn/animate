@@ -74,7 +74,7 @@ SCENES.one = function () {
   // the hero: faces right; looks up at the high drop, then the low one; still at both boundaries
   const look = TT < tHi ? [1, -0.3] : TT < tLo ? [0.8, -0.8] : TT < off - 0.3 ? [0.9, -0.55] : [1, -0.3];
   const mood = (TT > tDo && TT < tDo + 0.8) || (TT > tTim && TT < tTim + 0.7) ? 'wow' : 'calm';
-  heroGiot(SIDE_HERO[0], SIDE_HERO[1], HR, { key: 'hero', look, mood, legs: true });
+  heroSide(SIDE_HERO[0], SIDE_HERO[1], HR, { key: 'hero', up: Math.max(0, -look[1]), mood, legs: true });
   // the ONE colour that reaches the eye: drawn over the hero, bold, its head at the eye
   const kr = ev(tCao + 0.2, 0.5), kv = ev(tThap + 0.1, 0.5);
   lightRay(r_ray(Dh, SPEC[0], true), SPEC[0].col, { part: kr, w: 8, key: 'r_hir', a: fade });
@@ -84,7 +84,7 @@ SCENES.one = function () {
   // labels: "đỏ" by the high drop, "tím" by the low drop (right of them), the exaggeration note under the ground
   r_label('đỏ', Dh[0] + 76, Dh[1] + 20, 60, tCao, off, { col: SPEC[0].col });
   r_label('tím', Dl[0] + 84, Dl[1] + 20, 60, tLo, off, { col: SPEC[5].col });
-  r_label('(vẽ phóng đại)', 700, 1245, 50, tCao + 0.3, off, { col: SK.graph });
+  r_label('(vẽ phóng đại)', 700, 1245, 56, tCao + 0.3, off, { col: SK.ink });
   viTag('mỗi giọt một màu');
   pageCaption(['Mỗi giọt gửi mắt', 'chỉ một màu'], [[1, 'một màu']], { size: 62, at: 0.3 });
 };

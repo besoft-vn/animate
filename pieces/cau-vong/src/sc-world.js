@@ -76,7 +76,7 @@ SCENES.hook = function () {
   // the pot at the bow's first foot (left behind; rubbed out before the hero is home)
   const potA = 1 - seg(TT, 4.6, 5.0);
   w_pot(...w_HK_POT, potA);
-  w_label('kho báu?', 890, 1062, 52, 0.15, 5.0, { col: SK.graph, align: 'right' });
+  w_label('kho báu?', 890, 1062, 58, 0.15, 5.0, { col: SK.graph, align: 'right' });
   // a small pencil arrow from the walking hero toward the pot while it walks there
   if (TT > 0.9 && TT < 3.6) alphaDo(1 - seg(TT, 3.3, 3.6), () => arrowPencil([[610, 935], [720, 905], [835, 930]], ev(1.0, 0.6), { key: 'w_hkarw', w: 4 }));
   // the hero: its shadow (to the head's shadow), then the hero from behind, stepping while it walks
@@ -118,7 +118,7 @@ function w_side(o) {
 }
 function w_sideHero(E, X, look, mood = 'calm') {
   const w = w_inner(E, X), bob = 5 * Math.sin(TAU * (TT - E) / 1.3) * w;
-  heroGiot(SIDE_HERO[0], SIDE_HERO[1] + bob, HR, { key: 'w_hero', look, mood, legs: true, sx: 1 + 0.02 * Math.sin(TAU * (TT - E) / 1.3) * w, sy: 1 - 0.02 * Math.sin(TAU * (TT - E) / 1.3) * w });
+  heroSide(SIDE_HERO[0], SIDE_HERO[1] + bob, HR, { key: 'w_hero', up: Math.max(0, -look[1]), mood, legs: true, sx: 1 + 0.02 * Math.sin(TAU * (TT - E) / 1.3) * w, sy: 1 - 0.02 * Math.sin(TAU * (TT - E) / 1.3) * w });
 }
 
 // ---------------------------------------------------------------------
@@ -213,12 +213,12 @@ SCENES.end = function () {
   } else {
     const hop = Math.sin(Math.PI * seg(TT, tTurn + 0.15, tTurn + 0.6)), sq = 0.08 * Math.sin(TAU * seg(TT, tTurn + 0.1, tTurn + 0.7));
     const bob = 4 * Math.sin(TAU * (TT - tTurn) / 1.2);
-    heroGiot(BACK_HERO[0], BACK_HERO[1] - 34 * hop + bob, HR, { key: 'w_heroF', mood: 'happy', look: [-0.6, -0.3], legs: true, sx: 1 + sq, sy: 1 - sq, arms: [0.9 + 0.25 * Math.sin(TT * 5), 0.9 + 0.25 * Math.sin(TT * 5 + 1)] });
+    heroBack(BACK_HERO[0], BACK_HERO[1] - 34 * hop + bob, HR, { key: 'w_hero', sx: 1 + sq, sy: 1 - sq, arms: [0.9 + 0.25 * Math.sin(TT * 5), 0.9 + 0.25 * Math.sin(TT * 5 + 1)] });
     sparkle(BACK_HERO[0] + 80, BACK_HERO[1] - 80, 34, seg(TT, tTurn + 0.2, tTurn + 0.9), 'w_spk');
   }
   // labels: "của riêng bạn" by the hero's bow; a small "của bạn ấy" by the friend's (fainter)
   w_label('của riêng bạn', 700, 560, 62, tRieng - 0.2, null);
-  w_label('bạn ấy', 335, 905, 50, tCho + 0.4, null, { col: SK.graph });
+  w_label('bạn ấy', 150, 1165, 54, tCho + 0.4, null, { col: SK.ink });
   viTag('của riêng bạn');
   pageCaption(['Mỗi người một', 'cầu vồng riêng'], [[1, 'riêng']], { size: 62 });
 };

@@ -15,8 +15,7 @@
     "src/props.js",
     "src/sc-world.js",
     "src/sc-drop.js",
-    "src/sc-ring.js",
-    "src/sc-stubs.js"
+    "src/sc-ring.js"
   ],
   "voice": {
     "file": "voice/voice.wav",
