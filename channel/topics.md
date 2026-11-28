@@ -18,10 +18,10 @@ Tiêu chí: có một **quá trình thật** với các bước rõ ràng, có m
 - [x] 2026-11-25 — Vì sao nước biển mặn? → `pieces/nuoc-bien-man/` (sketchbook, 58s, giọng Tuan Khang / eleven_v3)
 - [x] 2026-11-26 — Phanh xe máy dừng xe như thế nào? → `pieces/phanh-xe-may/` (crosshatch, 56,25s, giọng Tuan Khang / eleven_v3)
 - [x] 2026-11-27 — Cầu vồng xuất hiện ra sao? → `pieces/cau-vong/` (sketchbook thay riso, 65,25s, giọng Tuan Khang / eleven_v3)
+- [x] 2026-11-28 — Mã QR chứa thông tin như thế nào? → `pieces/ma-qr/` (pixel, 51,75s, giọng Tuan Khang / eleven_v3)
 
 ## Hàng chờ (gợi ý style)
 - [ ] Vì sao lá cây đổi màu vào mùa thu? (cut-paper)
-- [ ] Mã QR chứa thông tin như thế nào? (pixel)
 - [ ] Vì sao kem đánh răng có sọc? (isometric)
 - [ ] Pin điện thoại lưu điện ra sao? (crosshatch)
 - [ ] Động đất xảy ra như thế nào? (sketchbook)

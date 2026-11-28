@@ -133,8 +133,8 @@ SCENES.payoff = () => lowres(RES, () => {
   else { prect(bx + bw + 2, by - 1, 19, 14, Q.ink); fx_spr(FX_CHECK, bx + bw + 3, by + 1, 2, Q.lime); }
   // the damage label, under the patch
   const lb = TT >= ba && TT < ba + 0.6 && Math.floor((TT - ba) / E16) % 2 === 0;
-  // "≈30% khối mã": 8 of the 26 codewords (blocks), not 30 % of the area
-  viText('≈30% khối mã', 233, 290, lb ? Q.white : Q.red, { align: 'right' });
+  // "≈30% từ mã": 8 of the 26 codewords (từ mã), not 30 % of the area
+  viText('≈30% từ mã', 233, 290, lb ? Q.white : Q.red, { align: 'right' });
   viTag('mức H: sửa ~30%', { at: -10 });
   viCaption('che gần 30% vẫn đọc được', { at: -10 });
 });

@@ -117,7 +117,7 @@ function cd_rowBits(t1, t0) {
 const cd_bitLayer = () => {
   cd_callout(...cd_DARK, VW('bit', 'đen'), 80, 140);
   cd_callout(...cd_LIGHT, VW('bit', 'trắng'), 150, 140);
-  cd_rowBits(VW('bit', 'một'), VW('bit', 'không'));
+  cd_rowBits(VW('bit', 'một'), VW('bit', 'không') - 0.3);
 };
 SCENES.bit = () => lowres(RES, () => {
   const T = TT;
