@@ -115,7 +115,7 @@ SCENES.payoff = () => lowres(RES, () => {
   if (TT >= che && TT < che + 0.5 && Math.floor((TT - che) / E16) % 2 === 0) { const [xa, ya] = qcell(9, 17); pframe(xa - 2, ya - 2, QX + 21 * QM - xa + 10, QY + 21 * QM - ya + 10, Q.red, 2); }
   const textOn = TT < ET('end') - 0.5;
   // hero + phone (raised in front of him), its screen shows the damaged code and a scan line
-  const hop = Math.round(8 * Math.sin(Math.PI * seg(TT, du, du + 0.45)));
+  const hop = Math.round(8 * Math.sin(Math.PI * seg(TT, du - 0.15, du + 0.2)));
   const [px, py, pw, ph] = FX_PH;
   heroAt(HERO_PX[0], HERO_PX[1], { look: [1, -1], hop, mood: TT >= du ? 'wow' : TT >= doc ? 'happy' : 'smile' });
   phone(px, py - hop, pw, ph, { screen: (sx, sy, sw, sh) => {
@@ -126,12 +126,16 @@ SCENES.payoff = () => lowres(RES, () => {
   if (!textOn) return;
   // the result: "CHAO! ✓" (the real content) — lime check pops bigger on "đủ"
   const big = TT >= du ? 2 : 1;
-  const [bx, by, bw] = viPanel('CHAO!', 103, 296, { fg: Q.sky, bg: Q.ink, edge: Q.sky, size: 14 });
+  const [bx, by, bw] = viPanel('CHAO!', 99, 296, { fg: Q.sky, bg: Q.ink, edge: Q.sky, size: 14 });
   if (big === 1) fx_spr(FX_CHECK, bx + bw + 3, by + 9, 1, Q.lime);
   else { prect(bx + bw + 2, by - 1, 19, 14, Q.ink); fx_spr(FX_CHECK, bx + bw + 3, by + 1, 2, Q.lime); }
   // the damage label, under the patch
   const lb = TT >= ba && TT < ba + 0.6 && Math.floor((TT - ba) / E16) % 2 === 0;
-  viText('hỏng ≈ 30%', 232, 290, lb ? Q.white : Q.red, { align: 'right' });
+  { // "hỏng": the hook above the o is drawn by hand (Pangolin's hook rasterises like a grave accent at this size)
+    const lc = lb ? Q.white : Q.red, x0 = 233 - viTextW('hỏng ≈ 30%', 16), ox = x0 + Math.round((viTextW('h', 16) + viTextW('ho', 16)) / 2);
+    viText('hong ≈ 30%', x0, 289, lc, { size: 16 });
+    prect(ox - 4, 286, 3, 1, lc); prect(ox - 2, 287, 1, 1, lc); prect(ox - 3, 288, 1, 1, lc);
+  }
   viTag('mức H: sửa ~30%', { at: -10 });
   viCaption('che gần 30% vẫn đọc được', { at: -10 });
 });
@@ -173,7 +177,7 @@ SCENES.end = () => lowres(RES, () => {
   // the phone locks on (grey corner brackets snap in, as in the hook) once it is raised
   if (TT >= tp0 + 0.3 && TT < tc0) { const k = Math.max(0, 3 - Math.floor((TT - tp0 - 0.3) / 0.12)) * 4; fx_brackets(108 - k, 144 - k, 96 + 2 * k, 96 + 2 * k, Q.grey); }
   // "lời chào": read! a sky square ring pings out from the code, three times
-  for (const p0 of [tc0, tc0 + 0.85, tc0 + 1.65]) if (TT >= p0 && TT < p0 + 0.5) { const h = 50 + 8 * Math.floor((TT - p0) / (1 / 12)); pframe(156 - h, 192 - h, 2 * h, 2 * h, Q.sky, 2); }
+  for (const p0 of [tc0, tc0 + 0.85, tc0 + 1.65]) if (TT >= p0 && TT < p0 + 0.5) { const g = 5 + 5 * Math.floor((TT - p0) / (1 / 12)); pframe(96 - g, 114 - g, 120 + 2 * g, 144 + 2 * g, Q.sky, 2); }
   // red frame blink round the logo on "giữa"
   if (TT >= tg && TT < tg + 0.75 && Math.floor((TT - tg) / E8) % 2 === 0) pframe(logoX - 3, logoHome - 3, ls + 6, ls + 6, Q.red, 2);
   // the phone: low at first, raised on "điện thoại", scans on "quét", says "CHAO!" on "lời chào"
@@ -188,6 +192,8 @@ SCENES.end = () => lowres(RES, () => {
     if (TT >= tq && TT < tc) prect(sx, sy + Math.round(seg(TT, tq, tq + 0.6) * (sh - 1)), sw, 1, Q.sky);
     if (TT >= tc) pframe(sx, sy, sw, sh, Q.sky);
   } });
+  // the scan: two sky lines from the phone's camera to the reading band on the poster
+  if (TT >= tq && TT < tc) { const yb = 150 + 4 * clamp(Math.floor((((TT - tq + 0.15) / 0.45) % 1) * 22), 0, 21); pline(px + 13, py, 112, yb, Q.sky); pline(px + 14, py, 200, yb, Q.sky); }
   prect(0, FLOOR_Y, 270, 480 - FLOOR_Y, Q.ink); prect(0, FLOOR_Y, 270, 1, Q.slate);   // the phone rises from behind the floor
   heroAt(HERO_PX[0], HERO_PX[1], { look: [1, -1], hop, mood: TT >= tc ? 'happy' : TT >= tq ? 'wow' : 'smile' });
   // "CHAO!" bubble from the phone
