@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mã QR chứa thông tin như thế nào?</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0910; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: min(100vh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; display: block; cursor: pointer; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+"use strict";
+// =====================================================================
+//  VẠN VẬT VẬN HÀNH — "Mã QR chứa thông tin như thế nào?" — 9:16, PIXEL (270x480, PAL16), voiced (vi), 24fps, 120 BPM.
+//  Format F5 (fixed-hero journey): the orange pixel critter (hero) holds up a phone at a QR poster (hook: "it looks
+//  like noise, but it is writing in squares") -> the big QR: dark = 1, light = 0 -> 8 modules = one letter: 'C'
+//  (01000011, the real modules of this real code) -> 3 finder patterns: where + which way up -> data laid in a
+//  2-column snake from the bottom-right corner up -> the mask flips cells (stripes) so no big blocks -> the rest is
+//  error correction (lime) computed from the data -> pause -> SLAM: a big chunk is covered/torn (red) and the code
+//  still reads "CHAO!" -> end: the poster again, now with a logo in the middle; the phone scans it: "CHAO!".
+//  The QR is REAL (src/qrdata.js): "CHAO!", version 1, level H, mask 001.
+//  KHUNG HÌNH GỌN: flat night backdrop, one subject per frame, no stars/dust/sparkle fields.
+//  The voice is the clock: era i starts on the 8th after line i-1 ends (+0.3s). The payoff era starts on the SLAM.
+//  Shared file: owned by the director; agents never edit it.
+// =====================================================================
+const FPS = 24, W = 1080, H = 1920;
+const BPM = 120, BEAT = 60 / BPM, E8 = BEAT / 2, E16 = BEAT / 4;
+const snap8 = (t) => Math.round(t / E8) * E8;
+const SAFE = { top: 240, bottom: 420, right: 140 };
+const HAND = '"Pangolin", "Segoe Print", "Comic Sans MS", "DejaVu Sans", sans-serif';
+const CX = 500;
+const HAND_PX = '"Pangolin", "DejaVu Sans", sans-serif';
+
+// ---- the voice: VOICE is injected by tools/build.mjs from voice.json
+const VL = (id) => VOICE.lines.find((l) => l.id === id);
+const _vn = (w) => w.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+// VW(id, word, n): when the n-th (1-based) occurrence of `word` in line `id` starts (falls back to the line start)
+function VW(id, word, n = 1) { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t0; return L.t0; }
+const VE = (id, word, n = 1) => { const L = VL(id), k = _vn(word); let c = 0; for (const w of L.words) if (_vn(w.w) === k && ++c === n) return w.t1; return L.t1; };
+
+const IDS = ['hook', 'bit', 'byte', 'finder', 'zigzag', 'mask', 'ecc', 'payoff', 'end'];
+const SLAM_ID = 'payoff';
+const SLAM = snap8(VL('ecc').t1 + 0.85);
+const ERA_T = IDS.map((id, i) => (i === 0 ? 0 : id === SLAM_ID ? SLAM : snap8(VL(IDS[i - 1]).t1 + 0.3)));
+const DURATION = Math.ceil(VOICE.duration / E8) * E8;
+const NFRAMES = Math.round(DURATION * FPS);
+const LOOP_T = NFRAMES / FPS;
+const ET = (id) => ERA_T[IDS.indexOf(id)];                       // era start
+const EE = (id) => (IDS.indexOf(id) + 1 < IDS.length ? ERA_T[IDS.indexOf(id) + 1] : DURATION);   // era end
+
+// ---- colours: PAL16 only (pixel kit). ONE COLOUR = ONE MEANING for the whole video:
+//  ORANGE = the hero only · WHITE / INK = QR modules (light = 0, dark = 1) · YELLOW = finder patterns (position) ·
+//  SKY = data bits / the letters · PINK = the mask · LIME = error-correction modules · RED = damage / cover ·
+//  NIGHT/SLATE/GREY = the world, the phone, frames.
+// (Q = PAL16 is defined in props.js: the kit loads after this file)
+// ---- WORLD: everything drawn at RES (270x480, 4 screen px per pixel); no camera (pixel art moves things).
+const RES = [270, 480], G = 4;
+// THE BIG QR (bit .. mask, ecc): 21x21 modules of QM px, top-left module at (QX, QY) px; a white card (quiet zone,
+// one module) around it.  Screen: x 164..836, y 416..1088 (card y 384..1120).
+const QM = 8, QX = 41, QY = 104;
+const QCARD = [QX - QM, QY - QM, 21 * QM + 2 * QM, 21 * QM + 2 * QM];
+const qcell = (r, c) => [QX + c * QM, QY + r * QM];          // top-left pixel of module (r, c) on the big QR
+// TEXT (Vietnamese, pixel-rasterised Pangolin, see viText): size 14 px = 56 screen px; CAPTION panel centred at
+// screen y 1385 (px 346); TAG top-left at px (17, 62) (screen 68, 248). Nothing important below px 315 (screen 1260)
+// except the caption.
+const CAP_Y = 346, TAG_XY = [17, 62];
+// ---- the bridges' contract: the hero (pixHero r = HRP px, orange) stands at HERO_PX (px, body centre) in EVERY
+// scene during [tc - 0.5, tc + 0.5] (all bridges are hero -> hero at the same spot).  Screen = HERO.
+const HRP = 9, HR = HRP * G;
+const HERO_PX = [30, 300];
+const HERO = [(HERO_PX[0] + 0.5) * G, (HERO_PX[1] + 0.5) * G];
+const BR = {
+  hookBit: { a: HERO, b: HERO }, bitByte: { a: HERO, b: HERO }, byteFinder: { a: HERO, b: HERO },
+  finderZigzag: { a: HERO, b: HERO }, zigzagMask: { a: HERO, b: HERO }, maskEcc: { a: HERO, b: HERO },
+  // ecc -> payoff: SLAM (hard cut, no bridge); payoff complete on its first frame, hero at HERO_PX
+  payoffEnd: { a: HERO, b: HERO },
+};
+const ERA_LIST = IDS.map((id, i) => [ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, () => SCENES[id]()]);
+const SCENES = {};
+const TITLES = {
+  hook: 'mã QR là chữ viết bằng ô vuông', bit: 'ô đen = 1, ô trắng = 0', byte: '8 ô = 1 chữ cái', finder: '3 ô định vị: ở đâu, chiều nào',
+  zigzag: 'xếp ngoằn ngoèo từ góc dưới phải', mask: 'mặt nạ đảo bớt ô', ecc: 'phần còn lại: mã sửa lỗi',
+  payoff: 'che gần 30% vẫn đọc được', end: 'logo giữa mã vẫn quét ra lời chào',
+};
+const SHOTS = IDS.map((id, i) => [id, i, ERA_T[i], i + 1 < IDS.length ? ERA_T[i + 1] : DURATION, TITLES[id]]);
+const TIMELINE = {
+  width: W, height: H, fps: FPS, bpm: BPM, duration: DURATION, frames: NFRAMES, loop: LOOP_T, safe: SAFE,
+  format: 'fixed-hero journey (morph-joined, one slam)',
+  shots: SHOTS.map(([key, era, t0, t1, title], i) => ({ id: i + 1, key, era, t0, t1, title })),
+  cuts: [SLAM],
+  morphs: ERA_T.slice(1).filter((t) => t !== SLAM),
+  cues: { slam: SLAM, bloom: SLAM },
+  acts: [
+    { name: '1 Chữ bằng ô vuông', role: 'build',   t0: 0,              t1: ET('finder') },
+    { name: '2 Bản đồ của mã',   role: 'journey', t0: ET('finder'),   t1: ET('ecc') },
+    { name: '3 Sửa lỗi',         role: 'peak',    t0: ET('ecc'),      t1: snap8(VL('ecc').t1) },
+    { name: '4 Lặng',            role: 'silence', t0: snap8(VL('ecc').t1), t1: SLAM - 0.125 },
+    { name: '5 Vẫn đọc được!',   role: 'gift',    t0: SLAM,           t1: SLAM + 2.25 },
+    { name: '6 Lời chào',        role: 'goodbye', t0: SLAM + 2.25,    t1: DURATION },
+  ],
+  board: IDS.map((id, i) => ({ t: +(ERA_T[i] + ((i + 1 < IDS.length ? ERA_T[i + 1] : DURATION) - ERA_T[i]) * 0.6).toFixed(2), title: TITLES[id], sound: '', next: i + 1 < IDS.length ? TITLES[IDS[i + 1]] : 'hết' })),
+  narration: VOICE.lines.map((l) => ({ t0: l.t0, t1: l.t1, text: l.text })),
+};
+window.TIMELINE = TIMELINE;

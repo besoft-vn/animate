@@ -1,0 +1,13 @@
+{
+  "name": "ma-qr",
+  "title": "Mã QR chứa thông tin như thế nào?",
+  "series": "Vạn vật vận hành như thế nào",
+  "date": "2026-11-28",
+  "format": { "width": 1080, "height": 1920, "fps": 24, "bpm": 120 },
+  "storyFormat": "F5 fixed-hero journey (the hero scans a real QR code; we zoom into its modules: bits -> a letter -> finder patterns -> zigzag -> mask -> error correction), morph-joined on the hero, one slam on the payoff (a third covered, still reads)",
+  "style": "pixel",
+  "scenes": ["src/qrdata.js", "src/props.js", "src/sc-code.js", "src/sc-map.js", "src/sc-fix.js"],
+  "voice": { "file": "voice/voice.wav", "music": -14 },
+  "captions": { "font": "Pangolin", "size": 62 },
+  "review": { "safe": { "top": 240, "bottom": 420, "right": 140 }, "refs": {}, "wpsMax": 5.0 }
+}

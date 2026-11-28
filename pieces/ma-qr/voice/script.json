@@ -1,0 +1,68 @@
+{
+ "lang": "vi",
+ "lead": 0.9,
+ "tail": 2,
+ "level": -16,
+ "tts": {
+  "provider": "elevenlabs-api",
+  "voice": "GaEEAHHYlbueVlFfyrPr",
+  "voice_name": "Tuan Khang - Emotional Narrator",
+  "model": "eleven_v3"
+ },
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Mã QR trông như một hình lộn xộn, nhưng thật ra là chữ viết bằng ô vuông.",
+   "after": 0.5,
+   "file": "hook.mp3"
+  },
+  {
+   "id": "bit",
+   "text": "Mỗi ô đen là số một, mỗi ô trắng là số không.",
+   "after": 0.5,
+   "file": "bit.mp3"
+  },
+  {
+   "id": "byte",
+   "text": "Cứ tám ô ghép lại thành một chữ cái, như chữ C này.",
+   "after": 0.5,
+   "file": "byte.mp3"
+  },
+  {
+   "id": "finder",
+   "text": "Ba ô vuông lớn ở ba góc giúp điện thoại biết mã nằm đâu, quay chiều nào.",
+   "after": 0.5,
+   "file": "finder.mp3"
+  },
+  {
+   "id": "zigzag",
+   "text": "Các chữ được xếp ngoằn ngoèo theo từng cặp cột, từ góc dưới bên phải đi lên.",
+   "after": 0.5,
+   "file": "zigzag.mp3"
+  },
+  {
+   "id": "mask",
+   "text": "Rồi một lớp mặt nạ đảo bớt ô, để không có mảng đen hay trắng nào quá to.",
+   "after": 0.5,
+   "file": "mask.mp3"
+  },
+  {
+   "id": "ecc",
+   "text": "Phần còn lại là mã sửa lỗi: những ô dự phòng, tính ra từ chính dữ liệu.",
+   "after": 1.6,
+   "file": "ecc.mp3"
+  },
+  {
+   "id": "payoff",
+   "text": "Ở mức cao nhất, mã bị che gần ba mươi phần trăm vẫn đọc ra đủ!",
+   "after": 0.6,
+   "file": "payoff.mp3"
+  },
+  {
+   "id": "end",
+   "text": "Vì vậy, logo dán giữa mã QR mà điện thoại vẫn quét ra lời chào.",
+   "after": 0.3,
+   "file": "end.mp3"
+  }
+ ]
+}
