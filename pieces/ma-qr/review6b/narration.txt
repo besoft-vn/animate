@@ -1,0 +1,9 @@
+0.90-6.55s: Mã QR trông như một hình lộn xộn, nhưng thật ra là chữ viết bằng ô vuông.
+7.05-10.70s: Mỗi ô đen là số một, mỗi ô trắng là số không.
+11.20-15.36s: Cứ tám ô ghép lại thành một chữ cái, như chữ C này.
+15.86-20.58s: Ba ô vuông lớn ở ba góc giúp điện thoại biết mã nằm đâu, quay chiều nào.
+21.08-26.52s: Các chữ được xếp ngoằn ngoèo theo từng cặp cột, từ góc dưới bên phải đi lên.
+27.02-33.18s: Rồi một lớp mặt nạ đảo bớt ô, để không có mảng đen hay trắng nào quá to.
+33.68-38.26s: Phần còn lại là mã sửa lỗi: những ô dự phòng, tính ra từ chính dữ liệu.
+39.86-44.10s: Ở mức cao nhất, mã bị che gần ba mươi phần trăm vẫn đọc ra đủ!
+44.70-49.62s: Vì vậy, logo dán giữa mã QR mà điện thoại vẫn quét ra lời chào.
