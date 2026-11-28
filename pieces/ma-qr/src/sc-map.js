@@ -170,7 +170,9 @@ SCENES.zigzag = () => lowres(RES, () => {
   mp_grid((r, c) => {
     const v = QR_RAW[r][c], i = QR_IDX[r][c];
     if (QR_KIND(r, c) !== 'data') return v ? (dim ? Q.grey : Q.ink) : null;
-    if (i >= 0 && i < n && t < tUndo) return v ? Q.blue : Q.ice;
+    // only the real data part (bits 0-71: mode, count, C H A O !, padding) is "letters" = sky; the path keeps
+    // running through the error-correction part (72+), which gets a neutral slate mark (it becomes lime in ecc)
+    if (i >= 0 && i < n && t < tUndo) return i < QR_DATA_BITS ? (v ? Q.blue : Q.ice) : v ? Q.slate : null;
     return v ? Q.ink : null;
   });
   // the 2-column frame around the pair the head is in (from "cặp cột")
@@ -223,7 +225,7 @@ SCENES.mask = () => lowres(RES, () => {
   mp_grid((r, c) => {
     const data = QR_KIND(r, c) === 'data', even = QR_MASKF(r, c), x = qcell(r, c)[0];
     const v = t >= tF0 && x + QM <= fx ? QR_M[r][c] : QR_RAW[r][c];
-    if (data && even && striped(r, c) && t < tOut1) return v ? Q.purple : Q.pink;
+    if (data && even && striped(r, c) && t < tOut1) return v ? Q.ink : Q.pink;
     return v ? Q.ink : null;
   });
   // the flip cursor: a pink bar sweeping across while the flips happen

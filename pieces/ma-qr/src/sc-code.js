@@ -87,8 +87,8 @@ SCENES.hook = () => lowres(RES, () => {
 // =====================================================================
 //  BIT 6.75 – 11   (and the part of it that carries into the start of byte)
 // =====================================================================
-const cd_TAG = 'đen = 1, trắng = 0';
-const cd_DARK = [10, 3], cd_LIGHT = [10, 14], cd_ROW = 10;
+const cd_TAG = 'đen 1, trắng 0';
+const cd_DARK = [10, 9], cd_LIGHT = [10, 17], cd_ROW = 10, cd_C0 = 9;   // row 10, cols 9..20: data cells only
 // a callout for module (r, c): sky frame on the module, a panel above with a 3x copy and "= v"
 function cd_callout(r, c, t0, px, py) {
   if (TT < t0) return;
@@ -106,16 +106,17 @@ function cd_callout(r, c, t0, px, py) {
 function cd_rowBits(t1, t0) {
   if (TT < t1) return;
   const [, ry] = qcell(cd_ROW, 0);
-  pframe(QX - 2, ry - 2, 21 * QM + 4, QM + 4, Q.sky, 1);
-  prect(QX - 2, ry + QM + 2, 21 * QM + 4, 16, Q.night);
-  for (let c = 0; c < QR_N; c++) {
-    const v = QR_RAW[cd_ROW][c], t = (v ? t1 : t0) + c * 0.02;
+  const x0 = QX + cd_C0 * QM, n = QR_N - cd_C0;
+  pframe(x0 - 2, ry - 2, n * QM + 4, QM + 4, Q.sky, 1);
+  prect(x0 - 2, ry + QM + 2, n * QM + 4, 16, Q.night);
+  for (let c = cd_C0; c < QR_N; c++) {
+    const v = QR_RAW[cd_ROW][c], t = (v ? t1 : t0) + (c - cd_C0) * 0.03;
     if (TT >= t) viText(String(v), QX + c * QM + 4, ry + QM + 5, Q.sky, { size: 13, align: 'center' });
   }
 }
 const cd_bitLayer = () => {
-  cd_callout(...cd_DARK, VW('bit', 'đen'), 40, 140);
-  cd_callout(...cd_LIGHT, VW('bit', 'trắng'), 124, 140);
+  cd_callout(...cd_DARK, VW('bit', 'đen'), 80, 140);
+  cd_callout(...cd_LIGHT, VW('bit', 'trắng'), 150, 140);
   cd_rowBits(VW('bit', 'một'), VW('bit', 'không'));
 };
 SCENES.bit = () => lowres(RES, () => {
@@ -161,8 +162,8 @@ SCENES.byte = () => lowres(RES, () => {
   }
   // the 8 cells, stream order
   // "như chữ C này": a sky bar reads the 8 bits left -> right
-  const rd = panel && T >= tNhu ? Math.min(8, Math.floor((T - tNhu) / ((tC - 0.05 - tNhu) / 8)) + 1) : 0;
-  if (rd) prect(cd_cellX(0) - 2, cd_CELL_Y + 18, 15 * rd + 1, 15, Q.sky);
+  const rd = panel && T >= tNhu ? Math.min(8, Math.floor((T - tNhu) / ((tC - 0.2 - tNhu) / 8)) + 1) : 0;
+  for (let k = 0; k < rd; k++) prect(cd_cellX(k), cd_CELL_Y + 18, cd_CS, 15, Q.sky);   // one block per cell, exactly under it
   QR_CHAR_C.forEach(([r, c], k) => {
     const t0 = k0 + k * kd; if (!out(k)) return;
     const v = QR_RAW[r][c], [sx, sy] = qcell(r, c);

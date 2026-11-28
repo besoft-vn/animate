@@ -107,7 +107,9 @@ SCENES.payoff = () => lowres(RES, () => {
   // the phone keeps scanning: a 2-row sky reading band sweeps the code (period 1.3 s) until "đủ";
   // the covered modules stay covered (the patch is drawn on top)
   const du0 = VW('payoff', 'đủ'), band = TT < du0 ? Math.floor((((TT - SLAM) / 1.3) % 1) * 23) - 1 : -9;
-  drawBigQR({ col: (r, c, v) => (r === band || r === band + 1 ? (v ? Q.blue : Q.ice) : null) });
+  // (neutral light, not sky: sky = data bits) — dark modules under the band read lighter, a 1-px white line leads it
+  drawBigQR({ col: (r, c, v) => (r === band || r === band + 1 ? (v ? Q.grey : null) : null) });
+  if (band >= 0 && band <= 21) prect(QX - 6, QY + band * QM, 21 * QM + 12, 1, Q.white);
   const beat = Math.floor((TT - SLAM) / BEAT + 1e-6);
   const che = VW('payoff', 'che'), ba = VW('payoff', 'ba'), doc = VW('payoff', 'đọc'), du = VW('payoff', 'đủ');
   fx_patch(beat % 2);
@@ -131,11 +133,8 @@ SCENES.payoff = () => lowres(RES, () => {
   else { prect(bx + bw + 2, by - 1, 19, 14, Q.ink); fx_spr(FX_CHECK, bx + bw + 3, by + 1, 2, Q.lime); }
   // the damage label, under the patch
   const lb = TT >= ba && TT < ba + 0.6 && Math.floor((TT - ba) / E16) % 2 === 0;
-  { // "hỏng": the hook above the o is drawn by hand (Pangolin's hook rasterises like a grave accent at this size)
-    const lc = lb ? Q.white : Q.red, x0 = 233 - viTextW('hỏng ≈ 30%', 16), ox = x0 + Math.round((viTextW('h', 16) + viTextW('ho', 16)) / 2);
-    viText('hong ≈ 30%', x0, 289, lc, { size: 16 });
-    prect(ox - 4, 286, 3, 1, lc); prect(ox - 2, 287, 1, 1, lc); prect(ox - 3, 288, 1, 1, lc);
-  }
+  // "≈30% khối mã": 8 of the 26 codewords (blocks), not 30 % of the area
+  viText('≈30% khối mã', 233, 290, lb ? Q.white : Q.red, { align: 'right' });
   viTag('mức H: sửa ~30%', { at: -10 });
   viCaption('che gần 30% vẫn đọc được', { at: -10 });
 });
@@ -172,8 +171,8 @@ SCENES.end = () => lowres(RES, () => {
   const tp0 = VW('end', 'điện'), tq0 = VW('end', 'quét'), tc0 = VW('end', 'lời');
   // "quét": a 2-row sky reading band sweeps the poster code (two passes) until "lời chào"
   const band = TT >= tq0 - 0.15 && TT < tc0 ? Math.floor((((TT - tq0 + 0.15) / 0.45) % 1) * 22) - 1 : -9;
-  fx_poster(ly, (r, c, v) => (r >= band && r <= band + 2 ? (v ? Q.blue : Q.ice) : null));
-  if (band > -9) { const by = 150 + 4 * clamp(band, 0, 21); prect(100, by - 2, 112, 2, Q.sky); prect(100, Math.min(150 + 84, by + 12), 112, 2, Q.sky); }
+  fx_poster(ly, (r, c, v) => (r >= band && r <= band + 2 ? (v ? Q.grey : null) : null));
+  if (band > -9) { const by = 150 + 4 * clamp(band, 0, 21); prect(100, by - 2, 112, 2, Q.grey); prect(100, Math.min(150 + 84, by + 12), 112, 2, Q.grey); }
   // the phone locks on (grey corner brackets snap in, as in the hook) once it is raised
   if (TT >= tp0 + 0.3 && TT < tc0) { const k = Math.max(0, 3 - Math.floor((TT - tp0 - 0.3) / 0.12)) * 4; fx_brackets(108 - k, 144 - k, 96 + 2 * k, 96 + 2 * k, Q.grey); }
   // "lời chào": read! a sky square ring pings out from the code, three times
